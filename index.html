@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.3</title>
+<title>RetireLab 4.4</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -230,7 +230,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 }
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.3</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.4</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -773,13 +773,20 @@ function addExpenseRow(d={name:'New car',amount:25000,start:65,term:1,indexed:fa
 addIncome.onclick=()=>addIncomeRow({name:'Other income',amount:0,basis:'commencement',start:+currentAge.value,end:'',index:0});
 addExpense.onclick=()=>addExpenseRow({name:'Large expenditure',amount:0,start:+currentAge.value+5,term:1,indexed:false});
 function incomes(){return [...document.querySelectorAll('#incomeTable tbody tr')].map(tr=>({
+ name:tr.querySelector('.inc-name')?.value||'Income',
  amount:+tr.querySelector('.inc-amount').value||0,
  basis:tr.querySelector('.inc-basis').value,
  start:+tr.querySelector('.inc-start').value||0,
  end:tr.querySelector('.inc-end').value===''?Infinity:(+tr.querySelector('.inc-end').value||0),
  index:+tr.querySelector('.inc-index').value||0
 }))}
-function expenses(){return [...document.querySelectorAll('#expenseTable tbody tr')].map(tr=>({amount:+tr.querySelector('.exp-amount').value||0,start:+tr.querySelector('.exp-start').value||0,term:Math.max(1,+tr.querySelector('.exp-term').value||1),indexed:tr.querySelector('.exp-indexed').value==='yes'}))}
+function expenses(){return [...document.querySelectorAll('#expenseTable tbody tr')].map(tr=>({
+ name:tr.querySelector('.exp-name')?.value||'Expenditure',
+ amount:+tr.querySelector('.exp-amount').value||0,
+ start:+tr.querySelector('.exp-start').value||0,
+ term:Math.max(1,+tr.querySelector('.exp-term').value||1),
+ indexed:tr.querySelector('.exp-indexed').value==='yes'
+}))}
 function mulberry32(a){return function(){let t=a+=0x6D2B79F5;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return((t^t>>>14)>>>0)/4294967296}}
 function randn(rng){let u=0,v=0;while(u===0)u=rng();while(v===0)v=rng();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
 function cholesky(A){const n=A.length,L=Array.from({length:n},()=>Array(n).fill(0));for(let i=0;i<n;i++)for(let j=0;j<=i;j++){let s=0;for(let k=0;k<j;k++)s+=L[i][k]*L[j][k];L[i][j]=i===j?Math.sqrt(Math.max(A[i][i]-s,1e-12)):(A[i][j]-s)/L[j][j]}return L}
@@ -1600,7 +1607,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.3</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.4</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

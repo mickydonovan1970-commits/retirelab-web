@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.1</title>
+<title>RetireLab 4.3</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -230,7 +230,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 }
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.3</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -286,7 +286,6 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-
 </section></div><div class="tabpanel" data-panel="portfolio"><section class="card full">
 <h2>CORE portfolio</h2>
 <div class="table-wrap"><table id="fundTable">
@@ -347,7 +346,6 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="income"><section class="card full">
@@ -371,7 +369,6 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="expenditure"><section class="card full">
@@ -391,7 +388,6 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="strategy"><section class="card full">
@@ -431,7 +427,6 @@ If either source is exhausted, the other source is used.
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="results"><section class="card full hidden" id="resultsCard">
@@ -1012,13 +1007,16 @@ function localAllocationCandidates(base,maxWeight,step){
 }
 
 rebalanceBtn.onclick=async()=>{
- if(totalCore()<=0)return;
+ if(totalCore()<=0){alert('Enter a CORE portfolio value first.');return}
  if(!allocationIsValid()){alert(`Fund allocations currently total ${allocationSum().toFixed(2)}%. Please make them add to 100% before comparing allocations.`);return}
 
+ openTab('optimiser');
  rebalanceBtn.disabled=true;
  rebalanceBtn.textContent='Optimising…';
  setOptimiserProgress(2,'Preparing common market scenarios…');
  await yieldToBrowser();
+
+ try{
 
  const inp=getInputs();
  const currentCash=inp.cashStart;
@@ -1126,8 +1124,14 @@ rebalanceBtn.onclick=async()=>{
 
  setOptimiserProgress(100,'Optimisation complete.');
  rebalCard.classList.remove('hidden');
- rebalanceBtn.disabled=false;
- rebalanceBtn.textContent='Find a better CORE allocation';
+ }catch(error){
+   console.error(error);
+   setOptimiserProgress(100,'Optimiser stopped because of an error. Please check the inputs and try again.');
+   alert('The optimiser could not complete. Your saved inputs have not been damaged.');
+ }finally{
+   rebalanceBtn.disabled=false;
+   rebalanceBtn.textContent='Find a better CORE allocation';
+ }
 };
 applySuggested.onclick=()=>{
  if(!suggestedAllocation)return;
@@ -1178,18 +1182,14 @@ function openTab(name){
 }
 document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.goto)));
-document.getElementById('dashboardRun').addEventListener('click',()=>document.getElementById('runBtn').click());
+const dashboardRunButton=document.getElementById('dashboardRun');
+if(dashboardRunButton){
+  dashboardRunButton.addEventListener('click',()=>{
+    const runButton=document.getElementById('runBtn');
+    if(runButton)runButton.click();
+  });
+}
 
-const originalRebalanceHandler=rebalanceBtn.onclick;
-rebalanceBtn.onclick=()=>{
-  originalRebalanceHandler();
-  const watch=setInterval(()=>{
-    if(!rebalCard.classList.contains('hidden')){
-      clearInterval(watch);openTab('optimiser');
-    }
-  },100);
-  setTimeout(()=>clearInterval(watch),30000);
-};
 </script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
@@ -1341,6 +1341,7 @@ document.querySelectorAll('.quick-run-model').forEach(button=>{
 });
 document.querySelectorAll('.quick-optimise-model').forEach(button=>{
   button.addEventListener('click',()=>{
+    openTab('optimiser');
     const optimiser=document.getElementById('rebalanceBtn');
     if(optimiser) optimiser.click();
   });
@@ -1599,7 +1600,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.1</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.3</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

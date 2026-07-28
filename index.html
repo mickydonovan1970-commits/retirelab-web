@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.5</title>
+<title>RetireLab 4.6</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -228,9 +228,58 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
   from{opacity:.55}
   to{opacity:1}
 }
+
+.chart-toolbar{
+  display:flex;
+  justify-content:flex-end;
+  margin:8px 0 8px;
+}
+.chart-modal{
+  position:fixed;
+  inset:0;
+  z-index:200;
+  padding:24px;
+  background:rgba(0,0,0,.78);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+.chart-modal.hidden{display:none}
+.chart-modal-panel{
+  width:min(1500px,96vw);
+  max-height:94vh;
+  overflow:auto;
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:14px;
+  padding:18px;
+}
+.chart-modal-header{
+  display:flex;
+  justify-content:space-between;
+  gap:16px;
+  align-items:flex-start;
+  margin-bottom:10px;
+}
+#expandedChart{
+  width:100%;
+  height:auto;
+  min-height:520px;
+  cursor:crosshair;
+  touch-action:none;
+}
+#chart,.sim-chart{
+  cursor:crosshair;
+  touch-action:none;
+}
+@media(max-width:700px){
+  .chart-modal{padding:8px}
+  .chart-modal-panel{width:100%;max-height:98vh;padding:12px}
+  #expandedChart{min-height:420px}
+}
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.5</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.6</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -439,7 +488,7 @@ If either source is exhausted, the other source is used.
 <div class="metric"><div class="label">90th percentile total wealth</div><div class="value" id="p90">—</div></div>
 <div class="metric"><div class="label">Median cash at end age</div><div class="value" id="medianCash">—</div></div>
 </div>
-<h3>Total wealth through time</h3><canvas height="360" id="chart" width="1100"></canvas>
+<h3>Total wealth through time</h3><div class="chart-toolbar"><button class="ghost small" id="expandMainChart" type="button">Expand chart</button></div><canvas height="360" id="chart" width="1100"></canvas>
 <p class="note">Total wealth is CORE plus cash. The success test remains: do not run out before the final large expenditure has finished.</p>
 </section>
 <section class="card full sim-history">
@@ -910,8 +959,16 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
  p10:quantile(finals,.1),median:quantile(finals,.5),p90:quantile(finals,.9),
  medianCash:quantile(finalCash,.5),snapshots,months,currentAge:inp.currentAge,endAge:inp.endAge,weights}
 }
-function drawChart(res){
- const c=chart,ctx=c.getContext('2d'),W=c.width,H=c.height;
+
+function compactGBP(value){
+ const abs=Math.abs(value);
+ if(abs>=1000000)return `${value<0?'-':''}£${(abs/1000000).toFixed(abs>=10000000?1:2)}m`;
+ if(abs>=1000)return `${value<0?'-':''}£${Math.round(abs/1000)}k`;
+ return gbp(value);
+}
+
+function renderSimulationCanvas(canvas,res,hoverMonth=null){
+ const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0f13';ctx.fillRect(0,0,W,H);
 
  const step=Math.max(1,Math.floor(res.months/120)),pts=[];
@@ -923,66 +980,103 @@ function drawChart(res){
 
  const target=Math.max(0,res.objectiveTarget||0);
  const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
- const Lm=78,Rm=88,Tm=22,Bm=42;
+ const expanded=canvas.id==='expandedChart';
+ const Lm=expanded?96:84,Rm=expanded?130:96,Tm=expanded?34:24,Bm=expanded?58:44;
+ const axisFont=expanded?'600 18px Inter, system-ui':'600 14px Inter, system-ui';
+ const valueFont=expanded?'600 18px Inter, system-ui':'600 13px Inter, system-ui';
 
- ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font='12px Raleway, system-ui';ctx.fillStyle='#87909c';
+ ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font=axisFont;ctx.fillStyle='#aeb6c1';
  for(let i=0;i<=5;i++){
    const yy=Tm+(H-Tm-Bm)*i/5;
    ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
-   ctx.fillText(gbp(ymax*(1-i/5)),4,yy+4);
+   ctx.fillText(compactGBP(ymax*(1-i/5)),8,yy+5);
  }
 
  const x=m=>Lm+(W-Lm-Rm)*m/Math.max(res.months,1);
  const y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
 
  [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
-   ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();
+   ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?(expanded?4:3):(expanded?3:2);ctx.beginPath();
    pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});
    ctx.stroke();
  });
 
- for(let age=Math.ceil(res.currentAge/5)*5;age<=res.endAge;age+=5){
+ const ageStep=expanded?1:5;
+ for(let age=Math.ceil(res.currentAge/ageStep)*ageStep;age<=res.endAge;age+=ageStep){
+   if(!expanded && age%5!==0)continue;
    const xx=x((age-res.currentAge)*12);
-   ctx.fillStyle='#87909c';ctx.fillText(age.toString(),xx-8,H-14);
+   ctx.fillStyle='#aeb6c1';ctx.font=axisFont;
+   ctx.fillText(age.toString(),xx-(expanded?10:8),H-(expanded?20:14));
  }
 
+ // Permanent objective crosshair.
  const objectiveMonth=Math.max(0,Math.min(res.months,Math.round((res.objectiveAge-res.currentAge)*12)));
- const objectiveX=x(objectiveMonth);
- const targetY=y(target);
-
- // Crosshair at objective age and target wealth.
- ctx.save();
- ctx.setLineDash([5,5]);
- ctx.strokeStyle='#b09567';
- ctx.lineWidth=1.25;
+ const objectiveX=x(objectiveMonth),targetY=y(target);
+ ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle='rgba(176,149,103,.7)';ctx.lineWidth=1;
  ctx.beginPath();ctx.moveTo(objectiveX,Tm);ctx.lineTo(objectiveX,H-Bm);ctx.stroke();
- ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();
- ctx.restore();
+ ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();ctx.restore();
 
- // Objective labels.
- ctx.font='11px Raleway, system-ui';
- ctx.fillStyle='#c8ae7d';
- ctx.fillText(`Age ${res.objectiveAge}`,Math.min(objectiveX+6,W-Rm-46),Tm+12);
- ctx.fillText(`Target ${gbp(target)}`,Math.max(Lm+4,W-Rm-86),Math.max(Tm+12,targetY-6));
+ // Hover/pinned inspection line, snapped to whole years.
+ const inspectMonth=hoverMonth===null?objectiveMonth:Math.max(0,Math.min(res.months,Math.round(hoverMonth/12)*12));
+ const inspectAge=res.currentAge+inspectMonth/12;
+ const inspectX=x(inspectMonth);
+ const point=pts.reduce((best,p)=>Math.abs(p.m-inspectMonth)<Math.abs(best.m-inspectMonth)?p:best,pts[0]);
 
- // Nearest percentile values at objective age.
- const objectivePoint=pts.reduce((best,p)=>Math.abs(p.m-objectiveMonth)<Math.abs(best.m-objectiveMonth)?p:best,pts[0]);
- const labels=[
-   {key:'p90',name:'90th',colour:'#8f99aa'},
-   {key:'p50',name:'Median',colour:'#5f91df'},
-   {key:'p10',name:'10th',colour:'#a75e65'}
+ if(inspectMonth!==objectiveMonth){
+   ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(167,176,190,.45)';ctx.lineWidth=1;
+   ctx.beginPath();ctx.moveTo(inspectX,Tm);ctx.lineTo(inspectX,H-Bm);ctx.stroke();ctx.restore();
+ }
+
+ ctx.font=valueFont;
+ ctx.fillStyle='rgba(210,216,225,.72)';
+ ctx.fillText(`Age ${Number.isInteger(inspectAge)?inspectAge:inspectAge.toFixed(1)}`,Math.min(inspectX+7,W-Rm-60),Tm+18);
+
+ const vals=[
+   {key:'p90',colour:'#8f99aa'},
+   {key:'p50',colour:'#5f91df'},
+   {key:'p10',colour:'#a75e65'}
  ];
- labels.forEach((item,idx)=>{
-   const val=objectivePoint[item.key];
-   const yy=y(val);
-   ctx.fillStyle=item.colour;
-   ctx.beginPath();ctx.arc(objectiveX,yy,4,0,Math.PI*2);ctx.fill();
-
-   const text=`${item.name} ${gbp(val)}`;
-   const textY=Math.max(Tm+12,Math.min(H-Bm-4,yy+(idx-1)*15));
-   ctx.fillStyle='#d9dee6';
-   ctx.fillText(text,Math.min(objectiveX+8,W-Rm+4),textY);
+ vals.forEach((item,idx)=>{
+   const val=point[item.key],yy=y(val);
+   ctx.fillStyle=item.colour;ctx.beginPath();ctx.arc(inspectX,yy,expanded?6:4,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='rgba(226,231,238,.78)';
+   const label=compactGBP(val);
+   const labelY=Math.max(Tm+18,Math.min(H-Bm-5,yy+(idx-1)*(expanded?24:18)));
+   ctx.fillText(label,Math.min(inspectX+(expanded?12:8),W-Rm+8),labelY);
  });
+}
+
+function attachInteractiveChart(canvas,resProvider){
+ let pinnedMonth=null;
+ const redraw=month=>renderSimulationCanvas(canvas,resProvider(),month===undefined?pinnedMonth:month);
+ const getMonth=event=>{
+   const rect=canvas.getBoundingClientRect();
+   const clientX=event.touches?.[0]?.clientX??event.clientX;
+   const scaleX=canvas.width/rect.width;
+   const xpx=(clientX-rect.left)*scaleX;
+   const expanded=canvas.id==='expandedChart';
+   const Lm=expanded?96:84,Rm=expanded?130:96;
+   const res=resProvider();
+   return (xpx-Lm)/(canvas.width-Lm-Rm)*res.months;
+ };
+ canvas.onmousemove=e=>{if(pinnedMonth===null)redraw(getMonth(e))};
+ canvas.onmouseleave=()=>{if(pinnedMonth===null)redraw(null)};
+ canvas.onclick=e=>{pinnedMonth=Math.max(0,Math.min(resProvider().months,Math.round(getMonth(e)/12)*12));redraw(pinnedMonth)};
+ canvas.ontouchmove=e=>{e.preventDefault();redraw(getMonth(e))};
+ canvas.ontouchend=e=>{
+   const touch=e.changedTouches?.[0];
+   if(!touch)return;
+   const fake={clientX:touch.clientX};
+   pinnedMonth=Math.max(0,Math.min(resProvider().months,Math.round(getMonth(fake)/12)*12));
+   redraw(pinnedMonth);
+ };
+ canvas.dataset.interactive='1';
+}
+
+function drawChart(res){
+ chart._retireLabResult=res;
+ renderSimulationCanvas(chart,res,null);
+ if(!chart.dataset.interactive)attachInteractiveChart(chart,()=>chart._retireLabResult);
 }
 function setMetricClass(el,p){el.className='value '+(p>=.85?'good':p>=.65?'warn':'bad')}
 function allocationIsValid(){
@@ -1458,62 +1552,89 @@ function buildSimulationSummary(){
   ].join(' · ');
 }
 
-function drawHistoryChart(canvas, record){
-  const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
-  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0f13';ctx.fillRect(0,0,W,H);
-  const pts=record.chartPoints||[];
-  if(!pts.length)return;
 
-  const target=Math.max(0,record.objectiveTarget||0);
-  const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
-  const Lm=70,Rm=100,Tm=18,Bm=34;
-
-  ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font='11px Raleway, system-ui';ctx.fillStyle='#87909c';
-  for(let i=0;i<=4;i++){
-    const yy=Tm+(H-Tm-Bm)*i/4;
-    ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
-    ctx.fillText(gbp(ymax*(1-i/4)),4,yy+4);
-  }
-
-  const maxM=pts[pts.length-1].m||1;
-  const x=m=>Lm+(W-Lm-Rm)*m/maxM;
-  const y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
-
-  [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
-    ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();
-    pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});
-    ctx.stroke();
-  });
-
-  const currentAge=+(record.plan?.basics?.currentAge||0);
-  const objectiveMonth=Math.max(0,Math.min(maxM,Math.round((record.objectiveAge-currentAge)*12)));
-  const objectiveX=x(objectiveMonth);
-  const targetY=y(target);
-
-  ctx.save();
-  ctx.setLineDash([5,5]);
-  ctx.strokeStyle='#b09567';ctx.lineWidth=1.2;
-  ctx.beginPath();ctx.moveTo(objectiveX,Tm);ctx.lineTo(objectiveX,H-Bm);ctx.stroke();
-  ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();
-  ctx.restore();
-
-  ctx.fillStyle='#c8ae7d';
-  ctx.fillText(`Age ${record.objectiveAge}`,Math.min(objectiveX+6,W-Rm-44),Tm+11);
-  ctx.fillText(`Target ${gbp(target)}`,Math.max(Lm+4,W-Rm-86),Math.max(Tm+12,targetY-5));
-
-  const objectivePoint=pts.reduce((best,p)=>Math.abs(p.m-objectiveMonth)<Math.abs(best.m-objectiveMonth)?p:best,pts[0]);
-  [
-    {key:'p90',name:'90th',colour:'#8f99aa'},
-    {key:'p50',name:'Median',colour:'#5f91df'},
-    {key:'p10',name:'10th',colour:'#a75e65'}
-  ].forEach((item,idx)=>{
-    const val=objectivePoint[item.key],yy=y(val);
-    ctx.fillStyle=item.colour;ctx.beginPath();ctx.arc(objectiveX,yy,3.5,0,Math.PI*2);ctx.fill();
-    ctx.fillStyle='#d9dee6';
-    ctx.fillText(`${item.name} ${gbp(val)}`,Math.min(objectiveX+7,W-Rm+4),Math.max(Tm+10,Math.min(H-Bm-3,yy+(idx-1)*13)));
-  });
+function historyRecordAsResult(record){
+ const currentAge=+(record.plan?.basics?.currentAge||0);
+ const endAge=+(record.plan?.basics?.endAge||currentAge+(record.chartPoints?.at(-1)?.m||0)/12);
+ const months=record.chartPoints?.at(-1)?.m||Math.max(0,(endAge-currentAge)*12);
+ const snapshots=Array.from({length:months+1},()=>null);
+ (record.chartPoints||[]).forEach(p=>{
+   snapshots[p.m]=[p.p10,p.p50,p.p90];
+ });
+ // This special object carries precomputed points to avoid recomputing quantiles.
+ return{
+   currentAge,endAge,months,
+   objectiveAge:record.objectiveAge,
+   objectiveTarget:record.objectiveTarget,
+   _historyPoints:record.chartPoints||[]
+ };
 }
+function renderHistoryCanvas(canvas,record,hoverMonth=null){
+ const res=historyRecordAsResult(record);
+ const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0f13';ctx.fillRect(0,0,W,H);
+ const pts=res._historyPoints;
+ if(!pts.length)return;
 
+ const target=Math.max(0,res.objectiveTarget||0);
+ const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
+ const Lm=76,Rm=106,Tm=20,Bm=38;
+ ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font='600 13px Inter, system-ui';ctx.fillStyle='#aeb6c1';
+ for(let i=0;i<=4;i++){
+   const yy=Tm+(H-Tm-Bm)*i/4;
+   ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
+   ctx.fillText(compactGBP(ymax*(1-i/4)),6,yy+4);
+ }
+ const maxM=pts[pts.length-1].m||1;
+ const x=m=>Lm+(W-Lm-Rm)*m/maxM,y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
+ [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
+   ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();
+   pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});ctx.stroke();
+ });
+ for(let age=Math.ceil(res.currentAge/5)*5;age<=res.endAge;age+=5){
+   const xx=x((age-res.currentAge)*12);ctx.fillStyle='#aeb6c1';
+   ctx.fillText(age.toString(),xx-8,H-12);
+ }
+ const objectiveMonth=Math.max(0,Math.min(maxM,Math.round((res.objectiveAge-res.currentAge)*12)));
+ const targetY=y(target),objectiveX=x(objectiveMonth);
+ ctx.save();ctx.setLineDash([5,5]);ctx.strokeStyle='rgba(176,149,103,.7)';
+ ctx.beginPath();ctx.moveTo(objectiveX,Tm);ctx.lineTo(objectiveX,H-Bm);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();ctx.restore();
+
+ const inspectMonth=hoverMonth===null?objectiveMonth:Math.max(0,Math.min(maxM,Math.round(hoverMonth/12)*12));
+ const inspectX=x(inspectMonth),inspectAge=res.currentAge+inspectMonth/12;
+ const point=pts.reduce((best,p)=>Math.abs(p.m-inspectMonth)<Math.abs(best.m-inspectMonth)?p:best,pts[0]);
+ if(inspectMonth!==objectiveMonth){
+   ctx.save();ctx.setLineDash([3,5]);ctx.strokeStyle='rgba(167,176,190,.45)';
+   ctx.beginPath();ctx.moveTo(inspectX,Tm);ctx.lineTo(inspectX,H-Bm);ctx.stroke();ctx.restore();
+ }
+ ctx.font='600 13px Inter, system-ui';ctx.fillStyle='rgba(210,216,225,.72)';
+ ctx.fillText(`Age ${Number.isInteger(inspectAge)?inspectAge:inspectAge.toFixed(1)}`,Math.min(inspectX+7,W-Rm-55),Tm+15);
+ [{key:'p90',colour:'#8f99aa'},{key:'p50',colour:'#5f91df'},{key:'p10',colour:'#a75e65'}].forEach((item,idx)=>{
+   const val=point[item.key],yy=y(val);
+   ctx.fillStyle=item.colour;ctx.beginPath();ctx.arc(inspectX,yy,4,0,Math.PI*2);ctx.fill();
+   ctx.fillStyle='rgba(226,231,238,.75)';
+   ctx.fillText(compactGBP(val),Math.min(inspectX+8,W-Rm+8),Math.max(Tm+15,Math.min(H-Bm-4,yy+(idx-1)*17)));
+ });
+}
+function drawHistoryChart(canvas,record){
+ canvas._retireLabRecord=record;
+ renderHistoryCanvas(canvas,record,null);
+ if(!canvas.dataset.interactive){
+   let pinnedMonth=null;
+   const getMonth=e=>{
+     const rect=canvas.getBoundingClientRect(),clientX=e.touches?.[0]?.clientX??e.clientX;
+     const xpx=(clientX-rect.left)*(canvas.width/rect.width);
+     const maxM=record.chartPoints?.at(-1)?.m||1;
+     return (xpx-76)/(canvas.width-76-106)*maxM;
+   };
+   canvas.onmousemove=e=>{if(pinnedMonth===null)renderHistoryCanvas(canvas,record,getMonth(e))};
+   canvas.onmouseleave=()=>{if(pinnedMonth===null)renderHistoryCanvas(canvas,record,null)};
+   canvas.onclick=e=>{pinnedMonth=Math.round(getMonth(e)/12)*12;renderHistoryCanvas(canvas,record,pinnedMonth)};
+   canvas.ontouchmove=e=>{e.preventDefault();renderHistoryCanvas(canvas,record,getMonth(e))};
+   canvas.dataset.interactive='1';
+ }
+}
 function renderSimulationHistory(){
   const host=document.getElementById('simulationHistory');
   host.innerHTML='';
@@ -1547,12 +1668,16 @@ function renderSimulationHistory(){
           <div class="sim-metric"><div class="k">Median</div><div class="v">${gbp(record.median)}</div></div>
           <div class="sim-metric"><div class="k">90th percentile</div><div class="v">${gbp(record.p90)}</div></div>
         </div>
+        <div class="chart-toolbar"><button type="button" class="ghost small expand-history-chart">Expand chart</button></div>
         <canvas class="sim-chart" width="1000" height="260"></canvas>
         <div class="sim-summary">${record.summary}</div>
       </div>`;
     host.appendChild(card);
 
     drawHistoryChart(card.querySelector('canvas'),record);
+    card.querySelector('.expand-history-chart').addEventListener('click',()=>{
+      openExpandedChart(record,`Simulation ${record.number}`);
+    });
 
     const collapse=card.querySelector('.collapse-btn');
     collapse.addEventListener('click',()=>{
@@ -1704,7 +1829,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.5</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.6</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};
@@ -1983,6 +2108,62 @@ function refreshRunFeedbackFromHistory(){
   if(hasResults)setRunFeedbackState('complete','Results ready');
 }
 setTimeout(refreshRunFeedbackFromHistory,500);
+</script>
+
+<div aria-hidden="true" class="chart-modal hidden" id="chartModal">
+<div class="chart-modal-panel">
+<div class="chart-modal-header">
+<div>
+<h2 id="chartModalTitle">Simulation chart</h2>
+<p class="note">Move across the chart to inspect yearly values. Tap or click to pin a year.</p>
+</div>
+<button class="ghost small" id="closeChartModal" type="button">Close</button>
+</div>
+<canvas height="720" id="expandedChart" width="1400"></canvas>
+</div>
+</div>
+
+<script>
+let expandedChartSource=null;
+function openExpandedChart(source,title='Simulation chart'){
+  expandedChartSource=source;
+  chartModalTitle.textContent=title;
+  chartModal.classList.remove('hidden');
+  chartModal.setAttribute('aria-hidden','false');
+  const canvas=document.getElementById('expandedChart');
+  if(source.chartPoints){
+    // Build full snapshots approximation only for display; use history renderer directly.
+    canvas._retireLabRecord=source;
+    renderHistoryCanvas(canvas,source,null);
+    if(!canvas.dataset.interactive){
+      let pinnedMonth=null;
+      const getMonth=e=>{
+        const rect=canvas.getBoundingClientRect(),clientX=e.touches?.[0]?.clientX??e.clientX;
+        const xpx=(clientX-rect.left)*(canvas.width/rect.width);
+        const maxM=source.chartPoints?.at(-1)?.m||1;
+        return (xpx-96)/(canvas.width-96-130)*maxM;
+      };
+      canvas.onmousemove=e=>{if(pinnedMonth===null)renderHistoryCanvas(canvas,expandedChartSource,getMonth(e))};
+      canvas.onmouseleave=()=>{if(pinnedMonth===null)renderHistoryCanvas(canvas,expandedChartSource,null)};
+      canvas.onclick=e=>{pinnedMonth=Math.round(getMonth(e)/12)*12;renderHistoryCanvas(canvas,expandedChartSource,pinnedMonth)};
+      canvas.dataset.interactive='1';
+    }
+  }else{
+    canvas._retireLabResult=source;
+    renderSimulationCanvas(canvas,source,null);
+    if(!canvas.dataset.interactive)attachInteractiveChart(canvas,()=>canvas._retireLabResult);
+  }
+}
+expandMainChart.addEventListener('click',()=>{
+  if(chart._retireLabResult)openExpandedChart(chart._retireLabResult,'Current simulation');
+});
+closeChartModal.addEventListener('click',()=>{
+  chartModal.classList.add('hidden');
+  chartModal.setAttribute('aria-hidden','true');
+});
+chartModal.addEventListener('click',e=>{
+  if(e.target===chartModal)closeChartModal.click();
+});
 </script>
 </body>
 </html>

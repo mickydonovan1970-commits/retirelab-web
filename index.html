@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.4</title>
+<title>RetireLab 4.5</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -230,7 +230,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 }
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.4</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.5</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -911,15 +911,78 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
  medianCash:quantile(finalCash,.5),snapshots,months,currentAge:inp.currentAge,endAge:inp.endAge,weights}
 }
 function drawChart(res){
- const c=chart,ctx=c.getContext('2d'),W=c.width,H=c.height;ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+ const c=chart,ctx=c.getContext('2d'),W=c.width,H=c.height;
+ ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0f13';ctx.fillRect(0,0,W,H);
+
  const step=Math.max(1,Math.floor(res.months/120)),pts=[];
- for(let m=0;m<=res.months;m+=step){const a=res.snapshots[m]||[0];pts.push({m,p10:quantile(a,.1),p50:quantile(a,.5),p90:quantile(a,.9)})}
- const ymax=Math.max(...pts.map(p=>p.p90),1)*1.05,Lm=72,Rm=18,Tm=18,Bm=38;
- ctx.strokeStyle='#dfe5ee';ctx.lineWidth=1;ctx.font='12px system-ui';ctx.fillStyle='#637083';
- for(let i=0;i<=5;i++){const y=Tm+(H-Tm-Bm)*i/5;ctx.beginPath();ctx.moveTo(Lm,y);ctx.lineTo(W-Rm,y);ctx.stroke();ctx.fillText(gbp(ymax*(1-i/5)),4,y+4)}
- const x=m=>Lm+(W-Lm-Rm)*m/res.months,y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
- [['p90','#9aa9c5'],['p50','#2f5bea'],['p10','#b42318']].forEach(([k,col])=>{ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});ctx.stroke()});
- for(let age=Math.ceil(res.currentAge/5)*5;age<=res.endAge;age+=5){const xx=x((age-res.currentAge)*12);ctx.fillStyle='#637083';ctx.fillText(age.toString(),xx-8,H-12)}
+ for(let m=0;m<=res.months;m+=step){
+   const a=res.snapshots[m]||[0];
+   pts.push({m,p10:quantile(a,.1),p50:quantile(a,.5),p90:quantile(a,.9)});
+ }
+ if(!pts.length)return;
+
+ const target=Math.max(0,res.objectiveTarget||0);
+ const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
+ const Lm=78,Rm=88,Tm=22,Bm=42;
+
+ ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font='12px Raleway, system-ui';ctx.fillStyle='#87909c';
+ for(let i=0;i<=5;i++){
+   const yy=Tm+(H-Tm-Bm)*i/5;
+   ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
+   ctx.fillText(gbp(ymax*(1-i/5)),4,yy+4);
+ }
+
+ const x=m=>Lm+(W-Lm-Rm)*m/Math.max(res.months,1);
+ const y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
+
+ [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
+   ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();
+   pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});
+   ctx.stroke();
+ });
+
+ for(let age=Math.ceil(res.currentAge/5)*5;age<=res.endAge;age+=5){
+   const xx=x((age-res.currentAge)*12);
+   ctx.fillStyle='#87909c';ctx.fillText(age.toString(),xx-8,H-14);
+ }
+
+ const objectiveMonth=Math.max(0,Math.min(res.months,Math.round((res.objectiveAge-res.currentAge)*12)));
+ const objectiveX=x(objectiveMonth);
+ const targetY=y(target);
+
+ // Crosshair at objective age and target wealth.
+ ctx.save();
+ ctx.setLineDash([5,5]);
+ ctx.strokeStyle='#b09567';
+ ctx.lineWidth=1.25;
+ ctx.beginPath();ctx.moveTo(objectiveX,Tm);ctx.lineTo(objectiveX,H-Bm);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();
+ ctx.restore();
+
+ // Objective labels.
+ ctx.font='11px Raleway, system-ui';
+ ctx.fillStyle='#c8ae7d';
+ ctx.fillText(`Age ${res.objectiveAge}`,Math.min(objectiveX+6,W-Rm-46),Tm+12);
+ ctx.fillText(`Target ${gbp(target)}`,Math.max(Lm+4,W-Rm-86),Math.max(Tm+12,targetY-6));
+
+ // Nearest percentile values at objective age.
+ const objectivePoint=pts.reduce((best,p)=>Math.abs(p.m-objectiveMonth)<Math.abs(best.m-objectiveMonth)?p:best,pts[0]);
+ const labels=[
+   {key:'p90',name:'90th',colour:'#8f99aa'},
+   {key:'p50',name:'Median',colour:'#5f91df'},
+   {key:'p10',name:'10th',colour:'#a75e65'}
+ ];
+ labels.forEach((item,idx)=>{
+   const val=objectivePoint[item.key];
+   const yy=y(val);
+   ctx.fillStyle=item.colour;
+   ctx.beginPath();ctx.arc(objectiveX,yy,4,0,Math.PI*2);ctx.fill();
+
+   const text=`${item.name} ${gbp(val)}`;
+   const textY=Math.max(Tm+12,Math.min(H-Bm-4,yy+(idx-1)*15));
+   ctx.fillStyle='#d9dee6';
+   ctx.fillText(text,Math.min(objectiveX+8,W-Rm+4),textY);
+ });
 }
 function setMetricClass(el,p){el.className='value '+(p>=.85?'good':p>=.65?'warn':'bad')}
 function allocationIsValid(){
@@ -1397,23 +1460,57 @@ function buildSimulationSummary(){
 
 function drawHistoryChart(canvas, record){
   const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
-  ctx.clearRect(0,0,W,H);ctx.fillStyle='#fff';ctx.fillRect(0,0,W,H);
+  ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d0f13';ctx.fillRect(0,0,W,H);
   const pts=record.chartPoints||[];
   if(!pts.length)return;
-  const ymax=Math.max(...pts.map(p=>p.p90),1)*1.05,Lm=66,Rm=16,Tm=16,Bm=34;
-  ctx.strokeStyle='#dfe5ee';ctx.lineWidth=1;ctx.font='11px system-ui';ctx.fillStyle='#637083';
+
+  const target=Math.max(0,record.objectiveTarget||0);
+  const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
+  const Lm=70,Rm=100,Tm=18,Bm=34;
+
+  ctx.strokeStyle='#252b34';ctx.lineWidth=1;ctx.font='11px Raleway, system-ui';ctx.fillStyle='#87909c';
   for(let i=0;i<=4;i++){
-    const y=Tm+(H-Tm-Bm)*i/4;
-    ctx.beginPath();ctx.moveTo(Lm,y);ctx.lineTo(W-Rm,y);ctx.stroke();
-    ctx.fillText(gbp(ymax*(1-i/4)),4,y+4);
+    const yy=Tm+(H-Tm-Bm)*i/4;
+    ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
+    ctx.fillText(gbp(ymax*(1-i/4)),4,yy+4);
   }
+
   const maxM=pts[pts.length-1].m||1;
   const x=m=>Lm+(W-Lm-Rm)*m/maxM;
   const y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
-  [['p90','#9aa9c5'],['p50','#2f5bea'],['p10','#b42318']].forEach(([k,col])=>{
+
+  [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
     ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?3:2;ctx.beginPath();
     pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});
     ctx.stroke();
+  });
+
+  const currentAge=+(record.plan?.basics?.currentAge||0);
+  const objectiveMonth=Math.max(0,Math.min(maxM,Math.round((record.objectiveAge-currentAge)*12)));
+  const objectiveX=x(objectiveMonth);
+  const targetY=y(target);
+
+  ctx.save();
+  ctx.setLineDash([5,5]);
+  ctx.strokeStyle='#b09567';ctx.lineWidth=1.2;
+  ctx.beginPath();ctx.moveTo(objectiveX,Tm);ctx.lineTo(objectiveX,H-Bm);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(Lm,targetY);ctx.lineTo(W-Rm,targetY);ctx.stroke();
+  ctx.restore();
+
+  ctx.fillStyle='#c8ae7d';
+  ctx.fillText(`Age ${record.objectiveAge}`,Math.min(objectiveX+6,W-Rm-44),Tm+11);
+  ctx.fillText(`Target ${gbp(target)}`,Math.max(Lm+4,W-Rm-86),Math.max(Tm+12,targetY-5));
+
+  const objectivePoint=pts.reduce((best,p)=>Math.abs(p.m-objectiveMonth)<Math.abs(best.m-objectiveMonth)?p:best,pts[0]);
+  [
+    {key:'p90',name:'90th',colour:'#8f99aa'},
+    {key:'p50',name:'Median',colour:'#5f91df'},
+    {key:'p10',name:'10th',colour:'#a75e65'}
+  ].forEach((item,idx)=>{
+    const val=objectivePoint[item.key],yy=y(val);
+    ctx.fillStyle=item.colour;ctx.beginPath();ctx.arc(objectiveX,yy,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#d9dee6';
+    ctx.fillText(`${item.name} ${gbp(val)}`,Math.min(objectiveX+7,W-Rm+4),Math.max(Tm+10,Math.min(H-Bm-3,yy+(idx-1)*13)));
   });
 }
 
@@ -1607,7 +1704,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.4</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.5</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

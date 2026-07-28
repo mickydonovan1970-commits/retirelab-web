@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.0</title>
+<title>RetireLab 4.1</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -174,9 +174,63 @@ button{border-radius:8px!important;transition:background .16s ease,border-color 
 table{color:var(--ink)!important}th{color:#7f8996!important;font-size:10px!important;letter-spacing:.08em;text-transform:uppercase;border-bottom:1px solid var(--line)!important;padding:11px 8px!important}td{border-bottom:1px solid var(--line2)!important;padding:11px 8px!important}tbody tr:nth-child(even){background:#101217!important}tbody tr:hover{background:#171a20!important}tfoot th{color:#cdd3da!important}.metric,.statbox,.sim-metric,.drawer-item,.compare-card{background:var(--panel2)!important;border:1px solid var(--line)!important;border-radius:10px!important}.metric .value,.statbox .v,.sim-metric .v{color:var(--ink)!important;font-family:"Raleway",sans-serif!important;font-weight:600!important}.metric .value{font-size:26px!important}
 canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!important;border-radius:10px!important}.sim-card{background:var(--panel)!important;border:1px solid var(--line)!important;box-shadow:none!important}.sim-card-header{background:var(--panel2)!important;border-bottom:1px solid var(--line)!important}.sim-summary{background:#101217!important;border:1px solid var(--line)!important;color:var(--muted)!important}.empty-history{background:#101217!important;border:1px dashed #303641!important;color:var(--muted)!important}.drawer{background:var(--panel)!important;color:var(--ink)!important;box-shadow:-10px 0 30px rgba(0,0,0,.45)!important}.drawer-backdrop{background:rgba(0,0,0,.62)!important}#projectManagerCard{margin-bottom:20px!important}#projectManagerCard h2{font-family:"Slabo 27px",Georgia,serif!important;font-size:24px!important;font-weight:400!important}footer{color:var(--muted2)!important;font-size:11px!important;letter-spacing:.08em;text-transform:uppercase}.collapse-btn{background:var(--panel3)!important;color:#c9d0d8!important;border:1px solid var(--line)!important}
 @media(max-width:900px){.dashboard-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){header{padding:20px 18px 14px!important}main{padding:0 14px 48px!important}.tabbar{padding:0 10px!important}.dashboard-summary{grid-template-columns:1fr}}
+
+.run-feedback{
+  margin-top:10px;
+  max-width:520px;
+}
+.run-progress-track{
+  height:3px;
+  overflow:hidden;
+  border-radius:999px;
+  background:#232831;
+}
+.run-progress-bar{
+  width:0%;
+  height:100%;
+  border-radius:inherit;
+  background:var(--accent);
+  transition:width .22s ease;
+}
+.run-feedback.running .run-progress-bar{
+  width:72%;
+  animation:retirelab-progress-pulse .8s ease-in-out infinite alternate;
+}
+.run-feedback.complete .run-progress-bar{
+  width:100%;
+  animation:none;
+  background:var(--good);
+}
+.run-feedback.error .run-progress-bar{
+  width:100%;
+  animation:none;
+  background:var(--bad);
+}
+.run-status{
+  min-height:16px;
+  margin-top:6px;
+  color:var(--muted-2);
+  font-size:11px;
+}
+.run-feedback.complete .run-status{color:#7eaa91}
+.run-feedback.error .run-status{color:#bc7278}
+.view-results-btn[disabled]{
+  opacity:.42;
+  cursor:not-allowed;
+  transform:none!important;
+}
+.view-results-btn.results-ready{
+  border-color:#385d49!important;
+  color:#8fbea1!important;
+  background:#15221b!important;
+}
+@keyframes retirelab-progress-pulse{
+  from{opacity:.55}
+  to{opacity:1}
+}
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -220,12 +274,19 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 </section><section class="card full">
 <h2>Run the model</h2>
 <div class="toolbar">
-<button class="primary" id="runBtn">Run Monte Carlo</button>
+<button class="primary" id="runBtn">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
 <button class="secondary" id="rebalanceBtn">Find a better CORE allocation</button>
 <button class="ghost" id="saveBtn">Save inputs</button>
 <button class="ghost" id="loadBtn">Load saved inputs</button>
 <button class="danger" id="resetBtn">Reset</button>
 </div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="0">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+
 </section></div><div class="tabpanel" data-panel="portfolio"><section class="card full">
 <h2>CORE portfolio</h2>
 <div class="table-wrap"><table id="fundTable">
@@ -277,9 +338,16 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 <section class="card full run-panel-copy">
 <h2>Run the model</h2>
 <div class="toolbar">
-<button class="primary quick-run-model" type="button">Run Monte Carlo</button>
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
 <button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
 </div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="1">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="income"><section class="card full">
@@ -294,9 +362,16 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <section class="card full run-panel-copy">
 <h2>Run the model</h2>
 <div class="toolbar">
-<button class="primary quick-run-model" type="button">Run Monte Carlo</button>
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
 <button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
 </div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="2">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="expenditure"><section class="card full">
@@ -307,9 +382,16 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <section class="card full run-panel-copy">
 <h2>Run the model</h2>
 <div class="toolbar">
-<button class="primary quick-run-model" type="button">Run Monte Carlo</button>
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
 <button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
 </div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="3">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="strategy"><section class="card full">
@@ -340,9 +422,16 @@ If either source is exhausted, the other source is used.
 <section class="card full run-panel-copy">
 <h2>Run the model</h2>
 <div class="toolbar">
-<button class="primary quick-run-model" type="button">Run Monte Carlo</button>
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
 <button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
 </div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="4">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
 </div><div class="tabpanel" data-panel="results"><section class="card full hidden" id="resultsCard">
@@ -835,10 +924,25 @@ function allocationIsValid(){
  return Math.abs(allocationSum()-100)<0.05;
 }
 
+
+function setRunFeedbackState(state,message){
+ document.querySelectorAll('.run-feedback').forEach(el=>{
+   el.classList.remove('running','complete','error');
+   if(state)el.classList.add(state);
+   const status=el.querySelector('.run-status');
+   if(status)status.textContent=message;
+ });
+ document.querySelectorAll('.view-results-btn').forEach(btn=>{
+   const ready=state==='complete';
+   btn.disabled=!ready;
+   btn.classList.toggle('results-ready',ready);
+ });
+}
+
 runBtn.onclick=()=>{
  if(totalCore()<=0){alert('Enter a CORE portfolio value first.');return}
  if(!allocationIsValid()){alert(`Fund allocations currently total ${allocationSum().toFixed(2)}%. Please make them add to 100% before running the simulation.`);return}
- runBtn.disabled=true;runBtn.textContent='Running…';
+ runBtn.disabled=true;runBtn.textContent='Running…';setRunFeedbackState('running','Running Monte Carlo…');
  setTimeout(()=>{
    const r=runSimulation();
    objectiveProb.textContent=pct(r.objectiveMet);
@@ -855,6 +959,7 @@ runBtn.onclick=()=>{
    drawChart(r);
    resultsCard.classList.remove('hidden');
    snapshotSimulationResult(r);
+   setRunFeedbackState('complete','Results ready');
    runBtn.disabled=false;runBtn.textContent='Run Monte Carlo';
  },30)
 };
@@ -1074,18 +1179,6 @@ function openTab(name){
 document.querySelectorAll('.tabbtn').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
 document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.goto)));
 document.getElementById('dashboardRun').addEventListener('click',()=>document.getElementById('runBtn').click());
-
-const originalRunHandler=runBtn.onclick;
-runBtn.onclick=()=>{
-  const wasHidden=resultsCard.classList.contains('hidden');
-  originalRunHandler();
-  const watch=setInterval(()=>{
-    if(!resultsCard.classList.contains('hidden')){
-      clearInterval(watch);openTab('results');
-    }
-  },100);
-  setTimeout(()=>clearInterval(watch),30000);
-};
 
 const originalRebalanceHandler=rebalanceBtn.onclick;
 rebalanceBtn.onclick=()=>{
@@ -1506,7 +1599,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.0</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.1</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};
@@ -1771,5 +1864,20 @@ document.addEventListener('input',()=>setTimeout(refreshDashboardV4,0));
 document.addEventListener('change',()=>setTimeout(refreshDashboardV4,0));
 document.addEventListener('click',()=>setTimeout(refreshDashboardV4,60));
 setInterval(refreshDashboardV4,1500);setTimeout(refreshDashboardV4,250);
-</script></body>
+</script>
+<script>
+document.querySelectorAll('.view-results-btn').forEach(button=>{
+  button.addEventListener('click',()=>{
+    if(!button.disabled)openTab('results');
+  });
+});
+
+// Preserve "results ready" after loading a project that already has simulations.
+function refreshRunFeedbackFromHistory(){
+  const hasResults=typeof simulationHistoryRecords!=='undefined' && simulationHistoryRecords.length>0;
+  if(hasResults)setRunFeedbackState('complete','Results ready');
+}
+setTimeout(refreshRunFeedbackFromHistory,500);
+</script>
+</body>
 </html>

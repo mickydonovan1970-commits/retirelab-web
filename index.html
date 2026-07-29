@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.9</title>
+<title>RetireLab 5.0</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -329,9 +329,105 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
   .portfolio-pie-wrap{grid-template-columns:1fr}
   #portfolioPieChart{max-height:300px}
 }
+
+/* Results cards: prevent large currency values escaping their cards. */
+.summary{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(190px,1fr))!important;
+  gap:14px!important;
+  align-items:stretch;
+}
+.metric{
+  min-width:0!important;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  justify-content:space-between;
+  min-height:126px;
+}
+.metric .label{
+  line-height:1.35!important;
+  overflow-wrap:anywhere;
+}
+.metric .value{
+  max-width:100%;
+  font-family:Inter,system-ui,sans-serif!important;
+  font-size:clamp(25px,2.2vw,38px)!important;
+  line-height:1.05!important;
+  letter-spacing:-.035em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+
+/* Fund amount and percentage fields match the muted pie-chart slices. */
+#fundTable tbody tr:nth-child(10n+1) .fund-value,
+#fundTable tbody tr:nth-child(10n+1) .fund-pct{
+  --fund-row:#4f7058;
+}
+#fundTable tbody tr:nth-child(10n+2) .fund-value,
+#fundTable tbody tr:nth-child(10n+2) .fund-pct{
+  --fund-row:#755f47;
+}
+#fundTable tbody tr:nth-child(10n+3) .fund-value,
+#fundTable tbody tr:nth-child(10n+3) .fund-pct{
+  --fund-row:#66516f;
+}
+#fundTable tbody tr:nth-child(10n+4) .fund-value,
+#fundTable tbody tr:nth-child(10n+4) .fund-pct{
+  --fund-row:#765055;
+}
+#fundTable tbody tr:nth-child(10n+5) .fund-value,
+#fundTable tbody tr:nth-child(10n+5) .fund-pct{
+  --fund-row:#506c72;
+}
+#fundTable tbody tr:nth-child(10n+6) .fund-value,
+#fundTable tbody tr:nth-child(10n+6) .fund-pct{
+  --fund-row:#706b4f;
+}
+#fundTable tbody tr:nth-child(10n+7) .fund-value,
+#fundTable tbody tr:nth-child(10n+7) .fund-pct{
+  --fund-row:#5f5874;
+}
+#fundTable tbody tr:nth-child(10n+8) .fund-value,
+#fundTable tbody tr:nth-child(10n+8) .fund-pct{
+  --fund-row:#566b5e;
+}
+#fundTable tbody tr:nth-child(10n+9) .fund-value,
+#fundTable tbody tr:nth-child(10n+9) .fund-pct{
+  --fund-row:#74604e;
+}
+#fundTable tbody tr:nth-child(10n) .fund-value,
+#fundTable tbody tr:nth-child(10n) .fund-pct{
+  --fund-row:#4b607d;
+}
+#fundTable .fund-value,
+#fundTable .fund-pct{
+  background:color-mix(in srgb,var(--fund-row) 25%,#171a20)!important;
+  border-color:color-mix(in srgb,var(--fund-row) 70%,#262b33)!important;
+  box-shadow:inset 3px 0 0 var(--fund-row);
+}
+#fundTable .fund-value:focus,
+#fundTable .fund-pct:focus{
+  outline-color:color-mix(in srgb,var(--fund-row) 55%,transparent)!important;
+  border-color:var(--fund-row)!important;
+}
+
+@media(max-width:1100px){
+  .summary{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+}
+@media(max-width:620px){
+  .summary{grid-template-columns:1fr!important}
+  .metric{min-height:104px}
+  .metric .value{
+    font-size:clamp(28px,10vw,40px)!important;
+    white-space:normal;
+    overflow-wrap:anywhere;
+  }
+}
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.9</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 5.0</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -1936,7 +2032,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.9</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 5.0</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

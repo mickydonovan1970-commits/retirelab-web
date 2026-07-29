@@ -1,20 +1,18 @@
-# RetireLab Release 6.0a — Annual Review Foundation
+# RetireLab Release 6.0b — Mixed Funding Roadmap
 
-## New
-- Annual Review tab after Results
-- Age-led planning timeline
-- Planning Mode with no inferred pre-retirement years
-- Median Monte Carlo roadmap refresh
-- Annual normal spending, planned large expenditure and guaranteed income
-- Gross pre-tax portfolio withdrawal
-- Indicative cash and CORE position
-- Indicative fund-by-fund sales using the selected Strategy sale method
+## Fixed
+- Annual Review now applies the Strategy cash/CORE rules year by year.
+- A projected year can be funded entirely from cash, entirely from CORE, or from both.
+- Good-year decisions use the CORE trigger and selected good-year rule.
+- Weak-year decisions use the selected bad-year rule.
+- Cash floor and fallback funding are respected.
+- Fund-by-fund sales use the selected sale method.
 
-## Structural change
-The application is now split into HTML, CSS and JavaScript files while remaining a plain GitHub Pages application.
+## Planning approach
+The roadmap uses each fund's median lognormal return implied by its return and volatility assumptions. It carries cash and each CORE fund forward from one age to the next.
 
-## Not yet included
-- Live Mode actual-value overrides
+## Still excluded
+- Tax
+- Money market interest on the year's spending allocation
+- Live actual-value overrides
 - Completed review history
-- Dashboard review status
-- Tax calculations

@@ -1,7 +1,7 @@
 
 (function(){
   let selectedAge = null;
-  let medianResult = null;
+  let roadmap = null;
 
   function annualInflationFactor(age){
     const inp=getInputs();
@@ -35,52 +35,183 @@
     },0);
   }
 
-  function medianPortfolioAt(age){
-    const inp=getInputs();
-    if(Math.abs(age-inp.currentAge)<.001)return inp.sippTotal;
-    if(!medianResult || !medianResult.snapshots)return NaN;
-    const month=Math.max(0,Math.min(medianResult.months,Math.round((age-inp.currentAge)*12)));
-    const values=medianResult.snapshots[month]||[];
-    return values.length?quantile(values,.5):NaN;
+  function medianFundReturn(fund){
+    const mu=(+fund.ret||0)/100;
+    const vol=(+fund.vol||0)/100;
+    return Math.exp(mu-.5*vol*vol)-1;
   }
 
-  function splitProjectedPortfolio(total,age){
-    const inp=getInputs();
-    if(Math.abs(age-inp.currentAge)<.001){
-      return {cash:inp.cashStart,core:Math.max(0,inp.sippTotal-inp.cashStart)};
-    }
-    const cashRatio=inp.sippTotal>0?inp.cashStart/inp.sippTotal:0;
-    const cash=Math.max(0,total*cashRatio);
-    return {cash,core:Math.max(0,total-cash)};
-  }
+  function applyFundSale(funds,amount,method,targetWeights){
+    const sales=funds.map(()=>0);
+    let remaining=Math.max(0,amount);
+    if(remaining<=.005)return sales;
 
-  function salePlan(amount,core){
-    amount=Math.max(0,Math.min(amount,core));
-    if(amount<=.005)return fundDefs.map(()=>0);
-    const weights=totalCore()>0?fundDefs.map(f=>f.value/totalCore()):fundDefs.map(()=>1/fundDefs.length);
-
-    if(saleMethod.value==='equal'){
-      const each=amount/fundDefs.length;
-      return fundDefs.map(()=>each);
+    if(method==='equal'){
+      let active=funds.map((value,index)=>value>.005?index:null).filter(index=>index!==null);
+      while(remaining>.005&&active.length){
+        const each=remaining/active.length;
+        const next=[];
+        active.forEach(index=>{
+          const take=Math.min(each,funds[index]);
+          funds[index]-=take;
+          sales[index]+=take;
+          remaining-=take;
+          if(funds[index]>.005)next.push(index);
+        });
+        active=next;
+      }
+      return sales;
     }
-    if(saleMethod.value==='proportional'){
-      return weights.map(w=>amount*w);
-    }
 
-    const projected=weights.map(w=>core*w);
-    const sales=projected.map(()=>0);
-    let remaining=amount;
-    while(remaining>.01 && projected.reduce((a,b)=>a+b,0)>.01){
-      const total=projected.reduce((a,b)=>a+b,0);
-      let best=0,bestOver=-Infinity;
-      projected.forEach((v,i)=>{
-        const over=v/total-weights[i];
-        if(v>0 && over>bestOver){best=i;bestOver=over}
+    if(method==='proportional'){
+      const total=funds.reduce((sum,value)=>sum+value,0);
+      if(total<=0)return sales;
+      funds.forEach((value,index)=>{
+        const take=Math.min(value,amount*value/total);
+        funds[index]-=take;
+        sales[index]+=take;
+        remaining-=take;
       });
-      const take=Math.min(remaining,projected[best]);
-      projected[best]-=take;sales[best]+=take;remaining-=take;
+      return sales;
+    }
+
+    while(remaining>.005&&funds.reduce((sum,value)=>sum+value,0)>.005){
+      const total=funds.reduce((sum,value)=>sum+value,0);
+      let best=0,bestOver=-Infinity;
+      funds.forEach((value,index)=>{
+        const overweight=value/total-targetWeights[index];
+        if(value>.005&&overweight>bestOver){
+          best=index;
+          bestOver=overweight;
+        }
+      });
+      const take=Math.min(remaining,funds[best]);
+      funds[best]-=take;
+      sales[best]+=take;
+      remaining-=take;
     }
     return sales;
+  }
+
+  function fundWithdrawal(funds,requested,method,targetWeights){
+    const available=funds.reduce((sum,value)=>sum+value,0);
+    const amount=Math.min(Math.max(0,requested),available);
+    return {
+      amount,
+      sales:applyFundSale(funds,amount,method,targetWeights)
+    };
+  }
+
+  function buildMedianRoadmap(){
+    const inp=getInputs();
+    const start=Math.ceil(inp.currentAge);
+    const end=Math.floor(inp.endAge);
+    const startingCore=Math.max(0,inp.sippTotal-inp.cashStart);
+    const targetWeights=startingCore>0
+      ?fundDefs.map(f=>Math.max(0,f.value)/startingCore)
+      :fundDefs.map(()=>1/fundDefs.length);
+
+    let funds=targetWeights.map(weight=>startingCore*weight);
+    let cash=Math.max(0,inp.cashStart);
+    let priorReturn=0;
+    let priorGain=0;
+    let priorReviewCore=startingCore;
+    const rows=[];
+
+    for(let age=start;age<=end;age++){
+      const openingFunds=[...funds];
+      const openingCore=openingFunds.reduce((sum,value)=>sum+value,0);
+      const openingCash=cash;
+      const normal=normalSpendAt(age);
+      const large=largeSpendAt(age);
+      const totalSpend=normal+large;
+      const income=incomeAt(age);
+      let need=Math.max(0,totalSpend-income);
+      const surplus=Math.max(0,income-totalSpend);
+      cash+=surplus;
+
+      const isGood=priorReturn>inp.trigger;
+      let fromCash=0;
+      let fromCore=0;
+      let sales=funds.map(()=>0);
+      const floor=Math.max(0,inp.cashFloor);
+
+      const takeCash=requested=>{
+        const available=Math.max(0,cash-floor);
+        const taken=Math.min(Math.max(0,requested),available);
+        cash-=taken;
+        return taken;
+      };
+      const takeCore=requested=>{
+        const result=fundWithdrawal(funds,requested,inp.saleMethod,targetWeights);
+        fromCore+=result.amount;
+        result.sales.forEach((value,index)=>sales[index]+=value);
+        return result.amount;
+      };
+
+      if(isGood){
+        let coreBudget=0;
+        if(inp.goodYearRule==='trigger_amount')coreBudget=Math.max(0,inp.trigger*priorReviewCore);
+        else if(inp.goodYearRule==='actual_gain')coreBudget=Math.max(0,priorGain);
+        else coreBudget=Infinity;
+
+        const firstCore=takeCore(Math.min(need,coreBudget));
+        need-=firstCore;
+        const cashTaken=takeCash(need);
+        fromCash+=cashTaken;
+        need-=cashTaken;
+        if(need>.005)need-=takeCore(need);
+      }else if(inp.badYearRule==='core_first'){
+        need-=takeCore(need);
+        if(need>.005){
+          const cashTaken=takeCash(need);
+          fromCash+=cashTaken;
+          need-=cashTaken;
+        }
+      }else{
+        const cashTaken=takeCash(need);
+        fromCash+=cashTaken;
+        need-=cashTaken;
+        if(need>.005)need-=takeCore(need);
+      }
+
+      // Any amount still unfunded is shown explicitly.
+      const unfunded=Math.max(0,need);
+
+      const coreAfterWithdrawal=funds.reduce((sum,value)=>sum+value,0);
+      const beforeReturnCore=coreAfterWithdrawal;
+      funds=funds.map((value,index)=>value*(1+medianFundReturn(fundDefs[index])));
+      const closingCore=funds.reduce((sum,value)=>sum+value,0);
+      const annualGain=closingCore-beforeReturnCore;
+      const annualReturn=beforeReturnCore>0?closingCore/beforeReturnCore-1:0;
+
+      rows.push({
+        age,
+        normal,
+        large,
+        totalSpend,
+        income,
+        withdrawal:Math.max(0,totalSpend-income),
+        openingCash,
+        openingCore,
+        openingPortfolio:openingCash+openingCore,
+        fromCash,
+        fromCore,
+        unfunded,
+        sales,
+        priorReturn,
+        priorGain,
+        isGood,
+        closingCash:cash,
+        closingCore,
+        closingPortfolio:cash+closingCore
+      });
+
+      priorReturn=annualReturn;
+      priorGain=Math.max(0,annualGain);
+      priorReviewCore=beforeReturnCore;
+    }
+    return rows;
   }
 
   function saleMethodText(){
@@ -93,7 +224,7 @@
     const inp=getInputs();
     const start=Math.ceil(inp.currentAge);
     const end=Math.floor(inp.endAge);
-    if(selectedAge===null || selectedAge<start || selectedAge>end)selectedAge=start;
+    if(selectedAge===null||selectedAge<start||selectedAge>end)selectedAge=start;
 
     annualAgeStrip.innerHTML='';
     for(let age=start;age<=end;age++){
@@ -113,53 +244,66 @@
   function renderAnnualReview(){
     const age=selectedAge??Math.ceil(getInputs().currentAge);
     annualReviewAgeDisplay.textContent=`Age ${age}`;
+    const row=roadmap?.find(item=>item.age===age);
 
-    const normal=normalSpendAt(age);
-    const large=largeSpendAt(age);
-    const totalSpend=normal+large;
-    const income=incomeAt(age);
-    const withdrawal=Math.max(0,totalSpend-income);
-    const portfolio=medianPortfolioAt(age);
-    const position=splitProjectedPortfolio(Number.isFinite(portfolio)?portfolio:0,age);
-    const coreSale=Math.max(0,withdrawal-position.cash);
-    const sales=salePlan(coreSale,position.core);
+    if(!row){
+      const normal=normalSpendAt(age);
+      const large=largeSpendAt(age);
+      const income=incomeAt(age);
+      arNormalSpend.textContent=gbp(normal);
+      arLargeSpend.textContent=gbp(large);
+      arTotalSpend.textContent=gbp(normal+large);
+      arIncome.textContent=gbp(income);
+      arWithdrawal.textContent=gbp(Math.max(0,normal+large-income));
+      arPortfolio.textContent='Refresh roadmap';
+      arCash.textContent='—';
+      arCore.textContent='—';
+      arCashTarget.textContent='—';
+      arCoreSale.textContent='—';
+      arPlanExplanation.textContent='Refresh the median roadmap to apply the withdrawal strategy year by year.';
+      arActionExplanation.textContent='The roadmap will decide how much comes from cash and how much comes from CORE using the selected trigger and funding rules.';
+      arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
+      arSalesExplanation.textContent=`Suggested sales will follow the Strategy setting: ${saleMethodText()}.`;
+      return;
+    }
 
-    arNormalSpend.textContent=gbp(normal);
-    arLargeSpend.textContent=gbp(large);
-    arTotalSpend.textContent=gbp(totalSpend);
-    arIncome.textContent=gbp(income);
-    arWithdrawal.textContent=gbp(withdrawal);
-    arPortfolio.textContent=Number.isFinite(portfolio)?gbp(portfolio):'Refresh roadmap';
-    arCash.textContent=Number.isFinite(portfolio)?gbp(position.cash):'—';
-    arCore.textContent=Number.isFinite(portfolio)?gbp(position.core):'—';
-    arCashTarget.textContent=gbp(withdrawal);
-    arCoreSale.textContent=Number.isFinite(portfolio)?gbp(coreSale):'—';
+    arNormalSpend.textContent=gbp(row.normal);
+    arLargeSpend.textContent=gbp(row.large);
+    arTotalSpend.textContent=gbp(row.totalSpend);
+    arIncome.textContent=gbp(row.income);
+    arWithdrawal.textContent=gbp(row.withdrawal);
+    arPortfolio.textContent=gbp(row.openingPortfolio);
+    arCash.textContent=gbp(row.openingCash);
+    arCore.textContent=gbp(row.openingCore);
+    arCashTarget.textContent=gbp(row.fromCash);
+    arCoreSale.textContent=gbp(row.fromCore);
 
     arPlanExplanation.textContent=
-      `Gross withdrawal is planned expenditure of ${gbp(totalSpend)} less guaranteed income of ${gbp(income)}. Figures are gross, before any tax.`;
+      `Gross withdrawal is planned expenditure of ${gbp(row.totalSpend)} less guaranteed income of ${gbp(row.income)}. Figures are gross, before tax.`;
 
-    arActionExplanation.textContent=Number.isFinite(portfolio)
-      ?(coreSale>0
-        ?`The indicative cash balance is ${gbp(position.cash)}, leaving ${gbp(coreSale)} to be raised from CORE for the year's spending MMF.`
-        :`The indicative cash balance covers the full gross withdrawal, so no CORE sale is shown for this planning year.`)
-      :'Refresh the median roadmap to calculate the projected portfolio position.';
+    const triggerText=`${(getInputs().trigger*100).toFixed(1)}%`;
+    const returnText=pct(row.priorReturn);
+    const classification=row.isGood?'above':'at or below';
+    let actionText=`The preceding median CORE return is ${returnText}, ${classification} the ${triggerText} trigger. `;
+    actionText+=`The selected rules therefore fund ${gbp(row.fromCore)} from CORE and ${gbp(row.fromCash)} from cash.`;
+    if(row.unfunded>.005)actionText+=` ${gbp(row.unfunded)} remains unfunded because both available sources were exhausted or protected by the cash floor.`;
+    arActionExplanation.textContent=actionText;
 
     arFundSales.innerHTML='';
-    if(!Number.isFinite(portfolio)){
-      arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
-    }else if(coreSale<=.005){
-      arFundSales.innerHTML='<div class="annual-empty">No CORE sale indicated.</div>';
+    if(row.fromCore<=.005){
+      arFundSales.innerHTML='<div class="annual-empty">No CORE sale indicated for this year.</div>';
     }else{
       const colours=typeof portfolioPieColours==='function'
         ?portfolioPieColours(fundDefs.length+1).slice(1)
         :fundDefs.map(()=> '#5f91df');
-      fundDefs.forEach((fund,i)=>{
-        const row=document.createElement('div');
-        row.className='annual-sale-row';
-        row.innerHTML=`<span class="annual-sale-dot" style="background:${colours[i%colours.length]}"></span>
+      fundDefs.forEach((fund,index)=>{
+        const sale=row.sales[index]||0;
+        const saleRow=document.createElement('div');
+        saleRow.className='annual-sale-row';
+        saleRow.innerHTML=`<span class="annual-sale-dot" style="background:${colours[index%colours.length]}"></span>
           <span class="annual-sale-name">${fund.name}</span>
-          <span class="annual-sale-value">${gbp(sales[i])}</span>`;
-        arFundSales.appendChild(row);
+          <span class="annual-sale-value">${gbp(sale)}</span>`;
+        arFundSales.appendChild(saleRow);
       });
     }
     arSalesExplanation.textContent=`Suggested sales follow the Strategy setting: ${saleMethodText()}.`;
@@ -170,8 +314,7 @@
     refreshAnnualReview.textContent='Calculating median path…';
     setTimeout(()=>{
       try{
-        const requested=Math.max(800,Math.min(+simCount.value||3000,3000));
-        medianResult=runSimulation(null,requested,26000,true,null);
+        roadmap=buildMedianRoadmap();
         renderAgeStrip();
         renderAnnualReview();
       }catch(error){
@@ -188,13 +331,13 @@
 
   document.addEventListener('input',event=>{
     if(event.target.closest('[data-panel="annual-review"]'))return;
-    medianResult=null;
+    roadmap=null;
     renderAgeStrip();
     renderAnnualReview();
   });
   document.addEventListener('change',event=>{
     if(event.target.closest('[data-panel="annual-review"]'))return;
-    medianResult=null;
+    roadmap=null;
     renderAgeStrip();
     renderAnnualReview();
   });

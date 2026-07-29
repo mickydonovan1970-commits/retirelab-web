@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 6.0a</title>
+<title>RetireLab 6.0b</title>
 <link href="css/style-1.css" rel="stylesheet"/>
 <link href="css/style-2.css" rel="stylesheet"/>
 <link href="css/style-3.css" rel="stylesheet"/>
 <link href="css/style-4.css" rel="stylesheet"/>
 <link href="css/style-5.css" rel="stylesheet"/><link href="css/annual-review.css" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.0a</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Annual Review</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.0b</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Annual Review</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -253,16 +253,16 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <div class="annual-metric"><span>Indicative cash</span><strong id="arCash">—</strong></div>
 <div class="annual-metric"><span>Indicative CORE</span><strong id="arCore">—</strong></div>
 </div>
-<p class="note" id="arPortfolioExplanation">At the model start age, these are the Strategy values. Later ages use the Monte Carlo median total and the current cash/CORE split as an indicative planning view.</p>
+<p class="note" id="arPortfolioExplanation">The roadmap applies the fund assumptions as a median planning path and carries the projected cash and CORE balances forward year by year.</p>
 </section>
 <section class="card">
 <h2>Annual action</h2>
 <div class="annual-action-callout">
-<span>Amount required in the spending MMF</span>
+<span>Fund this year's spending from cash</span>
 <strong id="arCashTarget">—</strong>
 </div>
 <div class="annual-action-callout secondary-callout">
-<span>Indicative CORE sale required</span>
+<span>Fund this year's spending from CORE</span>
 <strong id="arCoreSale">—</strong>
 </div>
 <p class="note" id="arActionExplanation"></p>
@@ -439,7 +439,7 @@ The annual CORE return used by the rule is the investment return before withdraw
 <script src="js/quick-actions.js"></script>
 <script src="js/simulation-history.js"></script>
 <script src="js/comparison.js"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.0a · Annual Review Foundation</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.0b · Mixed Funding Roadmap</footer>
 <script src="js/projects-and-storage.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/results-feedback.js"></script>

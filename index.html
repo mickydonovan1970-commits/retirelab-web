@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.6</title>
+<title>RetireLab 4.7</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -279,7 +279,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 }
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.6</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.7</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -1314,7 +1314,15 @@ function serialise(){return{
 saveBtn.onclick=()=>{localStorage.setItem('retirelab-simple-v2',JSON.stringify(serialise()));alert('Saved on this device.')};
 loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v});d.funds.forEach((f,i)=>Object.assign(fundDefs[i],f));renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';d.incomes.forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';d.expenses.forEach(addExpenseRow)};
 resetBtn.onclick=()=>{if(confirm('Reset all inputs?')){localStorage.removeItem('retirelab-simple-v2');location.reload()}};
-let previousTargetCore=162000;
+function currentEnteredFundPercentages(){
+ const inputs=[...document.querySelectorAll('.fund-pct')];
+ if(inputs.length===fundDefs.length){
+   return inputs.map(el=>Math.max(0,+el.value||0)/100);
+ }
+ const actualTotal=totalCore();
+ if(actualTotal>0)return fundDefs.map(f=>f.value/actualTotal);
+ return fundDefs.map(()=>1/fundDefs.length);
+}
 function syncSippToCore(){
  const total=Math.max(0,+sippTotal.value||0);
  const cash=Math.max(0,+cashStart.value||0);
@@ -1322,10 +1330,10 @@ function syncSippToCore(){
  const adjustedCash=Math.min(total,Math.max(0,+cashStart.value||0));
  const targetCore=Math.max(0,total-adjustedCash);
 
- // Preserve the percentages the user entered, even when they do not yet total 100%.
- const pcts=previousTargetCore>0?fundDefs.map(f=>f.value/previousTargetCore):[.25,.25,.25,.25];
+ // Fund percentages are the source of truth. Changing cash changes the
+ // available CORE £ amount, not the user's chosen allocation.
+ const pcts=currentEnteredFundPercentages();
  fundDefs.forEach((f,i)=>f.value=targetCore*pcts[i]);
- previousTargetCore=targetCore;
 
  calculatedCore.value=gbp(targetCore);
  sippBreakdown.textContent=`Total SIPP ${gbp(total)} = CORE ${gbp(targetCore)} + cash ${gbp(adjustedCash)}.`;
@@ -1829,7 +1837,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.6</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.7</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};
@@ -2109,7 +2117,6 @@ function refreshRunFeedbackFromHistory(){
 }
 setTimeout(refreshRunFeedbackFromHistory,500);
 </script>
-
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -2122,7 +2129,6 @@ setTimeout(refreshRunFeedbackFromHistory,500);
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-
 <script>
 let expandedChartSource=null;
 function openExpandedChart(source,title='Simulation chart'){

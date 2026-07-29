@@ -1,0 +1,169 @@
+
+.annual-review-hero{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+}
+.annual-review-kicker{
+  color:var(--muted-2);
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.annual-review-hero h2{
+  margin:5px 0 4px;
+  font-family:"Slabo 27px",Georgia,serif;
+  font-size:30px!important;
+  font-weight:400!important;
+}
+.annual-mode-badge{
+  flex:0 0 auto;
+  padding:8px 12px;
+  border:1px solid #385d49;
+  border-radius:999px;
+  background:#15221b;
+  color:#8fbea1;
+  font-size:12px;
+  font-weight:700;
+}
+.annual-review-heading{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:end;
+}
+.annual-age-display{
+  margin-top:5px;
+  font:600 30px Inter,system-ui,sans-serif;
+}
+.annual-age-strip{
+  display:flex;
+  gap:7px;
+  overflow-x:auto;
+  padding:14px 0 2px;
+}
+.annual-age-button{
+  flex:0 0 auto;
+  min-width:52px;
+  padding:9px 11px;
+  border:1px solid var(--line)!important;
+  background:var(--panel-2)!important;
+  color:var(--muted)!important;
+}
+.annual-age-button.active{
+  border-color:var(--strategy)!important;
+  background:#241f19!important;
+  color:#e4d4be!important;
+}
+.annual-review-grid{
+  grid-column:1 / -1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:20px;
+}
+.annual-figure-list{
+  display:flex;
+  flex-direction:column;
+  gap:0;
+}
+.annual-figure-list > div{
+  display:flex;
+  justify-content:space-between;
+  gap:20px;
+  padding:12px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.annual-figure-list span,
+.annual-metric span,
+.annual-action-callout span{
+  color:var(--muted);
+  font-size:12px;
+}
+.annual-figure-list strong,
+.annual-metric strong,
+.annual-action-callout strong{
+  font:600 22px Inter,system-ui,sans-serif;
+  white-space:nowrap;
+}
+.annual-total{
+  margin-top:4px;
+  border-bottom:0!important;
+}
+.annual-total strong{color:#8fbea1}
+.annual-metric-grid{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+}
+.annual-metric{
+  min-width:0;
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-2);
+}
+.annual-metric span{display:block;margin-bottom:9px}
+.annual-metric strong{
+  display:block;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.annual-action-callout{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:20px;
+  padding:17px;
+  border:1px solid #385d49;
+  border-radius:11px;
+  background:#15221b;
+}
+.secondary-callout{
+  margin-top:10px;
+  border-color:#463b2d;
+  background:#211c16;
+}
+.annual-sales-list{
+  display:flex;
+  flex-direction:column;
+}
+.annual-sale-row{
+  display:grid;
+  grid-template-columns:10px minmax(0,1fr) auto;
+  gap:10px;
+  align-items:center;
+  padding:10px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.annual-sale-dot{
+  width:9px;height:9px;border-radius:50%;
+}
+.annual-sale-name{
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.annual-sale-value{
+  font:600 15px Inter,system-ui,sans-serif;
+}
+.annual-empty{
+  color:var(--muted);
+  padding:14px 0;
+}
+.tabbtn[data-tab="annual-review"]::after{background:var(--analysis)}
+@media(max-width:900px){
+  .annual-review-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .annual-review-hero,
+  .annual-review-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .annual-metric-grid{grid-template-columns:1fr}
+  .annual-figure-list > div,
+  .annual-action-callout{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:6px;
+  }
+}

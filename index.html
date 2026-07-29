@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.8</title>
+<title>RetireLab 4.9</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -331,7 +331,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 }
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.8</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.9</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -480,7 +480,6 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <p class="note">After confirmation, the fund is added to the portfolio and appears on the Assumptions tab with confidence marked “User Defined”.</p>
 </div>
 <div class="alert hidden" id="allocationWarning" style="margin-top:12px"></div>
-
 <div class="portfolio-stats" id="portfolioStats">
 <div class="statbox"><div class="k">Expected nominal return</div><div class="v" id="portReturn">—</div></div>
 <div class="statbox"><div class="k">Expected real return</div><div class="v" id="portRealReturn">—</div></div>
@@ -491,9 +490,6 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </section><section class="card full">
 <h2>Withdrawal strategy</h2>
 <div class="fields">
-
-
-
 <div><label>Cash interest rate (%)</label><input id="cashRate" step="0.1" type="number" value="3.0"/></div>
 <div><label>CORE return trigger (%)</label><input id="cashTrigger" step="0.1" type="number" value="5.0"/></div>
 <div><label>Withdrawal strategy review frequency</label><select id="reviewFrequency"><option selected="" value="annual">Annual</option><option value="monthly">Monthly rolling 12 months</option></select></div>
@@ -1436,7 +1432,10 @@ function syncSippToCore(){
  fundDefs.forEach((f,i)=>f.value=targetCore*pcts[i]);
 
  calculatedCore.value=gbp(targetCore);
- sippBreakdown.textContent=`Total SIPP ${gbp(total)} = CORE ${gbp(targetCore)} + cash ${gbp(adjustedCash)}.`;
+ const breakdown=document.getElementById('sippBreakdownMirror');
+ if(breakdown){
+   breakdown.textContent=`Total SIPP ${gbp(total)} = CORE ${gbp(targetCore)} + cash ${gbp(adjustedCash)}.`;
+ }
  updateFundDisplay();
 }
 sippTotal.addEventListener('input',syncSippToCore);
@@ -1937,7 +1936,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.8</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.9</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

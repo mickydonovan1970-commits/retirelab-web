@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 5.1</title>
+<title>RetireLab 5.2</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -543,9 +543,93 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
     -webkit-overflow-scrolling:touch;
   }
 }
+
+/* Portfolio structure layout correction */
+#portfolioStructureCard{
+  overflow:visible!important;
+}
+.portfolio-structure-grid{
+  display:grid!important;
+  grid-template-columns:minmax(360px,440px) minmax(420px,1fr)!important;
+  gap:34px!important;
+  align-items:start!important;
+}
+.portfolio-structure-controls{
+  min-width:0!important;
+}
+.portfolio-pie-wrap{
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  gap:18px!important;
+  min-width:0!important;
+}
+#portfolioPieChart{
+  width:min(100%,520px)!important;
+  max-width:520px!important;
+  height:auto!important;
+  max-height:none!important;
+}
+.portfolio-pie-legend{
+  width:100%!important;
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:8px 18px!important;
+}
+.portfolio-pie-item{
+  display:grid!important;
+  grid-template-columns:10px minmax(0,1fr) auto!important;
+  grid-template-rows:auto!important;
+  gap:8px!important;
+  align-items:center!important;
+  padding:7px 0!important;
+  border-bottom:1px solid var(--line-soft)!important;
+  min-width:0!important;
+}
+.portfolio-pie-swatch{
+  grid-row:auto!important;
+  margin-top:0!important;
+  align-self:center!important;
+}
+.portfolio-pie-name{
+  grid-column:auto!important;
+  min-width:0!important;
+  max-width:100%!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+.portfolio-pie-value{
+  grid-column:auto!important;
+  min-width:max-content!important;
+  white-space:nowrap!important;
+  overflow:visible!important;
+  overflow-wrap:normal!important;
+  line-height:1.2!important;
+}
+
+@media(max-width:1050px){
+  .portfolio-structure-grid{
+    grid-template-columns:1fr!important;
+  }
+  .portfolio-pie-wrap{
+    align-items:stretch!important;
+  }
+  #portfolioPieChart{
+    align-self:center!important;
+  }
+}
+@media(max-width:720px){
+  .portfolio-pie-legend{
+    grid-template-columns:1fr!important;
+  }
+  .portfolio-pie-item{
+    grid-template-columns:10px minmax(0,1fr) auto!important;
+  }
+}
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 5.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 5.2</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -2150,7 +2234,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 5.1</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 5.2</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

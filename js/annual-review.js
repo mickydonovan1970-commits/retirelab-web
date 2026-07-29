@@ -260,6 +260,14 @@
       arCore.textContent='—';
       arCashTarget.textContent='—';
       arCoreSale.textContent='—';
+      arClosingPortfolio.textContent='—';
+      arCashPct.textContent='—';
+      arCorePct.textContent='—';
+      arCashBar.style.width='0%';
+      arCoreBar.style.width='0%';
+      arYearBadge.classList.remove('good-year','weak-year');
+      arYearBadge.textContent='—';
+      arPriorReturn.textContent='Previous CORE return —';
       arPlanExplanation.textContent='Refresh the median roadmap to apply the withdrawal strategy year by year.';
       arActionExplanation.textContent='The roadmap will decide how much comes from cash and how much comes from CORE using the selected trigger and funding rules.';
       arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
@@ -277,6 +285,20 @@
     arCore.textContent=gbp(row.openingCore);
     arCashTarget.textContent=gbp(row.fromCash);
     arCoreSale.textContent=gbp(row.fromCore);
+    arClosingPortfolio.textContent=gbp(row.closingPortfolio);
+
+    const fundingTotal=Math.max(0,row.fromCash+row.fromCore);
+    const cashPct=fundingTotal>0?row.fromCash/fundingTotal*100:0;
+    const corePct=fundingTotal>0?row.fromCore/fundingTotal*100:0;
+    arCashPct.textContent=`${cashPct.toFixed(0)}% of portfolio funding`;
+    arCorePct.textContent=`${corePct.toFixed(0)}% of portfolio funding`;
+    arCashBar.style.width=`${cashPct}%`;
+    arCoreBar.style.width=`${corePct}%`;
+
+    arYearBadge.classList.remove('good-year','weak-year');
+    arYearBadge.classList.add(row.isGood?'good-year':'weak-year');
+    arYearBadge.textContent=row.isGood?'Good year rule':'Weak year rule';
+    arPriorReturn.textContent=`Previous CORE return ${pct(row.priorReturn)}`;
 
     arPlanExplanation.textContent=
       `Gross withdrawal is planned expenditure of ${gbp(row.totalSpend)} less guaranteed income of ${gbp(row.income)}. Figures are gross, before tax.`;
@@ -326,6 +348,12 @@
       }
     },30);
   }
+
+
+  arWhyButton.addEventListener('click',()=>{
+    arWhyPanel.classList.toggle('hidden');
+    arWhyButton.textContent=arWhyPanel.classList.contains('hidden')?'Why?':'Hide why';
+  });
 
   refreshAnnualReview.addEventListener('click',refreshRoadmap);
 

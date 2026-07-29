@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 6.0b</title>
+<title>RetireLab 6.1</title>
 <link href="css/style-1.css" rel="stylesheet"/>
 <link href="css/style-2.css" rel="stylesheet"/>
 <link href="css/style-3.css" rel="stylesheet"/>
 <link href="css/style-4.css" rel="stylesheet"/>
 <link href="css/style-5.css" rel="stylesheet"/><link href="css/annual-review.css" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.0b</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Annual Review</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -216,70 +216,99 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 </section>
 </div><div class="tabpanel" data-panel="annual-review">
-<section class="card full annual-review-hero">
+<section class="roadmap-shell">
+<div class="roadmap-topbar">
 <div>
-<div class="annual-review-kicker">Retirement operating plan</div>
-<h2>Annual Review</h2>
-<p class="note">Planning Mode uses the model's median path. No years before the model start age are inferred.</p>
+<div class="annual-review-kicker">Median retirement roadmap</div>
+<div class="roadmap-title-row">
+<h2>Roadmap</h2>
+<span class="annual-mode-badge">Planning Mode</span>
 </div>
-<div class="annual-mode-badge">Planning Mode</div>
-</section>
-<section class="card full">
-<div class="annual-review-heading">
+<p class="note">Select an age to see how the current strategy funds that year. Figures are gross and pre-tax.</p>
+</div>
+<button class="primary" id="refreshAnnualReview" type="button">Refresh roadmap</button>
+</div>
+<div class="roadmap-age-card">
+<div class="roadmap-age-heading">
 <div>
-<span class="summary-label">Selected review age</span>
+<span class="summary-label">Selected age</span>
 <div class="annual-age-display" id="annualReviewAgeDisplay">Age —</div>
 </div>
-<button class="primary" id="refreshAnnualReview" type="button">Refresh median roadmap</button>
+<div class="roadmap-year-status">
+<span class="roadmap-status-badge" id="arYearBadge">—</span>
+<span class="roadmap-prior-return" id="arPriorReturn">Previous CORE return —</span>
+</div>
 </div>
 <div class="annual-age-strip" id="annualAgeStrip"></div>
-</section>
-<div class="annual-review-grid">
-<section class="card">
-<h2>This year's plan</h2>
-<div class="annual-figure-list">
-<div><span>Normal expenditure</span><strong id="arNormalSpend">—</strong></div>
-<div><span>Planned large expenditure</span><strong id="arLargeSpend">—</strong></div>
-<div><span>Total expenditure</span><strong id="arTotalSpend">—</strong></div>
+</div>
+<div class="roadmap-flow">
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">1</div>
+<div class="roadmap-stage-content">
+<h3>This year needs</h3>
+<div class="roadmap-ledger">
+<div><span>Normal spending</span><strong id="arNormalSpend">—</strong></div>
+<div><span>Planned expenditure</span><strong id="arLargeSpend">—</strong></div>
 <div><span>Guaranteed income</span><strong id="arIncome">—</strong></div>
-<div class="annual-total"><span>Gross portfolio withdrawal</span><strong id="arWithdrawal">—</strong></div>
+<div class="roadmap-ledger-total"><span>From portfolio</span><strong id="arWithdrawal">—</strong></div>
 </div>
+<span class="hidden" id="arTotalSpend">—</span>
 <p class="note" id="arPlanExplanation"></p>
-</section>
-<section class="card">
-<h2>Median portfolio position</h2>
-<div class="annual-metric-grid">
-<div class="annual-metric"><span>Total portfolio</span><strong id="arPortfolio">—</strong></div>
-<div class="annual-metric"><span>Indicative cash</span><strong id="arCash">—</strong></div>
-<div class="annual-metric"><span>Indicative CORE</span><strong id="arCore">—</strong></div>
 </div>
-<p class="note" id="arPortfolioExplanation">The roadmap applies the fund assumptions as a median planning path and carries the projected cash and CORE balances forward year by year.</p>
 </section>
-<section class="card">
-<h2>Annual action</h2>
-<div class="annual-action-callout">
-<span>Fund this year's spending from cash</span>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage roadmap-stage-funding">
+<div class="roadmap-stage-number">2</div>
+<div class="roadmap-stage-content">
+<div class="roadmap-stage-heading">
+<h3>Fund the year</h3>
+<button class="ghost small roadmap-why-button" id="arWhyButton" type="button">Why?</button>
+</div>
+<div class="roadmap-funding-values">
+<div class="roadmap-funding cash-funding">
+<span>Cash</span>
 <strong id="arCashTarget">—</strong>
+<small id="arCashPct">—</small>
 </div>
-<div class="annual-action-callout secondary-callout">
-<span>Fund this year's spending from CORE</span>
+<div class="roadmap-funding core-funding">
+<span>CORE</span>
 <strong id="arCoreSale">—</strong>
+<small id="arCorePct">—</small>
 </div>
-<p class="note" id="arActionExplanation"></p>
+</div>
+<div aria-label="Cash and CORE funding split" class="roadmap-funding-bar">
+<div class="roadmap-cash-bar" id="arCashBar"></div>
+<div class="roadmap-core-bar" id="arCoreBar"></div>
+</div>
+<div class="roadmap-why-panel hidden" id="arWhyPanel">
+<p id="arActionExplanation"></p>
+</div>
+</div>
 </section>
-<section class="card">
-<h2>Suggested fund sales</h2>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">3</div>
+<div class="roadmap-stage-content">
+<h3>Suggested CORE sales</h3>
 <div class="annual-sales-list" id="arFundSales"></div>
 <p class="note" id="arSalesExplanation"></p>
+</div>
+</section>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">4</div>
+<div class="roadmap-stage-content">
+<h3>Position through the year</h3>
+<div class="roadmap-outcome-grid">
+<div><span>Opening portfolio</span><strong id="arPortfolio">—</strong></div>
+<div><span>Opening cash</span><strong id="arCash">—</strong></div>
+<div><span>Opening CORE</span><strong id="arCore">—</strong></div>
+<div><span>Closing portfolio</span><strong id="arClosingPortfolio">—</strong></div>
+</div>
+<p class="note" id="arPortfolioExplanation">The roadmap carries the projected cash and CORE balances forward using the median planning path.</p>
+</div>
 </section>
 </div>
-<section class="card full">
-<h2>What this page is doing</h2>
-<p class="note">
-      Annual Review is an operational view of the existing RetireLab model, not a second forecasting engine.
-      Results retains the 10th, median and 90th percentile outcomes; this page converts the median planning path into an age-by-age gross funding outline.
-      Tax is deliberately excluded.
-    </p>
 </section>
 </div>
 <div class="tabpanel" data-panel="comparison">
@@ -439,7 +468,7 @@ The annual CORE return used by the rule is the investment return before withdraw
 <script src="js/quick-actions.js"></script>
 <script src="js/simulation-history.js"></script>
 <script src="js/comparison.js"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.0b · Mixed Funding Roadmap</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.1 · Compact Roadmap</footer>
 <script src="js/projects-and-storage.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/results-feedback.js"></script>

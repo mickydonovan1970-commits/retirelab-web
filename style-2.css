@@ -1,0 +1,73 @@
+
+:root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:#111a2b;color:#fff;padding:22px 24px}header h1{margin:0 0 6px;font-size:24px}header p{margin:0;color:#c9d2e3;font-size:14px}
+main{max-width:1220px;margin:24px auto;padding:0 18px 60px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;box-shadow:0 2px 8px rgba(22,32,51,.04)}
+.card h2{font-size:18px;margin:0 0 14px}.card h3{font-size:15px;margin:18px 0 8px}.full{grid-column:1/-1}
+.fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}
+input,select,button{font:inherit}input,select{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 10px;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid rgba(47,91,234,.18);border-color:var(--accent)}
+table{width:100%;border-collapse:collapse}th,td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+th:first-child,td:first-child{text-align:left}th{font-size:12px;color:var(--muted);font-weight:600}td input{min-width:82px;padding:7px 8px}
+.fund-name{font-weight:600;white-space:nowrap}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+button{border:0;border-radius:9px;padding:10px 14px;cursor:pointer;font-weight:650}.primary{background:var(--accent);color:#fff}
+.secondary{background:#e9eefc;color:#233b8f}.ghost{background:#eef1f6;color:#27354b}.danger{background:#fff0ee;color:var(--bad)}
+.small{padding:7px 10px;font-size:12px}.summary{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:12px}
+.metric{background:#f8faff;border:1px solid #e1e7f2;border-radius:12px;padding:14px}.metric .label{font-size:12px;color:var(--muted)}
+.metric .value{font-size:23px;font-weight:750;margin-top:4px}.good{color:var(--good)}.warn{color:var(--warn)}.bad{color:var(--bad)}
+.note{font-size:12px;color:var(--muted);line-height:1.45}.alert{padding:10px 12px;border-radius:9px;background:#fff8e7;color:#6e4700;border:1px solid #f2d99a;font-size:13px}
+canvas{width:100%;height:360px;border:1px solid var(--line);border-radius:10px;background:#fff}.hidden{display:none}
+@media(max-width:900px){.grid{grid-template-columns:1fr}.full{grid-column:auto}.summary{grid-template-columns:repeat(2,minmax(0,1fr))}.fields{grid-template-columns:1fr}.table-wrap{overflow:auto}}
+
+.tabbar{
+  position:sticky;top:0;z-index:20;display:flex;gap:6px;overflow-x:auto;
+  padding:10px 18px;background:#fff;border-bottom:1px solid var(--line);
+  box-shadow:0 2px 8px rgba(22,32,51,.05)
+}
+.tabbtn{
+  flex:0 0 auto;background:#eef1f6;color:#33415c;border:1px solid transparent;
+  padding:9px 13px;border-radius:9px;font-size:13px
+}
+.tabbtn.active{background:var(--accent);color:#fff}
+.tabpanel{display:none}
+.tabpanel.active{display:block}
+.dashboard-hero{
+  background:linear-gradient(135deg,#111a2b,#263b68);color:#fff;
+  border-radius:14px;padding:22px;margin-bottom:18px
+}
+.dashboard-hero h2{margin:0 0 6px;font-size:24px}
+.dashboard-hero p{margin:0;color:#d2d9e8}
+.dashboard-actions{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap}
+.assumption-badge{
+  display:inline-block;padding:3px 7px;border-radius:999px;background:#fff3cd;
+  color:#6e4b00;font-size:11px;font-weight:700;margin-left:5px
+}
+
+.tabbtn[data-tab="comparison"]{
+  background:#fff3df;color:#8a4c00;border-color:#f2d7ae
+}
+.tabbtn.active[data-tab="comparison"]{background:#b86a00;color:#fff}
+.compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.compare-card{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff}
+.compare-table td,.compare-table th{text-align:right}
+.compare-table td:first-child,.compare-table th:first-child{text-align:left}
+.delta-positive{color:var(--good);font-weight:700}
+.delta-negative{color:var(--bad);font-weight:700}
+.delta-neutral{color:var(--muted);font-weight:700}
+.compare-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media(max-width:900px){.compare-grid{grid-template-columns:1fr}}
+
+#projectManagerCard{margin-bottom:18px}
+#autoSaveStatus{background:#f8faff}
+
+.fund-name-input{min-width:190px;text-align:left}
+.fund-details-btn{margin-left:5px;padding:6px 8px}
+.remove-fund-btn{white-space:nowrap}
+
+#fundBuilder{border:1px solid #dfe5ee}
+.assumption-input{min-width:90px}
+.confidence-pill{
+  display:inline-block;padding:4px 8px;border-radius:999px;background:#eef1f6;
+  color:#33415c;font-size:11px;font-weight:700
+}

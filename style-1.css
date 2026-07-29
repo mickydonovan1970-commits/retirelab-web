@@ -1,0 +1,324 @@
+
+.roadmap-shell{
+  width:min(920px,100%);
+  margin:0 auto;
+}
+.roadmap-topbar{
+  display:flex;
+  justify-content:space-between;
+  gap:24px;
+  align-items:flex-start;
+  margin-bottom:16px;
+}
+.annual-review-kicker{
+  color:var(--muted-2);
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+}
+.roadmap-title-row{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:3px 0 2px;
+}
+.roadmap-title-row h2{
+  margin:0;
+  font-family:"Slabo 27px",Georgia,serif;
+  font-size:32px!important;
+  font-weight:400!important;
+}
+.annual-mode-badge{
+  padding:6px 10px;
+  border:1px solid #385d49;
+  border-radius:999px;
+  background:#15221b;
+  color:#8fbea1;
+  font-size:11px;
+  font-weight:700;
+}
+.roadmap-age-card,
+.roadmap-stage{
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+}
+.roadmap-age-card{
+  padding:16px;
+  margin-bottom:14px;
+}
+.roadmap-age-heading{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  align-items:center;
+}
+.annual-age-display{
+  margin-top:3px;
+  font:600 27px Inter,system-ui,sans-serif;
+}
+.roadmap-year-status{
+  display:flex;
+  flex-direction:column;
+  align-items:flex-end;
+  gap:5px;
+}
+.roadmap-status-badge{
+  padding:5px 9px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  color:#d3d9e0;
+  font-size:11px;
+  font-weight:700;
+}
+.roadmap-status-badge.good-year{
+  border-color:#385d49;
+  background:#15221b;
+  color:#8fbea1;
+}
+.roadmap-status-badge.weak-year{
+  border-color:#4b3e2e;
+  background:#211c16;
+  color:#c5aa7f;
+}
+.roadmap-prior-return{
+  color:var(--muted);
+  font:500 11px Inter,system-ui,sans-serif;
+}
+.annual-age-strip{
+  display:flex;
+  gap:6px;
+  overflow-x:auto;
+  padding-top:13px;
+}
+.annual-age-button{
+  flex:0 0 auto;
+  min-width:46px;
+  padding:8px 9px;
+  border:1px solid var(--line)!important;
+  background:var(--panel-2)!important;
+  color:var(--muted)!important;
+}
+.annual-age-button.active{
+  border-color:var(--strategy)!important;
+  background:#241f19!important;
+  color:#e4d4be!important;
+}
+.roadmap-flow{
+  display:flex;
+  flex-direction:column;
+}
+.roadmap-stage{
+  position:relative;
+  display:grid;
+  grid-template-columns:34px minmax(0,1fr);
+  gap:13px;
+  padding:17px;
+}
+.roadmap-stage-number{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:var(--panel-3);
+  color:#cdd3db;
+  font:700 12px Inter,system-ui,sans-serif;
+}
+.roadmap-stage-content{
+  min-width:0;
+}
+.roadmap-stage h3{
+  margin:3px 0 13px;
+  font-size:15px!important;
+}
+.roadmap-stage-heading{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:flex-start;
+}
+.roadmap-arrow{
+  height:22px;
+  display:grid;
+  place-items:center;
+  color:#59616d;
+  font-size:15px;
+}
+.roadmap-ledger{
+  display:flex;
+  flex-direction:column;
+}
+.roadmap-ledger > div{
+  display:flex;
+  justify-content:space-between;
+  gap:18px;
+  padding:8px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.roadmap-ledger span,
+.roadmap-funding span,
+.roadmap-outcome-grid span{
+  color:var(--muted);
+  font-size:12px;
+}
+.roadmap-ledger strong,
+.roadmap-funding strong,
+.roadmap-outcome-grid strong{
+  font:600 18px Inter,system-ui,sans-serif;
+  white-space:nowrap;
+}
+.roadmap-ledger-total{
+  margin-top:2px;
+  border-bottom:0!important;
+}
+.roadmap-ledger-total strong{
+  color:#8fbea1;
+  font-size:22px;
+}
+.roadmap-funding-values{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:10px;
+}
+.roadmap-funding{
+  padding:14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--panel-2);
+}
+.roadmap-funding span,
+.roadmap-funding strong,
+.roadmap-funding small{
+  display:block;
+}
+.roadmap-funding strong{
+  margin:5px 0 2px;
+  font-size:24px;
+}
+.roadmap-funding small{
+  color:var(--muted-2);
+  font:500 11px Inter,system-ui,sans-serif;
+}
+.cash-funding{
+  box-shadow:inset 3px 0 0 #4b607d;
+}
+.core-funding{
+  box-shadow:inset 3px 0 0 #66516f;
+}
+.roadmap-funding-bar{
+  display:flex;
+  height:9px;
+  margin-top:11px;
+  overflow:hidden;
+  border-radius:999px;
+  background:var(--panel-3);
+}
+.roadmap-cash-bar{
+  width:0;
+  background:#4b607d;
+  transition:width .25s ease;
+}
+.roadmap-core-bar{
+  width:0;
+  background:#66516f;
+  transition:width .25s ease;
+}
+.roadmap-why-panel{
+  margin-top:11px;
+  padding:11px 12px;
+  border:1px solid var(--line-soft);
+  border-radius:9px;
+  background:#101217;
+}
+.roadmap-why-panel p{
+  margin:0;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+.annual-sales-list{
+  display:flex;
+  flex-direction:column;
+}
+.annual-sale-row{
+  display:grid;
+  grid-template-columns:9px minmax(0,1fr) auto;
+  gap:9px;
+  align-items:center;
+  padding:8px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.annual-sale-dot{
+  width:8px;
+  height:8px;
+  border-radius:50%;
+}
+.annual-sale-name{
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:12px;
+}
+.annual-sale-value{
+  font:600 14px Inter,system-ui,sans-serif;
+}
+.annual-empty{
+  color:var(--muted);
+  padding:8px 0;
+  font-size:12px;
+}
+.roadmap-outcome-grid{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+}
+.roadmap-outcome-grid > div{
+  min-width:0;
+  padding:11px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--panel-2);
+}
+.roadmap-outcome-grid span,
+.roadmap-outcome-grid strong{
+  display:block;
+}
+.roadmap-outcome-grid strong{
+  margin-top:6px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.tabbtn[data-tab="annual-review"]::after{
+  background:var(--analysis);
+}
+@media(max-width:760px){
+  .roadmap-topbar,
+  .roadmap-age-heading{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  .roadmap-year-status{
+    align-items:flex-start;
+  }
+  .roadmap-outcome-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+  }
+}
+@media(max-width:520px){
+  .roadmap-funding-values,
+  .roadmap-outcome-grid{
+    grid-template-columns:1fr;
+  }
+  .roadmap-stage{
+    grid-template-columns:28px minmax(0,1fr);
+    gap:10px;
+    padding:14px;
+  }
+  .roadmap-ledger > div{
+    align-items:flex-start;
+    flex-direction:column;
+    gap:4px;
+  }
+}

@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 4.7</title>
+<title>RetireLab 4.8</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#172033;--muted:#637083;--line:#dfe5ee;--accent:#2f5bea;--good:#147d4a;--warn:#a55b00;--bad:#b42318}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
@@ -277,9 +277,61 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
   .chart-modal-panel{width:100%;max-height:98vh;padding:12px}
   #expandedChart{min-height:420px}
 }
+
+.portfolio-structure-grid{
+  display:grid;
+  grid-template-columns:minmax(280px,.9fr) minmax(360px,1.1fr);
+  gap:24px;
+  align-items:center;
+}
+.portfolio-pie-wrap{
+  display:grid;
+  grid-template-columns:minmax(240px,1fr) minmax(150px,.55fr);
+  gap:16px;
+  align-items:center;
+}
+#portfolioPieChart{
+  width:100%;
+  height:auto;
+  max-height:360px;
+  background:transparent!important;
+  border:0!important;
+}
+.portfolio-pie-legend{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.portfolio-pie-item{
+  display:grid;
+  grid-template-columns:10px minmax(0,1fr) auto;
+  gap:9px;
+  align-items:center;
+  padding:7px 0;
+  border-bottom:1px solid var(--line-soft);
+}
+.portfolio-pie-swatch{width:9px;height:9px;border-radius:50%}
+.portfolio-pie-name{
+  color:#cfd5dc;
+  font-size:12px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.portfolio-pie-value{
+  color:var(--muted);
+  font:600 12px Inter,system-ui,sans-serif;
+}
+@media(max-width:900px){
+  .portfolio-structure-grid{grid-template-columns:1fr}
+}
+@media(max-width:620px){
+  .portfolio-pie-wrap{grid-template-columns:1fr}
+  #portfolioPieChart{max-height:300px}
+}
 </style></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.7</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="portfolio" type="button">Portfolio</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Build 4.8</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -335,69 +387,7 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-</section></div><div class="tabpanel" data-panel="portfolio"><section class="card full">
-<h2>CORE portfolio</h2>
-<div class="table-wrap"><table id="fundTable">
-<thead><tr><th>Fund</th><th>Value (£)</th><th>Allocation (%)</th><th>Details</th><th></th></tr></thead>
-<tbody></tbody>
-<tfoot><tr><th>CORE total</th><th id="portfolioTotal">£0</th><th id="allocationTotal">100.0%</th><th></th><th></th></tr></tfoot>
-</table></div>
-<div class="toolbar"><button class="secondary small" id="addFundBtn" type="button">Add fund</button>
-<button class="secondary small" id="equaliseBtn">Equalise to 25% each</button>
-<button class="ghost small" id="normaliseBtn">Normalise to 100%</button>
-<span class="note">Enter fund values or percentages here. Investment assumptions are edited only on the Assumptions tab.</span>
-</div>
-<div class="card hidden" id="fundBuilder" style="margin-top:14px;background:#fbfcfe">
-<h3>Add a fund</h3>
-<div class="fields">
-<div>
-<label>Fund name</label>
-<input id="newFundName" placeholder="e.g. Vanguard Global Bond Index" type="text"/>
-</div>
-<div>
-<label>Expected nominal return (%)</label>
-<input id="newFundReturn" step="0.1" type="number" value="7.0"/>
-</div>
-<div>
-<label>Expected volatility (%)</label>
-<input id="newFundVolatility" min="0.1" step="0.1" type="number" value="15.0"/>
-</div>
-<div>
-<label>Starting value (£)</label>
-<input id="newFundValue" min="0" step="1000" type="number" value="0"/>
-</div>
-</div>
-<div class="toolbar">
-<button class="primary small" id="confirmFundBtn" type="button">Confirm fund</button>
-<button class="ghost small" id="cancelFundBtn" type="button">Cancel</button>
-</div>
-<p class="note">After confirmation, the fund is added to the portfolio and appears on the Assumptions tab with confidence marked “User Defined”.</p>
-</div>
-<div class="alert hidden" id="allocationWarning" style="margin-top:12px"></div>
-<div class="alert" id="sippBreakdown" style="margin-top:12px">Total SIPP £210,000 = CORE £162,000 + cash £48,000.</div>
-<div class="portfolio-stats" id="portfolioStats">
-<div class="statbox"><div class="k">Expected nominal return</div><div class="v" id="portReturn">—</div></div>
-<div class="statbox"><div class="k">Expected real return</div><div class="v" id="portRealReturn">—</div></div>
-<div class="statbox"><div class="k">Expected volatility</div><div class="v" id="portVol">—</div></div>
-<div class="statbox"><div class="k">CORE allocation total</div><div class="v" id="portAlloc">—</div></div>
-</div>
-<p class="note">Defaults are researched forward-looking planning assumptions. Returns are nominal, after the fund's published ongoing charge where practical, but before inflation. You can still override them.</p>
-</section>
-<section class="card full run-panel-copy">
-<h2>Run the model</h2>
-<div class="toolbar">
-<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
-<button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
-</div>
-<div aria-live="polite" class="run-feedback" data-run-feedback="1">
-<div class="run-progress-track">
-<div class="run-progress-bar"></div>
-</div>
-<div class="run-status">Ready to run</div>
-</div>
-<p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
-</section>
-</div><div class="tabpanel" data-panel="income"><section class="card full">
+</section></div><div class="tabpanel" data-panel="income"><section class="card full">
 <h2>Income</h2>
 <div class="table-wrap"><table id="incomeTable"><thead><tr><th>Name</th><th>Annual net income (£)</th><th>Amount basis</th><th>Start age</th><th>End age</th><th>Annual indexation (%)</th><th></th></tr></thead><tbody></tbody></table></div>
 <div class="toolbar"><button class="secondary small" id="addIncome">Add income</button></div>
@@ -439,15 +429,74 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
-</div><div class="tabpanel" data-panel="strategy"><section class="card full">
-<h2>SIPP cash reserve and withdrawal rule</h2>
+</div><div class="tabpanel" data-panel="strategy"><section class="card full" id="portfolioStructureCard">
+<h2>Portfolio structure</h2>
+<div class="portfolio-structure-grid">
+<div class="portfolio-structure-controls">
+<div class="fields" id="portfolioStructureFields"><div><label>Total SIPP value (£)</label><input id="sippTotal" min="0" step="1000" type="number" value="210000"/></div><div><label>Starting SIPP cash (£)</label><input id="cashStart" min="0" step="1000" type="number" value="48000"/></div><div><label>Calculated CORE value (£)</label><input id="calculatedCore" readonly="" type="text" value="£162,000"/></div></div>
+<div class="alert" id="sippBreakdownMirror" style="margin-top:12px"></div>
+</div>
+<div class="portfolio-pie-wrap">
+<canvas aria-label="Portfolio allocation pie chart" height="360" id="portfolioPieChart" width="520"></canvas>
+<div class="portfolio-pie-legend" id="portfolioPieLegend"></div>
+</div>
+</div>
+</section><section class="card full">
+<h2>CORE fund allocation</h2>
+<div class="table-wrap"><table id="fundTable">
+<thead><tr><th>Fund</th><th>Value (£)</th><th>Allocation (%)</th><th>Details</th><th></th></tr></thead>
+<tbody></tbody>
+<tfoot><tr><th>CORE total</th><th id="portfolioTotal">£0</th><th id="allocationTotal">100.0%</th><th></th><th></th></tr></tfoot>
+</table></div>
+<div class="toolbar"><button class="secondary small" id="addFundBtn" type="button">Add fund</button>
+<button class="secondary small" id="equaliseBtn">Equalise to 25% each</button>
+<button class="ghost small" id="normaliseBtn">Normalise to 100%</button>
+<span class="note">Enter fund values or percentages here. Investment assumptions are edited only on the Assumptions tab.</span>
+</div>
+<div class="card hidden" id="fundBuilder" style="margin-top:14px;background:#fbfcfe">
+<h3>Add a fund</h3>
 <div class="fields">
-<div><label>Total SIPP value (£)</label><input id="sippTotal" min="0" step="1000" type="number" value="210000"/></div>
-<div><label>Starting SIPP cash (£)</label><input id="cashStart" min="0" step="1000" type="number" value="48000"/></div>
-<div><label>Calculated CORE value (£)</label><input id="calculatedCore" readonly="" type="text" value="£162,000"/></div>
+<div>
+<label>Fund name</label>
+<input id="newFundName" placeholder="e.g. Vanguard Global Bond Index" type="text"/>
+</div>
+<div>
+<label>Expected nominal return (%)</label>
+<input id="newFundReturn" step="0.1" type="number" value="7.0"/>
+</div>
+<div>
+<label>Expected volatility (%)</label>
+<input id="newFundVolatility" min="0.1" step="0.1" type="number" value="15.0"/>
+</div>
+<div>
+<label>Starting value (£)</label>
+<input id="newFundValue" min="0" step="1000" type="number" value="0"/>
+</div>
+</div>
+<div class="toolbar">
+<button class="primary small" id="confirmFundBtn" type="button">Confirm fund</button>
+<button class="ghost small" id="cancelFundBtn" type="button">Cancel</button>
+</div>
+<p class="note">After confirmation, the fund is added to the portfolio and appears on the Assumptions tab with confidence marked “User Defined”.</p>
+</div>
+<div class="alert hidden" id="allocationWarning" style="margin-top:12px"></div>
+
+<div class="portfolio-stats" id="portfolioStats">
+<div class="statbox"><div class="k">Expected nominal return</div><div class="v" id="portReturn">—</div></div>
+<div class="statbox"><div class="k">Expected real return</div><div class="v" id="portRealReturn">—</div></div>
+<div class="statbox"><div class="k">Expected volatility</div><div class="v" id="portVol">—</div></div>
+<div class="statbox"><div class="k">CORE allocation total</div><div class="v" id="portAlloc">—</div></div>
+</div>
+<p class="note">Defaults are researched forward-looking planning assumptions. Returns are nominal, after the fund's published ongoing charge where practical, but before inflation. You can still override them.</p>
+</section><section class="card full">
+<h2>Withdrawal strategy</h2>
+<div class="fields">
+
+
+
 <div><label>Cash interest rate (%)</label><input id="cashRate" step="0.1" type="number" value="3.0"/></div>
 <div><label>CORE return trigger (%)</label><input id="cashTrigger" step="0.1" type="number" value="5.0"/></div>
-<div><label>Review frequency</label><select id="reviewFrequency"><option selected="" value="annual">Annual</option><option value="monthly">Monthly rolling 12 months</option></select></div>
+<div><label>Withdrawal strategy review frequency</label><select id="reviewFrequency"><option selected="" value="annual">Annual</option><option value="monthly">Monthly rolling 12 months</option></select></div>
 <div><label>When CORE return is at or below trigger</label><select id="badYearRule"><option selected="" value="cash_first">Use cash first, then CORE if cash runs out</option><option value="core_first">Use CORE first</option></select></div>
 <div><label>When CORE return is above trigger</label><select id="goodYearRule">
 <option selected="" value="trigger_amount">Use up to trigger % of start-of-year CORE; rest from cash</option>
@@ -457,14 +506,8 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <div><label>How CORE sales are taken</label><select id="saleMethod"><option selected="" value="equal">Equal £ amount from each fund</option><option value="proportional">Proportionally from all funds</option><option value="overweight">From the most overweight fund first</option></select></div>
 <div><label>Minimum cash floor (£)</label><input id="cashFloor" min="0" step="1000" type="number" value="0"/></div>
 </div>
-<p class="note">
-Changing the total SIPP or cash amount automatically recalculates the CORE value while preserving the four fund percentages.
-Default interpretation of your rule: if the CORE return is 5% or less, the spending shortfall is funded from cash first.
-If it is above 5%, the model sells CORE investments up to 5% of the CORE value at the start of that review year and takes any remaining shortfall from cash.
-If either source is exhausted, the other source is used.
-</p>
-</section>
-<section class="card full run-panel-copy">
+<p class="note">The model reviews this withdrawal rule annually by default. A weak CORE year uses cash first; a stronger year uses CORE according to the selected rule.</p>
+</section><section class="card full run-panel-copy">
 <h2>Run the model</h2>
 <div class="toolbar">
 <button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
@@ -477,8 +520,7 @@ If either source is exhausted, the other source is used.
 <div class="run-status">Ready to run</div>
 </div>
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
-</section>
-</div><div class="tabpanel" data-panel="results"><section class="card full hidden" id="resultsCard">
+</section></div><div class="tabpanel" data-panel="results"><section class="card full hidden" id="resultsCard">
 <h2>Results</h2>
 <div class="summary"><div class="metric"><div class="label">Objective met</div><div class="value" id="objectiveProb">—</div></div><div class="metric"><div class="label">Median above / below target</div><div class="value" id="objectiveGap">—</div></div>
 <div class="metric"><div class="label">Plan success</div><div class="value" id="successProb">—</div></div>
@@ -713,6 +755,62 @@ confirmFundBtn.onclick=()=>{
   renderFunds();
   openTab('assumptions');
 };
+
+function portfolioPieColours(count){
+ const palette=['#4b607d','#4f7058','#755f47','#66516f','#765055','#506c72','#706b4f','#5f5874','#566b5e','#74604e'];
+ return Array.from({length:count},(_,i)=>palette[i%palette.length]);
+}
+function drawPortfolioPie(){
+ const canvas=document.getElementById('portfolioPieChart');
+ const legend=document.getElementById('portfolioPieLegend');
+ if(!canvas||!legend)return;
+
+ const cash=Math.max(0,+cashStart.value||0);
+ const items=[{name:'Cash',value:cash},...fundDefs.map(f=>({name:f.name,value:Math.max(0,+f.value||0)}))];
+ const total=items.reduce((sum,item)=>sum+item.value,0);
+ const colours=portfolioPieColours(items.length);
+ const ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+ ctx.clearRect(0,0,W,H);
+
+ const cx=W*.48,cy=H*.5,r=Math.min(W,H)*.37,inner=r*.57;
+ if(total<=0){
+   ctx.fillStyle='#252b33';
+   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.fill();
+ }else{
+   let angle=-Math.PI/2;
+   items.forEach((item,i)=>{
+     const slice=item.value/total*Math.PI*2;
+     ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+slice);ctx.closePath();
+     ctx.fillStyle=colours[i];ctx.fill();
+     ctx.strokeStyle='#0d0f13';ctx.lineWidth=3;ctx.stroke();
+     angle+=slice;
+   });
+ }
+ ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);ctx.fillStyle='#121419';ctx.fill();
+ ctx.textAlign='center';
+ ctx.fillStyle='#9aa3af';ctx.font='500 13px Raleway,system-ui';
+ ctx.fillText('Total portfolio',cx,cy-8);
+ ctx.fillStyle='#eef1f5';ctx.font='600 22px Inter,system-ui';
+ ctx.fillText(compactGBP(total),cx,cy+20);
+ ctx.textAlign='left';
+
+ legend.innerHTML='';
+ items.forEach((item,i)=>{
+   const pctValue=total>0?item.value/total*100:0;
+   const row=document.createElement('div');
+   row.className='portfolio-pie-item';
+   row.innerHTML=`<span class="portfolio-pie-swatch" style="background:${colours[i]}"></span>
+     <span class="portfolio-pie-name" title="${item.name}">${item.name}</span>
+     <span class="portfolio-pie-value">${pctValue.toFixed(1)}% · ${compactGBP(item.value)}</span>`;
+   legend.appendChild(row);
+ });
+
+ const mirror=document.getElementById('sippBreakdownMirror');
+ if(mirror){
+   mirror.textContent=`Total SIPP ${gbp(+sippTotal.value||0)} = CORE ${gbp(targetCoreValue())} + cash ${gbp(cash)}.`;
+ }
+}
+
 function renderFunds(){
  const tb=document.querySelector('#fundTable tbody');tb.innerHTML='';
  fundDefs.forEach((f,i)=>{
@@ -783,7 +881,9 @@ function bindFunds(){
  }
  portfolioTotal.textContent=gbp(actualTotal);
  updateAllocationWarning();
+ drawPortfolioPie();
 }
+equaliseBtn.textContent='Equalise funds';
 equaliseBtn.onclick=()=>{
  const core=targetCoreValue()||162000;
  fundDefs.forEach(f=>f.value=core/fundDefs.length);
@@ -1837,7 +1937,7 @@ compareSelectA.addEventListener('change',renderComparison);
 compareSelectB.addEventListener('change',renderComparison);
 setTimeout(refreshComparisonSelectors,0);
 </script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.7</footer>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Build 4.8</footer>
 <script>
 const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};

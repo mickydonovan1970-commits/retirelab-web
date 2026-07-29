@@ -1,118 +1,503 @@
+<!DOCTYPE html>
 
-const researchedFundProfiles=[
- {
-  role:'Core stabiliser',
-  type:'Global value-oriented multi-asset (equity-heavy)',
-  confidence:'Medium',
-  equity:'Approximately 75–80%',
-  defensive:'Approximately 20–25%',
-  ocf:'Performance-fee structure; no conventional fixed OCF shown in the Morningstar report',
-  range:'6.0%–8.0%',
-  reviewed:'28 July 2026',
-  notes:'The fund is benchmarked against 60% global equities and 40% global government bonds, but its published May 2026 allocation was materially more equity-heavy: about 75.6% equities, 18.7% bonds and 2.9% cash. RetireLab therefore models it closer to an equity-heavy 80/20 value-oriented multi-asset fund than a classic 60/40 portfolio. The 7.0% nominal return is a planning assumption, not a forecast.',
-  sources:'Orbis fund page and benchmark description; Morningstar report dated 27 July 2026; published 3-year standard deviation 8.24%.'
- },
- {
-  role:'Income and dividend growth',
-  type:'Active global equity income / value',
-  confidence:'Medium',
-  equity:'Predominantly equities',
-  defensive:'Minimal',
-  ocf:'0.825%',
-  range:'6.3%–8.7%',
-  reviewed:'28 July 2026',
-  notes:'Artemis describes the fund as a contrarian global dividend portfolio with a strong value bias. Its May 2026 portfolio had 90 holdings and unusually high exposure to emerging markets, financials, industrials, materials and energy. RetireLab uses a full-equity volatility assumption with a modest value/income tilt rather than treating it as a lower-risk income fund.',
-  sources:'Artemis Global Income official fund page and share-class data, May–June 2026.'
- },
- {
-  role:'Diversified income',
-  type:'Active global equity income / large value',
-  confidence:'Medium',
-  equity:'At least 75%; practically equity-dominant',
-  defensive:'Small cash/other allocation',
-  ocf:'0.81%',
-  range:'6.1%–8.5%',
-  reviewed:'28 July 2026',
-  notes:'The fund aims for income plus long-term capital growth and must invest at least 75% in global equities. Current portfolio data classify it as large value, with roughly 60 equity holdings and a dividend-yield factor around 3.2%. RetireLab models it as slightly less volatile than a concentrated global large-cap index, but still as an equity fund.',
-  sources:'BNY Mellon Global Income W Acc objective and Fidelity/Morningstar portfolio and charge data, May–July 2026.'
- },
- {
-  role:'Growth engine',
-  type:'S&P Global 100 net total-return index tracker',
-  confidence:'Medium–High',
-  equity:'Approximately 100%',
-  defensive:'None',
-  ocf:'0.15%',
-  range:'6.2%–8.8%',
-  reviewed:'28 July 2026',
-  notes:'The fund replicates the S&P Global 100 Index and is therefore concentrated in very large multinational companies. It has high equity sensitivity and no meaningful defensive allocation. The 7.5% nominal planning return is intentionally below its strongest historical periods because current capital-market forecasts are more restrained, particularly for expensive US large-cap shares.',
-  sources:'L&G/Fidelity investment objective, charges and portfolio data; Vanguard 2026 capital-market outlook.'
- }
-];
+<html lang="en-GB">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<title>RetireLab 6.1.2</title>
+<link href="css/style-1.css?v=6.1.2" rel="stylesheet"/>
+<link href="css/style-2.css?v=6.1.2" rel="stylesheet"/>
+<link href="css/style-3.css?v=6.1.2" rel="stylesheet"/>
+<link href="css/style-4.css?v=6.1.2" rel="stylesheet"/>
+<link href="css/style-5.css?v=6.1.2" rel="stylesheet"/><link href="css/annual-review.css?v=6.1.2" rel="stylesheet"/></head>
+<body>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.1.2</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
+<section class="dashboard-summary" id="dashboardSummary">
+<div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
+<div class="summary-item"><span class="summary-label">Objective</span><span class="summary-value" id="dashObjective">£120,000 at age 69</span></div>
+<div class="summary-item"><span class="summary-label">Last objective result</span><span class="summary-value" id="dashLastResult">No simulation yet</span></div>
+<div class="summary-item"><span class="summary-label">Auto-save</span><span class="summary-value" id="dashSaveStatus">On</span></div>
+</section><section class="card full" id="projectManagerCard">
+<h2>Projects</h2>
+<div class="fields">
+<div>
+<label>Current project</label>
+<select id="projectSelector"></select>
+</div>
+<div>
+<label>Auto-save status</label>
+<input id="autoSaveStatus" readonly="" type="text" value="Preparing…"/>
+</div>
+</div>
+<div class="toolbar">
+<button class="primary small" id="newProjectBtn" type="button">New project</button>
+<button class="secondary small" id="duplicateProjectBtn" type="button">Duplicate</button>
+<button class="ghost small" id="renameProjectBtn" type="button">Rename</button>
+<button class="danger small" id="deleteProjectBtn" type="button">Delete</button>
+<button class="ghost small" id="exportProjectBtn" type="button">Export project</button>
+<button class="ghost small" id="importProjectBtn" type="button">Import project</button>
+<input accept=".json,application/json" class="hidden" id="importProjectFile" type="file"/>
+</div>
+<p class="note">Projects and simulation histories are stored locally in this browser. Export a project periodically for backup or transfer to another computer.</p>
+</section>
+<section class="card">
+<h2>Plan basics</h2>
+<div class="fields">
+<div><label>Current age</label><input id="currentAge" max="89" min="18" type="number" value="60"/></div>
+<div><label>End age</label><input id="endAge" max="110" min="50" type="number" value="90"/></div>
+<div><label>Annual spending need (£, today's money)</label><input id="annualSpending" min="0" step="500" type="number" value="40000"/></div>
+<div><label>Spending indexation</label><select id="spendingIndex"><option selected="" value="inflation">Inflation-linked</option><option value="fixed">Fixed nominal £</option></select></div>
+<div><label>Simulations</label><select id="simCount"><option value="5000">5,000</option><option selected="" value="10000">10,000</option><option value="25000">25,000</option><option value="50000">50,000</option></select></div>
+<div><label>Random seed</label><input id="seed" type="number" value="2026"/></div>
+<div><label>Objective age</label><input id="objectiveAge" min="0" step="1" type="number" value="69"/></div><div><label>Minimum required wealth at objective age (£)</label><input id="objectiveTarget" min="0" step="1000" type="number" value="120000"/></div></div>
+<p class="note">Enter net spending and net income. Tax is not modelled. The objective test is separate from simply avoiding depletion.</p>
+</section><section class="card full">
+<h2>Run the model</h2>
+<div class="toolbar">
+<button class="primary" id="runBtn">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
+<button class="secondary" id="rebalanceBtn">Find a better CORE allocation</button>
+<button class="ghost" id="saveBtn">Save inputs</button>
+<button class="ghost" id="loadBtn">Load saved inputs</button>
+<button class="danger" id="resetBtn">Reset</button>
+</div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="0">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+</section></div><div class="tabpanel" data-panel="income"><section class="card full">
+<h2>Income</h2>
+<div class="table-wrap"><table id="incomeTable"><thead><tr><th>Name</th><th>Annual net income (£)</th><th>Amount basis</th><th>Start age</th><th>End age</th><th>Annual indexation (%)</th><th></th></tr></thead><tbody></tbody></table></div>
+<div class="toolbar"><button class="secondary small" id="addIncome">Add income</button></div>
+<div class="alert" style="margin-top:12px">
+For each later-starting income, choose whether the amount entered is <strong>today's-money value</strong> or the <strong>cash amount expected when it starts</strong>.
+“Amount at commencement” is the default. The app does not inflate that figure before the start date; indexation begins once the income starts.
+</div>
+</section>
+<section class="card full run-panel-copy">
+<h2>Run the model</h2>
+<div class="toolbar">
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
+<button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
+</div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="2">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+<p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
+</section>
+</div><div class="tabpanel" data-panel="expenditure"><section class="card full">
+<h2>Large expenditures and financing</h2>
+<div class="table-wrap"><table id="expenseTable"><thead><tr><th>Description</th><th>Total cost (£)</th><th>Start age</th><th>Financing term (years)</th><th>Inflation-linked?</th><th></th></tr></thead><tbody></tbody></table></div>
+<div class="toolbar"><button class="secondary small" id="addExpense">Add expenditure</button></div>
+</section>
+<section class="card full run-panel-copy">
+<h2>Run the model</h2>
+<div class="toolbar">
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
+<button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
+</div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="3">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+<p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
+</section>
+</div><div class="tabpanel" data-panel="strategy"><section class="card full" id="portfolioStructureCard">
+<h2>Portfolio structure</h2>
+<div class="portfolio-structure-grid">
+<div class="portfolio-structure-controls">
+<div class="fields" id="portfolioStructureFields"><div><label>Total SIPP value (£)</label><input id="sippTotal" min="0" step="1000" type="number" value="210000"/></div><div><label>Starting SIPP cash (£)</label><input id="cashStart" min="0" step="1000" type="number" value="48000"/></div><div><label>Calculated CORE value (£)</label><input id="calculatedCore" readonly="" type="text" value="£162,000"/></div></div>
+<div class="alert" id="sippBreakdownMirror" style="margin-top:12px"></div>
+</div>
+<div class="portfolio-pie-wrap">
+<canvas aria-label="Portfolio allocation pie chart" height="360" id="portfolioPieChart" width="520"></canvas>
+<div class="portfolio-pie-legend" id="portfolioPieLegend"></div>
+</div>
+</div>
+</section><section class="card full">
+<h2>CORE fund allocation</h2>
+<div class="table-wrap"><table id="fundTable">
+<thead><tr><th>Fund</th><th>Value (£)</th><th>Allocation (%)</th><th>Details</th><th></th></tr></thead>
+<tbody></tbody>
+<tfoot><tr><th>CORE total</th><th id="portfolioTotal">£0</th><th id="allocationTotal">100.0%</th><th></th><th></th></tr></tfoot>
+</table></div>
+<div class="toolbar"><button class="secondary small" id="addFundBtn" type="button">Add fund</button>
+<button class="secondary small" id="equaliseBtn">Equalise to 25% each</button>
+<button class="ghost small" id="normaliseBtn">Normalise to 100%</button>
+<span class="note">Enter fund values or percentages here. Investment assumptions are edited only on the Assumptions tab.</span>
+</div>
+<div class="card hidden" id="fundBuilder" style="margin-top:14px;background:#fbfcfe">
+<h3>Add a fund</h3>
+<div class="fields">
+<div>
+<label>Fund name</label>
+<input id="newFundName" placeholder="e.g. Vanguard Global Bond Index" type="text"/>
+</div>
+<div>
+<label>Expected nominal return (%)</label>
+<input id="newFundReturn" step="0.1" type="number" value="7.0"/>
+</div>
+<div>
+<label>Expected volatility (%)</label>
+<input id="newFundVolatility" min="0.1" step="0.1" type="number" value="15.0"/>
+</div>
+<div>
+<label>Starting value (£)</label>
+<input id="newFundValue" min="0" step="1000" type="number" value="0"/>
+</div>
+</div>
+<div class="toolbar">
+<button class="primary small" id="confirmFundBtn" type="button">Confirm fund</button>
+<button class="ghost small" id="cancelFundBtn" type="button">Cancel</button>
+</div>
+<p class="note">After confirmation, the fund is added to the portfolio and appears on the Assumptions tab with confidence marked “User Defined”.</p>
+</div>
+<div class="alert hidden" id="allocationWarning" style="margin-top:12px"></div>
+<div class="portfolio-stats" id="portfolioStats">
+<div class="statbox"><div class="k">Expected nominal return</div><div class="v" id="portReturn">—</div></div>
+<div class="statbox"><div class="k">Expected real return</div><div class="v" id="portRealReturn">—</div></div>
+<div class="statbox"><div class="k">Expected volatility</div><div class="v" id="portVol">—</div></div>
+<div class="statbox"><div class="k">CORE allocation total</div><div class="v" id="portAlloc">—</div></div>
+</div>
+<p class="note">Defaults are researched forward-looking planning assumptions. Returns are nominal, after the fund's published ongoing charge where practical, but before inflation. You can still override them.</p>
+</section><section class="card full">
+<h2>Withdrawal strategy</h2>
+<div class="fields strategy-general-fields">
+<div><label>Cash interest rate (%)</label><input id="cashRate" step="0.1" type="number" value="3.0"/></div>
+<div><label>CORE return trigger (%)</label><input id="cashTrigger" step="0.1" type="number" value="5.0"/></div>
+<div><label>Withdrawal strategy review frequency</label><select id="reviewFrequency"><option selected="" value="annual">Annual</option><option value="monthly">Monthly rolling 12 months</option></select></div>
+<div><label>How CORE sales are taken</label><select id="saleMethod"><option selected="" value="equal">Equal £ amount from each fund</option><option value="proportional">Proportionally from all funds</option><option value="overweight">From the most overweight fund first</option></select></div>
+</div>
+<div class="strategy-policy-grid">
+<div class="strategy-policy-box">
+<div class="strategy-policy-title"><h3>Weak CORE years</h3><button aria-label="Explain weak CORE year rule" class="strategy-help" data-help="weak" type="button">?</button></div>
+<label>When CORE return is at or below trigger</label>
+<select id="badYearRule"><option selected="" value="cash_first">Use cash first, then CORE if cash runs out</option><option value="core_first">Use CORE first</option></select>
+<p class="note">The minimum cash reserve does not restrict essential spending in a weak year.</p>
+<div aria-live="polite" class="strategy-help-popover hidden" id="strategyHelp-weak" role="status"></div></div>
+<div class="strategy-policy-box">
+<div class="strategy-policy-title"><h3>Strong CORE years</h3><button aria-label="Explain strong CORE year rule" class="strategy-help" data-help="strong" type="button">?</button></div>
+<label>When CORE return is above trigger</label>
+<select id="goodYearRule">
+<option selected="" value="trigger_amount">Use up to trigger % of start-of-year CORE; rest from cash</option>
+<option value="actual_gain">Use up to the actual annual gain; rest from cash</option>
+<option value="all_core">Use CORE for the full spending shortfall</option>
+</select>
+<label style="margin-top:12px">Minimum cash reserve to retain (£)</label>
+<input id="cashFloor" min="0" step="1000" type="number" value="0"/>
+<p class="note">In strong years, cash is protected at this level where possible; CORE funds any remaining shortfall.</p>
+<div aria-live="polite" class="strategy-help-popover hidden" id="strategyHelp-strong" role="status"></div></div>
+</div>
 
-function profileForFund(i){
- const key=fundDefs[i]?.profile;
- const map={orbis:researchedFundProfiles[0],artemis:researchedFundProfiles[1],bny:researchedFundProfiles[2],lg:researchedFundProfiles[3]};
- return map[key]||{
-   role:'User-added holding',
-   type:'Custom fund assumption',
-   confidence:'User Defined',
-   equity:'Not specified',
-   defensive:'Not specified',
-   ocf:'Not specified',
-   range:'Not specified',
-   reviewed:'User entry',
-   notes:'This fund was added manually. RetireLab uses the return, volatility and correlation proxy entered on the Portfolio tab.',
-   sources:'User-supplied assumptions.'
- };
-}
-function openFundDrawerV21(i){
- const p=profileForFund(i);
- document.getElementById('drawerFundName').textContent=fundDefs[i].name;
- document.getElementById('drawerRole').textContent=p.role||'';
- document.getElementById('drawerType').textContent=p.type||'—';
- document.getElementById('drawerReturn').textContent=(+fundDefs[i].ret).toFixed(1)+'%';
- document.getElementById('drawerVol').textContent=(+fundDefs[i].vol).toFixed(1)+'%';
- document.getElementById('drawerConfidence').textContent=p.confidence||'—';
- document.getElementById('drawerRange').textContent=p.range||'—';
- document.getElementById('drawerEquity').textContent=p.equity||'—';
- document.getElementById('drawerDefensive').textContent=p.defensive||'—';
- document.getElementById('drawerOcf').textContent=p.ocf||'—';
- document.getElementById('drawerReviewed').textContent=p.reviewed||'—';
- document.getElementById('drawerNotes').textContent=p.notes||'';
- document.getElementById('drawerSources').textContent=p.sources||'';
- document.getElementById('fundBackdrop').classList.add('open');
- document.getElementById('fundDrawer').classList.add('open');
-}
-function closeFundDrawerV21(){
- document.getElementById('fundBackdrop').classList.remove('open');
- document.getElementById('fundDrawer').classList.remove('open');
-}
-document.getElementById('closeFundDrawer').addEventListener('click',closeFundDrawerV21);
-document.getElementById('fundBackdrop').addEventListener('click',closeFundDrawerV21);
-
-function wireFundLinksV21(){
- document.querySelectorAll('.fund-details-btn').forEach(b=>{
-   b.onclick=()=>openFundDrawerV21(+b.dataset.i);
- });
-}
-function updatePortfolioStatsV21(){
- const total=totalCore();
- const weights=total>0?fundDefs.map(f=>f.value/total):fundDefs.map(()=>0);
- const er=weights.reduce((s,w,i)=>s+w*(fundDefs[i].ret/100),0);
- const vols=fundDefs.map(f=>f.vol/100);
- let variance=0;
- for(let i=0;i<fundDefs.length;i++)for(let j=0;j<fundDefs.length;j++)variance+=weights[i]*weights[j]*vols[i]*vols[j]*buildCorrelationMatrix()[i][j];
- const vol=Math.sqrt(Math.max(0,variance));
- const infl=(+document.getElementById('inflMean').value||0)/100;
- document.getElementById('portReturn').textContent=(er*100).toFixed(2)+'%';
- document.getElementById('portRealReturn').textContent=(((1+er)/(1+infl)-1)*100).toFixed(2)+'%';
- document.getElementById('portVol').textContent=(vol*100).toFixed(2)+'%';
- document.getElementById('portAlloc').textContent=allocationSum().toFixed(2)+'%';
-}
-setTimeout(()=>{
- wireFundLinksV21();
- updatePortfolioStatsV21();
- document.querySelectorAll('#fundTable input').forEach(el=>el.addEventListener('input',updatePortfolioStatsV21));
- document.getElementById('inflMean').addEventListener('input',updatePortfolioStatsV21);
-},0);
+<p class="note">The model reviews this withdrawal policy annually by default.</p>
+</section><section class="card full run-panel-copy">
+<h2>Run the model</h2>
+<div class="toolbar">
+<button class="primary quick-run-model" type="button">Run Monte Carlo</button><button class="secondary view-results-btn" disabled="disabled" type="button">View Results</button>
+<button class="secondary quick-optimise-model" type="button">Find a better CORE allocation</button>
+</div>
+<div aria-live="polite" class="run-feedback" data-run-feedback="4">
+<div class="run-progress-track">
+<div class="run-progress-bar"></div>
+</div>
+<div class="run-status">Ready to run</div>
+</div>
+<p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
+</section></div><div class="tabpanel" data-panel="results"><section class="card full hidden" id="resultsCard">
+<h2>Results</h2>
+<div class="summary"><div class="metric"><div class="label">Objective met</div><div class="value" id="objectiveProb">—</div></div><div class="metric"><div class="label">Median above / below target</div><div class="value" id="objectiveGap">—</div></div>
+<div class="metric"><div class="label">Plan success</div><div class="value" id="successProb">—</div></div>
+<div class="metric"><div class="label">Survival to end age</div><div class="value" id="survivalProb">—</div></div>
+<div class="metric"><div class="label">10th percentile wealth at end age</div><div class="value" id="p10">—</div></div>
+<div class="metric"><div class="label">Median wealth at end age</div><div class="value" id="median">—</div></div>
+<div class="metric"><div class="label">90th percentile wealth at end age</div><div class="value" id="p90">—</div></div>
+<div class="metric"><div class="label">Median cash at end age</div><div class="value" id="medianCash">—</div></div>
+</div>
+<h3>Total wealth through time</h3><div class="chart-toolbar"><button class="ghost small" id="expandMainChart" type="button">Expand chart</button></div><canvas height="360" id="chart" width="1100"></canvas>
+<p class="note">Total wealth is CORE plus cash. The success test remains: do not run out before the final large expenditure has finished.</p>
+</section>
+<section class="card full sim-history">
+<h3>Simulation history</h3>
+<div id="simulationHistory">
+<div class="empty-history" id="emptySimulationHistory">Run the model to create Simulation 1.</div>
+</div>
+</section>
+</div><div class="tabpanel" data-panel="annual-review">
+<section class="roadmap-shell">
+<div class="roadmap-topbar">
+<div>
+<div class="annual-review-kicker">Median retirement roadmap</div>
+<div class="roadmap-title-row">
+<h2>Roadmap</h2>
+<span class="annual-mode-badge">Planning Mode</span>
+</div>
+<p class="note">Select an age to see how the current strategy funds that year. Figures are gross and pre-tax.</p>
+</div>
+<button class="primary" id="refreshAnnualReview" type="button">Refresh roadmap</button>
+</div>
+<div class="roadmap-age-card">
+<div class="roadmap-age-heading">
+<div>
+<span class="summary-label">Selected age</span>
+<div class="annual-age-display" id="annualReviewAgeDisplay">Age —</div>
+</div>
+<div class="roadmap-year-status">
+<span class="roadmap-status-badge" id="arYearBadge">—</span>
+<span class="roadmap-prior-return" id="arPriorReturn">Previous CORE return —</span>
+</div>
+</div>
+<div class="annual-age-strip" id="annualAgeStrip"></div>
+</div>
+<div class="roadmap-flow">
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">1</div>
+<div class="roadmap-stage-content">
+<h3>This year needs</h3>
+<div class="roadmap-ledger">
+<div><span>Normal spending</span><strong id="arNormalSpend">—</strong></div>
+<div><span>Planned expenditure</span><strong id="arLargeSpend">—</strong></div>
+<div><span>Guaranteed income</span><strong id="arIncome">—</strong></div>
+<div class="roadmap-ledger-total"><span>From portfolio</span><strong id="arWithdrawal">—</strong></div>
+</div>
+<span class="hidden" id="arTotalSpend">—</span>
+<p class="note" id="arPlanExplanation"></p>
+</div>
+</section>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage roadmap-stage-funding">
+<div class="roadmap-stage-number">2</div>
+<div class="roadmap-stage-content">
+<div class="roadmap-stage-heading">
+<h3>Fund the year</h3>
+<button class="ghost small roadmap-why-button" id="arWhyButton" type="button">Why?</button>
+</div>
+<div class="roadmap-funding-values">
+<div class="roadmap-funding cash-funding">
+<span>Cash</span>
+<strong id="arCashTarget">—</strong>
+<small id="arCashPct">—</small>
+</div>
+<div class="roadmap-funding core-funding">
+<span>CORE</span>
+<strong id="arCoreSale">—</strong>
+<small id="arCorePct">—</small>
+</div>
+</div>
+<div aria-label="Cash and CORE funding split" class="roadmap-funding-bar">
+<div class="roadmap-cash-bar" id="arCashBar"></div>
+<div class="roadmap-core-bar" id="arCoreBar"></div>
+</div>
+<div class="roadmap-why-panel hidden" id="arWhyPanel">
+<p id="arActionExplanation"></p>
+</div>
+</div>
+</section>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">3</div>
+<div class="roadmap-stage-content">
+<h3>Suggested CORE sales</h3>
+<div class="annual-sales-list" id="arFundSales"></div>
+<p class="note" id="arSalesExplanation"></p>
+</div>
+</section>
+<div class="roadmap-arrow">↓</div>
+<section class="roadmap-stage">
+<div class="roadmap-stage-number">4</div>
+<div class="roadmap-stage-content">
+<h3>Position through the year</h3>
+<div class="roadmap-outcome-grid">
+<div><span>Opening portfolio</span><strong id="arPortfolio">—</strong></div>
+<div><span>Opening cash</span><strong id="arCash">—</strong></div>
+<div><span>Opening CORE</span><strong id="arCore">—</strong></div>
+<div><span>Closing portfolio</span><strong id="arClosingPortfolio">—</strong></div>
+</div>
+<p class="note" id="arPortfolioExplanation">The roadmap carries the projected cash and CORE balances forward using the median planning path.</p>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div class="tabpanel" data-panel="comparison">
+<section class="card full">
+<h2>Compare simulations</h2>
+<div class="compare-grid">
+<div>
+<label>Simulation A</label>
+<select id="compareSelectA"></select>
+</div>
+<div>
+<label>Simulation B</label>
+<select id="compareSelectB"></select>
+</div>
+</div>
+<div class="toolbar">
+<button class="primary" id="runComparison" type="button">Compare selected simulations</button>
+</div>
+</section>
+<section class="card full">
+<h2>Comparison</h2>
+<div class="empty-history" id="comparisonEmpty">Run at least two simulations, then select them above.</div>
+<div class="hidden" id="comparisonContent">
+<div class="table-wrap">
+<table class="compare-table">
+<thead><tr><th>Metric</th><th id="compareHeadA">Simulation A</th><th id="compareHeadB">Simulation B</th><th>Difference (B − A)</th></tr></thead>
+<tbody id="comparisonBody"></tbody>
+</table>
+</div>
+<div class="compare-actions">
+<button class="secondary" id="loadSimulationA" type="button">Load Simulation A</button>
+<button class="secondary" id="loadSimulationB" type="button">Load Simulation B</button>
+<button class="danger" id="deleteSimulationA" type="button">Delete Simulation A</button>
+<button class="danger" id="deleteSimulationB" type="button">Delete Simulation B</button>
+</div>
+<h3>Simulation summaries</h3>
+<div class="compare-grid">
+<div class="compare-card"><strong id="summaryTitleA">Simulation A</strong><div class="sim-summary" id="summaryA"></div></div>
+<div class="compare-card"><strong id="summaryTitleB">Simulation B</strong><div class="sim-summary" id="summaryB"></div></div>
+</div>
+</div>
+</section>
+</div>
+<div class="tabpanel" data-panel="optimiser">
+<div class="card full" id="optimiserControls">
+<h2>Optimiser constraints</h2>
+<div class="fields">
+<div>
+<label>Minimum cash bucket (£)</label>
+<input id="optimiserCashMin" min="0" step="1000" type="number" value="20000"/>
+</div>
+<div>
+<label>Maximum cash bucket (£)</label>
+<input id="optimiserCashMax" min="0" step="1000" type="number" value="80000"/>
+</div>
+<div>
+<label>Cash test interval (£)</label>
+<input id="optimiserCashStep" min="1000" step="1000" type="number" value="5000"/>
+</div>
+<div>
+<label>Maximum allocation to any one fund (%)</label>
+<input id="maxFundAllocation" max="100" min="25" step="1" type="number" value="40"/>
+</div>
+</div>
+<p class="note">The optimiser will not suggest a fund weighting above the maximum you set. This is a concentration-risk control, not a prediction about any particular manager.</p>
+<div class="hidden" id="optimiserProgressWrap" style="margin-top:14px">
+<div class="note" id="optimiserProgressText">Preparing optimiser…</div>
+<div style="height:12px;background:#e7ebf2;border-radius:999px;overflow:hidden;margin-top:6px">
+<div id="optimiserProgressBar" style="height:100%;width:0%;background:#2f5bea;transition:width .15s ease"></div>
+</div>
+</div>
+</div>
+<section class="card full hidden" id="rebalCard">
+<h2>Model-based allocation comparison</h2>
+<div class="alert" id="rebalSummary"></div>
+<div class="portfolio-stats" id="optimiserCashSummary" style="margin-top:14px">
+<div class="statbox"><div class="k">Current cash</div><div class="v" id="optCurrentCash">—</div></div>
+<div class="statbox"><div class="k">Suggested cash</div><div class="v" id="optSuggestedCash">—</div></div>
+<div class="statbox"><div class="k">Current CORE</div><div class="v" id="optCurrentCore">—</div></div>
+<div class="statbox"><div class="k">Suggested CORE</div><div class="v" id="optSuggestedCore">—</div></div>
+</div>
+<div class="table-wrap"><table><thead><tr><th>Fund</th><th>Current %</th><th>Suggested %</th><th>Suggested £</th><th>Buy / (sell)</th></tr></thead><tbody id="rebalBody"></tbody></table></div>
+<div class="toolbar"><button class="primary small" id="applySuggested">Apply suggested allocation</button></div>
+<p class="note">This is a model comparison, not regulated financial advice.</p>
+</section></div><div class="tabpanel" data-panel="assumptions">
+<div class="card full">
+<h2>Investment research status</h2>
+<div class="alert"><strong>Installed in this build:</strong> researched fund characteristics and forward-looking nominal planning assumptions reviewed 28 July 2026.</div>
+<p class="note">These figures combine current fund structure, published charges, available risk information and broad capital-market expectations. Exact fund-to-fund correlations remain characteristic-based proxies because a complete aligned monthly total-return dataset was not publicly available.</p>
+<div class="table-wrap"><table>
+<thead><tr><th>Fund</th><th>Nominal return</th><th>Volatility</th><th>Planning range</th><th>Confidence</th></tr></thead>
+<tbody>
+<tr><td>Orbis Global Balanced</td><td>7.0%</td><td>10.5%</td><td>6.0%–8.0%</td><td>Medium</td></tr>
+<tr><td>Artemis Global Income</td><td>7.5%</td><td>15.5%</td><td>6.3%–8.7%</td><td>Medium</td></tr>
+<tr><td>BNY Mellon Global Income</td><td>7.3%</td><td>14.5%</td><td>6.1%–8.5%</td><td>Medium</td></tr>
+<tr><td>L&amp;G Global 100</td><td>7.5%</td><td>16.5%</td><td>6.2%–8.8%</td><td>Medium–High</td></tr>
+</tbody></table></div>
+<div class="alert" style="margin-top:12px">Return, volatility and correlation assumptions are edited in the table below. User-added funds are marked “User Defined”.</div>
+</div>
+<section class="card full" id="fundAssumptionsEditor">
+<h2>Fund assumptions</h2>
+<p class="note">These are nominal returns before inflation. Changes here feed directly into the Monte Carlo model and optimiser.</p>
+<div class="table-wrap">
+<table id="assumptionsFundTable">
+<thead>
+<tr>
+<th>Fund</th>
+<th>Expected nominal return (%)</th>
+<th>Volatility (%)</th>
+<th>Correlation proxy</th>
+<th>Confidence</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+</div>
+</section>
+<div class="alert"><strong>Investment-return figures are nominal, before inflation.</strong>
+    They are still editable proxy assumptions in this beta and have not yet been replaced by the researched fund profiles.</div><section class="card">
+<h2>Inflation assumptions</h2>
+<div class="fields">
+<div><label>Expected annual inflation (%)</label><input id="inflMean" step="0.1" type="number" value="2.5"/></div>
+<div><label>Inflation volatility (%)</label><input id="inflVol" step="0.1" type="number" value="1.5"/></div>
+</div>
+</section><section class="card full">
+<h2>Important limitations</h2>
+<p class="note">
+This version uses a correlated-normal Monte Carlo model with editable assumptions. The cash rule is applied mechanically.
+It does not model tax, trading costs, fund fees separately, intra-year tax timing, changing correlations, or behavioural changes.
+The annual CORE return used by the rule is the investment return before withdrawals.
+</p>
+</section></div></div></main>
+<script src="js/engine-and-ui.js?v=6.1.2"></script>
+<div class="drawer-backdrop" id="fundBackdrop"></div>
+<aside aria-hidden="true" class="drawer" id="fundDrawer">
+<button class="close small" id="closeFundDrawer" type="button">Close</button>
+<h2 id="drawerFundName">Fund details</h2>
+<p class="note" id="drawerRole"></p>
+<div class="drawer-grid">
+<div class="drawer-item"><div class="k">Model type</div><div class="v" id="drawerType">—</div></div>
+<div class="drawer-item"><div class="k">Expected nominal return</div><div class="v" id="drawerReturn">—</div></div>
+<div class="drawer-item"><div class="k">Expected volatility</div><div class="v" id="drawerVol">—</div></div>
+<div class="drawer-item"><div class="k">Confidence</div><div class="v" id="drawerConfidence">—</div></div>
+<div class="drawer-item"><div class="k">Plausible return range</div><div class="v" id="drawerRange">—</div></div>
+<div class="drawer-item"><div class="k">Equity exposure</div><div class="v" id="drawerEquity">—</div></div>
+<div class="drawer-item"><div class="k">Defensive exposure</div><div class="v" id="drawerDefensive">—</div></div>
+<div class="drawer-item"><div class="k">Published charge</div><div class="v" id="drawerOcf">—</div></div>
+<div class="drawer-item"><div class="k">Last reviewed</div><div class="v" id="drawerReviewed">—</div></div>
+</div>
+<h3>Characteristics and assumptions</h3>
+<p class="note" id="drawerNotes"></p>
+<h3>Evidence used</h3>
+<p class="note" id="drawerSources"></p>
+<div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
+</aside>
+<script src="js/fund-research.js?v=6.1.2"></script>
+<script src="js/quick-actions.js?v=6.1.2"></script>
+<script src="js/simulation-history.js?v=6.1.2"></script>
+<script src="js/comparison.js?v=6.1.2"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.1.2 · Help &amp; Deployment Fix</footer>
+<script src="js/projects-and-storage.js?v=6.1.2"></script>
+<script src="js/dashboard.js?v=6.1.2"></script>
+<script src="js/results-feedback.js?v=6.1.2"></script>
+<div aria-hidden="true" class="chart-modal hidden" id="chartModal">
+<div class="chart-modal-panel">
+<div class="chart-modal-header">
+<div>
+<h2 id="chartModalTitle">Simulation chart</h2>
+<p class="note">Move across the chart to inspect yearly values. Tap or click to pin a year.</p>
+</div>
+<button class="ghost small" id="closeChartModal" type="button">Close</button>
+</div>
+<canvas height="720" id="expandedChart" width="1400"></canvas>
+</div>
+</div>
+<script src="js/interactive-charts.js?v=6.1.2"></script>
+<script src="js/annual-review.js?v=6.1.2"></script></body>
+</html>

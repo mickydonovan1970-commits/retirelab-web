@@ -814,29 +814,39 @@ if(dashboardRunButton){
 
 
 
-function updateStrategyHelp(kind){
- const popover=document.getElementById('strategyHelpPopover');
- if(!popover)return;
+function strategyHelpText(kind){
  const trigger=(+cashTrigger.value||0).toFixed(1);
  const floor=Math.max(0,+cashFloor.value||0);
  if(kind==='weak'){
    const rule=badYearRule.value==='cash_first'
      ?'the model spends available cash first and then sells CORE for any remaining shortfall'
      :'the model sells CORE first and uses cash only if CORE cannot meet the full shortfall';
-   popover.innerHTML=`<strong>Example using your settings</strong><br>If CORE returns ${trigger}% or less, ${rule}. The £${Math.round(floor).toLocaleString('en-GB')} cash reserve does not prevent essential spending in a weak year.`;
- }else{
-   const rule=goodYearRule.value==='actual_gain'?'uses up to the actual annual CORE gain':goodYearRule.value==='all_core'?'uses CORE for the full shortfall':`uses up to ${trigger}% of start-of-year CORE`;
-   popover.innerHTML=`<strong>Example using your settings</strong><br>Suppose cash is £25,000, spending is £20,000 and the permitted CORE amount is £8,000. The model ${rule}, then uses cash while retaining £${Math.round(floor).toLocaleString('en-GB')} where possible. With a £10,000 reserve, that example becomes £10,000 from CORE and £10,000 from cash.`;
+   return `<strong>Example using your settings</strong><br>If CORE returns ${trigger}% or less, ${rule}. The £${Math.round(floor).toLocaleString('en-GB')} reserve does not block essential spending in a weak year.`;
  }
- popover.classList.remove('hidden');
+ const rule=goodYearRule.value==='actual_gain'?'uses up to the actual annual CORE gain':goodYearRule.value==='all_core'?'uses CORE for the full shortfall':`uses up to ${trigger}% of start-of-year CORE`;
+ return `<strong>Example using your settings</strong><br>Suppose cash is £25,000, spending is £20,000 and the permitted CORE amount is £8,000. The model ${rule}, then uses cash while retaining £${Math.round(floor).toLocaleString('en-GB')} where possible. With a £10,000 reserve, that example becomes £10,000 from CORE and £10,000 from cash.`;
+}
+function showStrategyHelp(button,forceOpen=false){
+ const kind=button.dataset.help;
+ const panel=document.getElementById(`strategyHelp-${kind}`);
+ if(!panel)return;
+ const shouldOpen=forceOpen||panel.classList.contains('hidden');
+ document.querySelectorAll('.strategy-help-popover').forEach(p=>p.classList.add('hidden'));
+ document.querySelectorAll('.strategy-help').forEach(b=>b.setAttribute('aria-expanded','false'));
+ if(shouldOpen){
+   panel.innerHTML=strategyHelpText(kind);
+   panel.classList.remove('hidden');
+   button.setAttribute('aria-expanded','true');
+ }
 }
 document.querySelectorAll('.strategy-help').forEach(button=>{
- button.addEventListener('mouseenter',()=>updateStrategyHelp(button.dataset.help));
- button.addEventListener('focus',()=>updateStrategyHelp(button.dataset.help));
- button.addEventListener('click',()=>{
-   const popover=document.getElementById('strategyHelpPopover');
-   if(!popover)return;
-   if(!popover.classList.contains('hidden')&&popover.dataset.kind===button.dataset.help){popover.classList.add('hidden');return}
-   popover.dataset.kind=button.dataset.help;updateStrategyHelp(button.dataset.help);
+ button.setAttribute('aria-expanded','false');
+ button.addEventListener('mouseenter',()=>showStrategyHelp(button,true));
+ button.addEventListener('focus',()=>showStrategyHelp(button,true));
+ button.addEventListener('click',event=>{
+   event.preventDefault();
+   const panel=document.getElementById(`strategyHelp-${button.dataset.help}`);
+   const wasOpen=panel&&!panel.classList.contains('hidden');
+   showStrategyHelp(button,!wasOpen);
  });
 });

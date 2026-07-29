@@ -475,3 +475,5 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 .strategy-help-popover{margin-top:12px;padding:12px 14px;border:1px solid #4b3e2e;border-radius:10px;background:#211c16;color:#c9b89e;font-size:12px;line-height:1.55}
 .strategy-help-popover strong{color:#e4d4be}
 @media(max-width:760px){.strategy-policy-grid{grid-template-columns:1fr}}
+
+.strategy-policy-box .strategy-help-popover{margin-top:14px}.strategy-help[aria-expanded="true"]{border-color:var(--strategy)!important;color:#e4d4be!important;background:#241f19!important}

@@ -1,3 +1,14 @@
+function escapeSimulationText(value){
+  return String(value??'').replace(/[&<>"']/g,ch=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[ch]));
+}
+function simulationDisplayName(record){
+  const name=String(record?.name||'').trim();
+  return name||`Simulation ${record?.number??''}`;
+}
+function persistSimulationHistoryChange(){
+  if(typeof persistProjectStore==='function')persistProjectStore(false);
+}
+
 
 let simulationHistoryRecords = [];
 let nextSimulationNumber = 1;
@@ -137,10 +148,10 @@ function renderSimulationHistory(){
     card.innerHTML=`
       <div class="sim-card-header">
         <div>
-          <span class="sim-card-title">Simulation ${record.number}</span>
-          <span class="sim-card-time">${record.time}</span>
+          <div class="sim-card-heading"><span class="sim-card-title" title="${escapeSimulationText(simulationDisplayName(record))}">${escapeSimulationText(simulationDisplayName(record))}</span><span class="sim-card-time">${record.time}</span></div>
         </div>
         <div class="sim-card-actions">
+          <button type="button" class="rename-simulation-btn small">Rename</button>
           <button type="button" class="collapse-btn small">${index===0?'Collapse':'Expand'}</button>
           ${index===0?'':`<button type="button" class="bin-btn small">Bin</button>`}
         </div>
@@ -163,7 +174,18 @@ function renderSimulationHistory(){
 
     drawHistoryChart(card.querySelector('canvas'),record);
     card.querySelector('.expand-history-chart').addEventListener('click',()=>{
-      openExpandedChart(record,`Simulation ${record.number}`);
+      openExpandedChart(record,simulationDisplayName(record));
+    });
+
+    card.querySelector('.rename-simulation-btn').addEventListener('click',()=>{
+      const current=simulationDisplayName(record);
+      const entered=prompt('Name this saved simulation:',current);
+      if(entered===null)return;
+      const cleaned=entered.trim().slice(0,80);
+      record.name=cleaned||`Simulation ${record.number}`;
+      persistSimulationHistoryChange();
+      renderSimulationHistory();
+      if(typeof renderComparison==='function'){const content=document.getElementById('comparisonContent');if(content&&!content.classList.contains('hidden'))renderComparison();}
     });
 
     const collapse=card.querySelector('.collapse-btn');
@@ -176,6 +198,7 @@ function renderSimulationHistory(){
     if(bin){
       bin.addEventListener('click',()=>{
         simulationHistoryRecords=simulationHistoryRecords.filter(r=>r.id!==record.id);
+        persistSimulationHistoryChange();
         renderSimulationHistory();
       });
     }
@@ -197,7 +220,8 @@ function snapshotSimulationResult(result){
   }
   simulationHistoryRecords.unshift({
     id:Date.now()+'-'+Math.random().toString(36).slice(2),
-    number:nextSimulationNumber++,
+    number:nextSimulationNumber,
+    name:`Simulation ${nextSimulationNumber++}`,
     time:new Date().toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'}),
     objectiveMet:result.objectiveMet,
     objectiveMedian:result.objectiveMedian,

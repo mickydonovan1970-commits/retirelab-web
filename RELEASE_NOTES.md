@@ -1,14 +1,14 @@
-# RetireLab Release 6.2 — Roadmap Scenarios
+# RetireLab Release 6.3 — Clearer Roadmap & Named Simulations
 
-## New
-- Roadmap Mode selector with **Median Market** and **Example Lifetime**.
-- Median Market remains the smooth planning baseline.
-- Example Lifetime generates one repeatable seeded sequence of correlated fund returns and inflation outcomes.
-- Previous and next controls make it easy to browse different example retirements.
-- The selected example number can be entered directly and always reproduces the same lifetime for the same model inputs.
-- Each age now shows that year's sampled CORE return and inflation rate in Example Lifetime mode.
+## Roadmap
+- Replaces the four summary boxes with a clear start → movement → end layout.
+- Separates Portfolio, Cash and CORE.
+- Shows spending, sales, income surplus and returns rather than only the resulting balances.
+- Displays net £ and percentage changes with increase/decrease styling.
+- Remains compact and adapts to mobile screens.
 
-## Behaviour
-- Both modes apply the same cash/CORE trigger, cash-floor and fund-sale rules.
-- Example Lifetime is illustrative rather than a forecast of what will happen.
-- Results remains the authoritative view of the full Monte Carlo distribution.
+## Saved simulations
+- Every saved simulation can be renamed.
+- Custom names appear in simulation history, expanded charts, Comparison selectors, comparison headings, load confirmations and delete confirmations.
+- Existing unnamed simulations remain compatible and display their original automatic name.
+- Names are stored with the current project and persist with the existing browser storage.

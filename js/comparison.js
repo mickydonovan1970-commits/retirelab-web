@@ -3,7 +3,7 @@ function getSimulationById(id){
   return simulationHistoryRecords.find(r=>r.id===id)||null;
 }
 function simulationLabel(r){
-  return `Simulation ${r.number} — ${pct(r.objectiveMet)} objective`;
+  return `${simulationDisplayName(r)} — ${pct(r.objectiveMet)} objective`;
 }
 function refreshComparisonSelectors(){
   const a=document.getElementById('compareSelectA');
@@ -42,10 +42,10 @@ function renderComparison(){
   }
   comparisonEmpty.classList.add('hidden');
   comparisonContent.classList.remove('hidden');
-  compareHeadA.textContent=`Simulation ${a.number}`;
-  compareHeadB.textContent=`Simulation ${b.number}`;
-  summaryTitleA.textContent=`Simulation ${a.number}`;
-  summaryTitleB.textContent=`Simulation ${b.number}`;
+  compareHeadA.textContent=simulationDisplayName(a);
+  compareHeadB.textContent=simulationDisplayName(b);
+  summaryTitleA.textContent=simulationDisplayName(a);
+  summaryTitleB.textContent=simulationDisplayName(b);
   summaryA.textContent=a.summary;
   summaryB.textContent=b.summary;
   comparisonBody.innerHTML='';
@@ -79,11 +79,11 @@ function loadSimulationRecord(record){
   restoreRows('#incomeTable',d.incomes,addIncomeRow);
   restoreRows('#expenseTable',d.expenses,addExpenseRow);
   openTab('dashboard');
-  alert(`Simulation ${record.number} has been loaded into the app.`);
+  alert(`${simulationDisplayName(record)} has been loaded into the app.`);
 }
 function deleteSimulationRecord(record){
   if(!record)return;
-  if(!confirm(`Delete Simulation ${record.number}?`))return;
+  if(!confirm(`Delete ${simulationDisplayName(record)}?`))return;
   simulationHistoryRecords=simulationHistoryRecords.filter(r=>r.id!==record.id);
   renderSimulationHistory();
   refreshComparisonSelectors();

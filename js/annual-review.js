@@ -173,9 +173,11 @@
       const coreBeforeReturn=funds.reduce((sum,value)=>sum+value,0);
       const fundReturns=yearlyFundReturns(mode,rng);
       funds=funds.map((value,index)=>value*(1+fundReturns[index]));
+      const cashBeforeInterest=cash;
       cash*=1+inp.cashRate;
       const closingCore=funds.reduce((sum,value)=>sum+value,0);
       const annualGain=closingCore-coreBeforeReturn;
+      const cashInterest=cash-cashBeforeInterest;
       const annualReturn=coreBeforeReturn>0?closingCore/coreBeforeReturn-1:0;
       const portfolioReturn=coreBeforeReturn>0
         ?fundReturns.reduce((sum,r,index)=>sum+r*(coreBeforeReturn?((funds[index]/(1+r))/coreBeforeReturn):0),0)
@@ -201,6 +203,10 @@
         closingCash:cash,
         closingCore,
         closingPortfolio:cash+closingCore,
+        surplus,
+        annualGain,
+        cashInterest,
+        coreBeforeReturn,
         annualReturn,
         portfolioReturn,
         fundReturns,
@@ -262,6 +268,9 @@
     arWithdrawal.textContent=gbp(Math.max(0,spend.total-income));
     arPortfolio.textContent='Refresh roadmap';
     arCash.textContent=arCore.textContent=arCashTarget.textContent=arCoreSale.textContent=arClosingPortfolio.textContent='—';
+    arClosingCash.textContent=arClosingCore.textContent='—';
+    arPortfolioMovement.textContent=arCashMovement.textContent=arCoreMovement.textContent='—';
+    arPortfolioChange.textContent=arCashChange.textContent=arCoreChange.textContent='—';
     arCashPct.textContent=arCorePct.textContent='—';
     arCashBar.style.width=arCoreBar.style.width='0%';
     arYearBadge.classList.remove('good-year','weak-year');
@@ -272,6 +281,28 @@
     arActionExplanation.textContent='The roadmap will decide how much comes from cash and CORE using the selected trigger and funding rules.';
     arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
     arSalesExplanation.textContent=`Suggested sales will follow the Strategy setting: ${saleMethodText()}.`;
+  }
+
+  function signedGBP(value){
+    if(Math.abs(value)<.005)return gbp(0);
+    return `${value>0?'+':'−'}${gbp(Math.abs(value))}`;
+  }
+
+  function changeClass(value){
+    if(Math.abs(value)<.005)return 'roadmap-neutral';
+    return value>0?'roadmap-positive':'roadmap-negative';
+  }
+
+  function movementLines(items){
+    return items.filter(item=>Math.abs(item.value)>.005).map(item=>
+      `<div class="roadmap-movement-line"><span>${item.label}</span><strong class="${changeClass(item.value)}">${signedGBP(item.value)}</strong></div>`
+    ).join('')||'<span class="roadmap-neutral">No movement</span>';
+  }
+
+  function renderChange(element,value,opening){
+    const percentage=opening>0?value/opening:0;
+    element.className=`roadmap-change ${changeClass(value)}`;
+    element.innerHTML=`<strong>${signedGBP(value)}</strong><small>${percentage>0?'+':''}${(percentage*100).toFixed(1)}%</small>`;
   }
 
   function renderAnnualReview(){
@@ -291,6 +322,29 @@
     arCashTarget.textContent=gbp(row.fromCash);
     arCoreSale.textContent=gbp(row.fromCore);
     arClosingPortfolio.textContent=gbp(row.closingPortfolio);
+    arClosingCash.textContent=gbp(row.closingCash);
+    arClosingCore.textContent=gbp(row.closingCore);
+
+    const portfolioChange=row.closingPortfolio-row.openingPortfolio;
+    const cashChange=row.closingCash-row.openingCash;
+    const coreChange=row.closingCore-row.openingCore;
+    arPortfolioMovement.innerHTML=movementLines([
+      {label:'Income surplus',value:row.surplus},
+      {label:'Portfolio withdrawals',value:-(row.fromCash+row.fromCore)},
+      {label:'Investment & cash return',value:row.annualGain+row.cashInterest}
+    ]);
+    arCashMovement.innerHTML=movementLines([
+      {label:'Income surplus',value:row.surplus},
+      {label:'Spending from cash',value:-row.fromCash},
+      {label:'Cash interest',value:row.cashInterest}
+    ]);
+    arCoreMovement.innerHTML=movementLines([
+      {label:'CORE sold',value:-row.fromCore},
+      {label:'Investment return',value:row.annualGain}
+    ]);
+    renderChange(arPortfolioChange,portfolioChange,row.openingPortfolio);
+    renderChange(arCashChange,cashChange,row.openingCash);
+    renderChange(arCoreChange,coreChange,row.openingCore);
 
     const fundingTotal=Math.max(0,row.fromCash+row.fromCore);
     const cashPct=fundingTotal>0?row.fromCash/fundingTotal*100:0;

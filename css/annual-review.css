@@ -269,27 +269,76 @@
   padding:8px 0;
   font-size:12px;
 }
-.roadmap-outcome-grid{
-  display:grid;
-  grid-template-columns:repeat(4,minmax(0,1fr));
-  gap:9px;
+
+.roadmap-position-table{
+  display:flex;
+  flex-direction:column;
+  gap:7px;
 }
-.roadmap-outcome-grid > div{
+.roadmap-position-header,
+.roadmap-position-row{
+  display:grid;
+  grid-template-columns:minmax(112px,1.05fr) minmax(100px,.85fr) minmax(190px,1.65fr) minmax(100px,.85fr) minmax(105px,.9fr);
+  gap:8px;
+  align-items:stretch;
+}
+.roadmap-position-header{
+  padding:0 10px 3px;
+  color:var(--muted-2);
+  font-size:10px;
+  letter-spacing:.06em;
+  text-transform:uppercase;
+}
+.roadmap-position-row > *{
   min-width:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
   padding:11px;
   border:1px solid var(--line);
   border-radius:9px;
   background:var(--panel-2);
 }
-.roadmap-outcome-grid span,
-.roadmap-outcome-grid strong{
-  display:block;
+.roadmap-position-row > strong{
+  font:600 17px Inter,system-ui,sans-serif;
+  white-space:nowrap;
 }
-.roadmap-outcome-grid strong{
-  margin-top:6px;
-  overflow:hidden;
-  text-overflow:ellipsis;
+.roadmap-position-component strong{
+  font-size:13px;
 }
+.roadmap-position-component small,
+.roadmap-movement small{
+  margin-top:3px;
+  color:var(--muted-2);
+  font-size:10px;
+  line-height:1.35;
+}
+.portfolio-row .roadmap-position-component{box-shadow:inset 3px 0 0 #5f91df}
+.cash-row .roadmap-position-component{box-shadow:inset 3px 0 0 #7652a5}
+.core-row .roadmap-position-component{box-shadow:inset 3px 0 0 #3f8f93}
+.roadmap-movement{
+  gap:4px;
+  font-size:11px;
+  line-height:1.35;
+}
+.roadmap-movement-line{
+  display:flex;
+  justify-content:space-between;
+  gap:8px;
+}
+.roadmap-movement-line span:first-child{color:var(--muted)}
+.roadmap-change{
+  align-items:flex-start;
+  font:600 14px Inter,system-ui,sans-serif;
+}
+.roadmap-change small{
+  margin-top:3px;
+  color:inherit;
+  font-size:10px;
+}
+.roadmap-positive{color:#76b98a!important}
+.roadmap-negative{color:#c97373!important}
+.roadmap-neutral{color:var(--muted)!important}
 .tabbtn[data-tab="annual-review"]::after{
   background:var(--analysis);
 }
@@ -302,15 +351,26 @@
   .roadmap-year-status{
     align-items:flex-start;
   }
-  .roadmap-outcome-grid{
-    grid-template-columns:repeat(2,minmax(0,1fr));
+  .roadmap-position-header{display:none}
+  .roadmap-position-row{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .roadmap-position-component{grid-column:1 / -1}
+  .roadmap-position-row > *::before{
+    display:block;
+    margin-bottom:4px;
+    color:var(--muted-2);
+    font-size:9px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
   }
+  .roadmap-position-row > :nth-child(2)::before{content:"Start of year"}
+  .roadmap-position-row > :nth-child(3)::before{content:"Movement"}
+  .roadmap-position-row > :nth-child(4)::before{content:"End of year"}
+  .roadmap-position-row > :nth-child(5)::before{content:"Net change"}
 }
 @media(max-width:520px){
-  .roadmap-funding-values,
-  .roadmap-outcome-grid{
-    grid-template-columns:1fr;
-  }
+  .roadmap-funding-values{grid-template-columns:1fr}
+  .roadmap-position-row{grid-template-columns:1fr}
+  .roadmap-position-component{grid-column:auto}
   .roadmap-stage{
     grid-template-columns:28px minmax(0,1fr);
     gap:10px;

@@ -1,5 +1,5 @@
 # RetireLab
 
-Retirement Decision Laboratory — Release 6.2.
+Retirement Decision Laboratory — Release 6.3.
 
-This is a plain HTML, CSS and JavaScript application for GitHub Pages. No build tools or installation are required.
+A plain HTML, CSS and JavaScript retirement-planning application designed for GitHub Pages.

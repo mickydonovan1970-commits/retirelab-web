@@ -1,6 +1,5 @@
-# Deployment refresh: 6.1.2 RetireLab
+# RetireLab
 
-Retirement Decision Laboratory.
+Retirement Decision Laboratory — Release 6.2.
 
-Open `index.html` through GitHub Pages. The application remains plain HTML, CSS and JavaScript with no build tools or installation required.
-
+This is a plain HTML, CSS and JavaScript application for GitHub Pages. No build tools or installation are required.

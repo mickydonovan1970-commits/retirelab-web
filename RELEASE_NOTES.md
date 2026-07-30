@@ -1,14 +1,15 @@
-# RetireLab Release 6.3 — Clearer Roadmap & Named Simulations
+# RetireLab Release 6.3.1 — Remaining Investment Portfolio
 
-## Roadmap
-- Replaces the four summary boxes with a clear start → movement → end layout.
-- Separates Portfolio, Cash and CORE.
-- Shows spending, sales, income surplus and returns rather than only the resulting balances.
-- Displays net £ and percentage changes with increase/decrease styling.
-- Remains compact and adapts to mobile screens.
+## Roadmap correction
+- Annual spending is treated as having left the investment model at the start of the year.
+- Step 4 is renamed **Remaining Investment Portfolio**.
+- Its opening column now shows the post-funding balances, after the year's withdrawal has been taken from Bridge Cash and/or CORE.
+- The section displays only Remaining Portfolio, Bridge Cash and CORE.
+- During-year movements now show investment growth and cash interest only; the annual withdrawal is not counted a second time.
+- The end-of-year value rolls forward naturally into the following annual review.
 
-## Saved simulations
-- Every saved simulation can be renamed.
-- Custom names appear in simulation history, expanded charts, Comparison selectors, comparison headings, load confirmations and delete confirmations.
-- Existing unnamed simulations remain compatible and display their original automatic name.
-- Names are stored with the current project and persist with the existing browser storage.
+## Unchanged
+- Four-step Roadmap flow.
+- Median Market and Example Lifetime modes.
+- Named saved simulations and comparisons.
+- Existing withdrawal strategy rules.

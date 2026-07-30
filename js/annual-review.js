@@ -193,6 +193,9 @@
         openingCash,
         openingCore,
         openingPortfolio:openingCash+openingCore,
+        fundedCash:cashBeforeInterest,
+        fundedCore:coreBeforeReturn,
+        fundedPortfolio:cashBeforeInterest+coreBeforeReturn,
         fromCash,
         fromCore,
         unfunded,
@@ -316,35 +319,30 @@
     arTotalSpend.textContent=gbp(row.totalSpend);
     arIncome.textContent=gbp(row.income);
     arWithdrawal.textContent=gbp(row.withdrawal);
-    arPortfolio.textContent=gbp(row.openingPortfolio);
-    arCash.textContent=gbp(row.openingCash);
-    arCore.textContent=gbp(row.openingCore);
+    arPortfolio.textContent=gbp(row.fundedPortfolio);
+    arCash.textContent=gbp(row.fundedCash);
+    arCore.textContent=gbp(row.fundedCore);
     arCashTarget.textContent=gbp(row.fromCash);
     arCoreSale.textContent=gbp(row.fromCore);
     arClosingPortfolio.textContent=gbp(row.closingPortfolio);
     arClosingCash.textContent=gbp(row.closingCash);
     arClosingCore.textContent=gbp(row.closingCore);
 
-    const portfolioChange=row.closingPortfolio-row.openingPortfolio;
-    const cashChange=row.closingCash-row.openingCash;
-    const coreChange=row.closingCore-row.openingCore;
+    const portfolioChange=row.closingPortfolio-row.fundedPortfolio;
+    const cashChange=row.closingCash-row.fundedCash;
+    const coreChange=row.closingCore-row.fundedCore;
     arPortfolioMovement.innerHTML=movementLines([
-      {label:'Income surplus',value:row.surplus},
-      {label:'Portfolio withdrawals',value:-(row.fromCash+row.fromCore)},
       {label:'Investment & cash return',value:row.annualGain+row.cashInterest}
     ]);
     arCashMovement.innerHTML=movementLines([
-      {label:'Income surplus',value:row.surplus},
-      {label:'Spending from cash',value:-row.fromCash},
       {label:'Cash interest',value:row.cashInterest}
     ]);
     arCoreMovement.innerHTML=movementLines([
-      {label:'CORE sold',value:-row.fromCore},
       {label:'Investment return',value:row.annualGain}
     ]);
-    renderChange(arPortfolioChange,portfolioChange,row.openingPortfolio);
-    renderChange(arCashChange,cashChange,row.openingCash);
-    renderChange(arCoreChange,coreChange,row.openingCore);
+    renderChange(arPortfolioChange,portfolioChange,row.fundedPortfolio);
+    renderChange(arCashChange,cashChange,row.fundedCash);
+    renderChange(arCoreChange,coreChange,row.fundedCore);
 
     const fundingTotal=Math.max(0,row.fromCash+row.fromCore);
     const cashPct=fundingTotal>0?row.fromCash/fundingTotal*100:0;
@@ -362,7 +360,7 @@
       ?`Median year return ${pct(row.annualReturn)}`
       :`Example ${exampleNumber} · this year ${pct(row.annualReturn)} · inflation ${pct(row.inflationRate)}`;
 
-    arPlanExplanation.textContent=`Gross withdrawal is planned expenditure of ${gbp(row.totalSpend)} less guaranteed income of ${gbp(row.income)}. Figures are gross, before tax.`;
+    arPlanExplanation.textContent=`Gross withdrawal is planned expenditure of ${gbp(row.totalSpend)} less guaranteed income of ${gbp(row.income)}. Once funded, that money leaves the investment model. Figures are gross, before tax.`;
     const triggerText=`${(getInputs().trigger*100).toFixed(1)}%`;
     const classification=row.isGood?'above':'at or below';
     let actionText=`The preceding CORE return is ${pct(row.priorReturn)}, ${classification} the ${triggerText} trigger. `;

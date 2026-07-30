@@ -57,11 +57,13 @@ function applyPlanSnapshot(d){
   });
   if(Array.isArray(d.funds)&&d.funds.length){
     fundDefs.splice(0,fundDefs.length,...d.funds.map(f=>({
+      ...f,
+      id:f.id||('fund-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)),
       name:f.name||'Unnamed fund',
       value:+f.value||0,
-      ret:+f.ret||0,
-      vol:Math.max(.1,+f.vol||.1),
-      corr:Math.max(0,Math.min(.99,f.corr===undefined?.8:+f.corr)),
+      ret:Number(f.ret)||0,
+      vol:Math.max(0,Number(f.vol)||0),
+      corr:Math.max(0,Math.min(.99,f.corr===undefined?.8:Number(f.corr)||0)),
       profile:f.profile||'custom'
     })));
   }

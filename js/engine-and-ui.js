@@ -1,9 +1,9 @@
 
 const fundDefs=[
-{name:'Orbis Global Balanced',value:40500,ret:7.0,vol:10.5,corr:0.72,profile:'orbis'},
-{name:'Artemis Global Income',value:40500,ret:7.5,vol:15.5,corr:0.88,profile:'artemis'},
-{name:'BNY Mellon Global Income',value:40500,ret:7.3,vol:14.5,corr:0.86,profile:'bny'},
-{name:'L&G Global 100',value:40500,ret:7.5,vol:16.5,corr:0.86,profile:'lg'}
+{id:'fund-orbis-balanced',libraryId:'orbis-balanced',name:'Orbis Global Balanced',value:40500,ret:7.0,vol:10.5,corr:0.72,defaultRet:7.0,defaultVol:10.5,defaultCorr:0.72,category:'Defensive / Flexible',profile:'orbis'},
+{id:'fund-artemis-global-income',libraryId:'artemis-global-income',name:'Artemis Global Income',value:40500,ret:7.5,vol:15.5,corr:0.88,defaultRet:7.5,defaultVol:15.5,defaultCorr:0.88,category:'Income',profile:'artemis'},
+{id:'fund-bny-global-income',libraryId:'bny-global-income',name:'BNY Mellon Global Income',value:40500,ret:7.3,vol:14.5,corr:0.86,defaultRet:7.3,defaultVol:14.5,defaultCorr:0.86,category:'Income',profile:'bny'},
+{id:'fund-lg-global-100',libraryId:'lg-global-100',name:'L&G Global 100 Index Trust',value:40500,ret:7.5,vol:16.5,corr:0.86,defaultRet:7.5,defaultVol:16.5,defaultCorr:0.86,category:'Global Equity',profile:'lg'}
 ];
 function buildCorrelationMatrix(){
  const n=fundDefs.length;
@@ -19,8 +19,10 @@ const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function totalCore(){return fundDefs.reduce((s,f)=>s+(+f.value||0),0)}
 
 function fundConfidenceLabel(f){
-  return f.profile==='custom'?'User Defined':
-    f.profile==='lg'?'Medium–High':'Medium';
+  if(f.profile==='custom')return 'User Defined';
+  if(f.assumptionOverride)return 'User Override';
+  if(f.libraryId)return 'Library Default';
+  return f.profile==='lg'?'Medium–High':'Medium';
 }
 function renderAssumptionsTable(){
   const body=document.querySelector('#assumptionsFundTable tbody');
@@ -28,62 +30,39 @@ function renderAssumptionsTable(){
   body.innerHTML='';
   fundDefs.forEach((f,i)=>{
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td>${f.name}</td>
+    const canReset=Number.isFinite(f.defaultRet)&&Number.isFinite(f.defaultVol)&&Number.isFinite(f.defaultCorr);
+    tr.innerHTML=`<td><strong>${f.name}</strong><small class="assumption-fund-meta">${f.category||'Custom fund'}${f.identifier?' · '+f.identifier:''}</small></td>
       <td><input class="assumption-input assumption-ret" data-i="${i}" type="number" step="0.1" value="${f.ret}"></td>
       <td><input class="assumption-input assumption-vol" data-i="${i}" type="number" min="0" step="0.1" value="${f.vol}"></td>
       <td><input class="assumption-input assumption-corr" data-i="${i}" type="number" min="0" max="0.99" step="0.01" value="${f.corr??0.8}"></td>
-      <td><span class="confidence-pill">${fundConfidenceLabel(f)}</span></td>`;
+      <td><span class="confidence-pill">${fundConfidenceLabel(f)}</span></td>
+      <td>${canReset?`<button type="button" class="ghost small reset-fund-defaults" data-i="${i}">Reset</button>`:'—'}</td>`;
     body.appendChild(tr);
   });
+  const markOverride=i=>{fundDefs[i].assumptionOverride=true};
   document.querySelectorAll('.assumption-ret').forEach(el=>el.oninput=e=>{
-    fundDefs[+e.target.dataset.i].ret=+e.target.value||0;
-    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();
-    scheduleProjectSave?.();
+    const i=+e.target.dataset.i;fundDefs[i].ret=+e.target.value||0;markOverride(i);
+    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();if(typeof renderActiveFundResearch==='function')renderActiveFundResearch();if(typeof scheduleProjectSave==='function')scheduleProjectSave();
   });
   document.querySelectorAll('.assumption-vol').forEach(el=>el.oninput=e=>{
-    fundDefs[+e.target.dataset.i].vol=Math.max(0,Number(e.target.value)||0);
-    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();
-    scheduleProjectSave?.();
+    const i=+e.target.dataset.i;fundDefs[i].vol=Math.max(0,Number(e.target.value)||0);markOverride(i);
+    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();if(typeof renderActiveFundResearch==='function')renderActiveFundResearch();if(typeof scheduleProjectSave==='function')scheduleProjectSave();
   });
   document.querySelectorAll('.assumption-corr').forEach(el=>el.oninput=e=>{
-    fundDefs[+e.target.dataset.i].corr=Math.max(0,Math.min(.99,+e.target.value||0));
-    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();
-    scheduleProjectSave?.();
+    const i=+e.target.dataset.i;fundDefs[i].corr=Math.max(0,Math.min(.99,+e.target.value||0));markOverride(i);
+    if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();if(typeof renderActiveFundResearch==='function')renderActiveFundResearch();if(typeof scheduleProjectSave==='function')scheduleProjectSave();
   });
+  document.querySelectorAll('.reset-fund-defaults').forEach(el=>el.onclick=e=>{
+    const f=fundDefs[+e.currentTarget.dataset.i];
+    f.ret=f.defaultRet;f.vol=f.defaultVol;f.corr=f.defaultCorr;f.assumptionOverride=false;
+    renderAssumptionsTable();if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();if(typeof scheduleProjectSave==='function')scheduleProjectSave();
+  });
+  if(typeof renderActiveFundResearch==='function')renderActiveFundResearch();
 }
-
-addFundBtn.onclick=()=>{
-  fundBuilder.classList.remove('hidden');
-  newFundName.focus();
-};
-cancelFundBtn.onclick=()=>{
-  fundBuilder.classList.add('hidden');
-};
-confirmFundBtn.onclick=()=>{
-  const name=(newFundName.value||'').trim();
-  if(!name){alert('Please enter a fund name.');newFundName.focus();return}
-  const ret=+newFundReturn.value;
-  const vol=+newFundVolatility.value;
-  const value=Math.max(0,+newFundValue.value||0);
-  if(!isFinite(ret)){alert('Please enter an expected nominal return.');return}
-  if(!isFinite(vol)||vol<0){alert('Please enter a volatility of 0% or above.');return}
-  fundDefs.push({
-    name,
-    value,
-    ret,
-    vol,
-    corr:0.80,
-    profile:'custom'
-  });
-  fundBuilder.classList.add('hidden');
-  newFundName.value='';
-  newFundReturn.value='7.0';
-  newFundVolatility.value='15.0';
-  newFundValue.value='0';
-  renderFunds();
-  openTab('assumptions');
-};
-
+function renderActiveFundResearch(){
+  const body=document.getElementById('activeFundResearchBody');if(!body)return;
+  body.innerHTML=fundDefs.map(f=>`<tr><td><strong>${f.name}</strong></td><td>${f.category||'Custom'}</td><td>${(+f.ret).toFixed(1)}%</td><td>${(+f.vol).toFixed(1)}%</td><td>${f.profile==='custom'?'User supplied':f.assumptionOverride?'User override':'Library default'}</td></tr>`).join('');
+}
 function portfolioPieColours(count){
  const palette=['#4b607d','#4f7058','#755f47','#66516f','#765055','#506c72','#706b4f','#5f5874','#566b5e','#74604e'];
  return Array.from({length:count},(_,i)=>palette[i%palette.length]);
@@ -759,7 +738,7 @@ function serialise(){return{
  funds:fundDefs,incomes:incomes(),expenses:expenses()
 }}
 saveBtn.onclick=()=>{localStorage.setItem('retirelab-simple-v2',JSON.stringify(serialise()));alert('Saved on this device.')};
-loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v});d.funds.forEach((f,i)=>Object.assign(fundDefs[i],f));renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';d.incomes.forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';d.expenses.forEach(addExpenseRow)};
+loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow)};
 resetBtn.onclick=()=>{if(confirm('Reset all inputs?')){localStorage.removeItem('retirelab-simple-v2');location.reload()}};
 function currentEnteredFundPercentages(){
  const inputs=[...document.querySelectorAll('.fund-pct')];

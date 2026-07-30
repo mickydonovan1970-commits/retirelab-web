@@ -52,6 +52,8 @@ const researchedFundProfiles=[
 
 function profileForFund(i){
  const key=fundDefs[i]?.profile;
+ const libraryProfile=key==='library'?window.libraryProfileForFund?.(fundDefs[i]):null;
+ if(libraryProfile)return libraryProfile;
  const map={orbis:researchedFundProfiles[0],artemis:researchedFundProfiles[1],bny:researchedFundProfiles[2],lg:researchedFundProfiles[3]};
  return map[key]||{
    role:'User-added holding',

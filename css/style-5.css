@@ -516,3 +516,78 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 @media(max-width:1050px){.strategy-slot-grid,.strategy-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:760px){.strategy-library{grid-template-columns:1fr}.strategy-library-metrics{grid-template-columns:1fr}.strategy-comparison-wrap{overflow-x:auto!important}}
 @media(max-width:540px){.strategy-slot-grid,.strategy-summary-grid{grid-template-columns:1fr}}
+
+
+/* Release 6.4.1 — strategy identity and result highlighting */
+.strategy-comparison-table th.strategy-identity{
+  position:relative;
+  padding-top:13px!important;
+  padding-bottom:13px!important;
+}
+.strategy-comparison-table th.strategy-identity span{
+  display:inline-block;
+  max-width:210px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  vertical-align:bottom;
+}
+.strategy-comparison-table th.strategy-identity::before{
+  content:"";
+  position:absolute;
+  left:8px;
+  right:8px;
+  top:4px;
+  height:2px;
+  border-radius:999px;
+  opacity:.8;
+}
+.strategy-identity-0{color:#89a9d8!important}
+.strategy-identity-1{color:#a18bad!important}
+.strategy-identity-2{color:#b39a78!important}
+.strategy-identity-3{color:#8896aa!important}
+.strategy-identity-0::before{background:var(--accent)}
+.strategy-identity-1::before{background:var(--analysis)}
+.strategy-identity-2::before{background:var(--strategy)}
+.strategy-identity-3::before{background:var(--dash)}
+
+.strategy-summary-card{
+  position:relative;
+  overflow:hidden;
+}
+.strategy-summary-card::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  bottom:0;
+  width:3px;
+  opacity:.85;
+}
+.strategy-summary-identity-0::before{background:var(--accent)}
+.strategy-summary-identity-1::before{background:var(--analysis)}
+.strategy-summary-identity-2::before{background:var(--strategy)}
+.strategy-summary-identity-3::before{background:var(--dash)}
+.strategy-summary-identity-0 .strategy-summary-name{color:#89a9d8}
+.strategy-summary-identity-1 .strategy-summary-name{color:#a18bad}
+.strategy-summary-identity-2 .strategy-summary-name{color:#b39a78}
+.strategy-summary-identity-3 .strategy-summary-name{color:#8896aa}
+
+.strategy-comparison-table td.comparison-value{
+  border-left:1px solid transparent;
+  border-right:1px solid transparent;
+  transition:background .15s ease,color .15s ease,border-color .15s ease;
+}
+.strategy-comparison-table td.compare-best{
+  color:#8fbea1!important;
+  background:rgba(95,150,121,.12)!important;
+  border-left-color:rgba(95,150,121,.24);
+  border-right-color:rgba(95,150,121,.24);
+  font-weight:700;
+}
+.strategy-comparison-table td.compare-worst{
+  color:#c98b90!important;
+  background:rgba(154,86,92,.12)!important;
+  border-left-color:rgba(154,86,92,.24);
+  border-right-color:rgba(154,86,92,.24);
+  font-weight:700;
+}

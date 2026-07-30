@@ -1,14 +1,14 @@
-# RetireLab Release 6.4 — Compare Strategies
+# RetireLab Release 6.4.1 — Comparison Clarity
 
-## New
-- Comparison renamed **Compare Strategies**.
-- Up to four named saved strategies can be compared side by side.
-- Strategy slots can be cleared without deleting saved data.
-- Saved strategy library provides separate **Add to comparison** and **Load into RetireLab** actions.
-- Rename and delete are compact icon actions beside each saved strategy name.
-- The currently loaded strategy is highlighted.
+## Improved
+- Each compared strategy now has a restrained identity colour.
+- The strategy name in the comparison-table header matches the colour of its summary card below.
+- Identity colours use the existing RetireLab palette: blue, plum, amber and slate.
+- Best and worst values are highlighted automatically in result rows.
+- Tied best or worst values are handled correctly.
+- Rows where all strategies have the same value remain neutral.
+- Starting Bridge Cash has been removed from the result table; strategy inputs remain visible in the summary cards.
 
-## Preserved
-- Existing saved simulations remain compatible.
-- Custom simulation names continue throughout charts, history and comparison.
-- Loading a strategy remains a deliberate action and does not occur merely by comparing it.
+## Colour meaning
+- Strategy identity colour answers: “Which strategy is this?”
+- Green and red result highlights answer: “Which outcome is best or worst?”

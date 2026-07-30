@@ -51,16 +51,33 @@ function metricValue(record,key){
   return values[key];
 }
 const comparisonMetrics=[
-  ['Objective met','objectiveMet',value=>`${(value*100).toFixed(1)}%`],
-  ['Median at objective age','objectiveMedian',gbp],
-  ['Median vs target','objectiveGap',gbp],
-  ['Plan success','success',value=>`${(value*100).toFixed(1)}%`],
-  ['Survival to end age','survive',value=>`${(value*100).toFixed(1)}%`],
-  ['10th percentile at end age','p10',gbp],
-  ['Median at end age','median',gbp],
-  ['90th percentile at end age','p90',gbp],
-  ['Starting Bridge Cash','cash',gbp]
+  {label:'Objective met',key:'objectiveMet',formatter:value=>`${(value*100).toFixed(1)}%`,better:'high'},
+  {label:'Median at objective age',key:'objectiveMedian',formatter:gbp,better:'high'},
+  {label:'Median vs target',key:'objectiveGap',formatter:gbp,better:'high'},
+  {label:'Plan success',key:'success',formatter:value=>`${(value*100).toFixed(1)}%`,better:'high'},
+  {label:'Survival to end age',key:'survive',formatter:value=>`${(value*100).toFixed(1)}%`,better:'high'},
+  {label:'10th percentile at end age',key:'p10',formatter:gbp,better:'high'},
+  {label:'Median at end age',key:'median',formatter:gbp,better:'high'},
+  {label:'90th percentile at end age',key:'p90',formatter:gbp,better:'high'}
 ];
+
+function comparisonExtremes(values,better){
+  const finite=values.filter(Number.isFinite);
+  if(finite.length<2)return {best:new Set(),worst:new Set()};
+  const high=Math.max(...finite),low=Math.min(...finite);
+  const scale=Math.max(1,Math.abs(high),Math.abs(low));
+  const tolerance=scale*1e-10;
+  if(Math.abs(high-low)<=tolerance)return {best:new Set(),worst:new Set()};
+  const bestValue=better==='low'?low:high;
+  const worstValue=better==='low'?high:low;
+  const best=new Set(),worst=new Set();
+  values.forEach((value,index)=>{
+    if(!Number.isFinite(value))return;
+    if(Math.abs(value-bestValue)<=tolerance)best.add(index);
+    if(Math.abs(value-worstValue)<=tolerance)worst.add(index);
+  });
+  return {best,worst};
+}
 function renderComparison(){
   const records=selectedComparisonRecords();
   if(!records.length){
@@ -70,16 +87,21 @@ function renderComparison(){
   }
   comparisonEmpty.classList.add('hidden');
   comparisonContent.classList.remove('hidden');
-  comparisonHead.innerHTML=`<tr><th>Metric</th>${records.map(record=>`<th>${escapeSimulationText(simulationDisplayName(record))}</th>`).join('')}</tr>`;
+  comparisonHead.innerHTML=`<tr><th>Metric</th>${records.map((record,index)=>`<th class="strategy-identity strategy-identity-${index}"><span>${escapeSimulationText(simulationDisplayName(record))}</span></th>`).join('')}</tr>`;
   comparisonBody.innerHTML='';
-  comparisonMetrics.forEach(([label,key,formatter])=>{
+  comparisonMetrics.forEach(({label,key,formatter,better})=>{
+    const values=records.map(record=>metricValue(record,key));
+    const extremes=comparisonExtremes(values,better);
     const row=document.createElement('tr');
-    row.innerHTML=`<td>${label}</td>${records.map(record=>`<td>${formatter(metricValue(record,key))}</td>`).join('')}`;
+    row.innerHTML=`<td>${label}</td>${values.map((value,index)=>{
+      const state=extremes.best.has(index)?' compare-best':extremes.worst.has(index)?' compare-worst':'';
+      return `<td class="comparison-value${state}">${formatter(value)}</td>`;
+    }).join('')}`;
     comparisonBody.appendChild(row);
   });
-  strategySummaryGrid.innerHTML=records.map(record=>`
-    <article class="strategy-summary-card">
-      <strong>${escapeSimulationText(simulationDisplayName(record))}</strong>
+  strategySummaryGrid.innerHTML=records.map((record,index)=>`
+    <article class="strategy-summary-card strategy-summary-identity-${index}">
+      <strong class="strategy-summary-name">${escapeSimulationText(simulationDisplayName(record))}</strong>
       <span>${escapeSimulationText(record.time||'')}</span>
       <p>${escapeSimulationText(record.summary||'')}</p>
       <button type="button" class="secondary small load-library-strategy" data-id="${record.id}">Load into RetireLab</button>

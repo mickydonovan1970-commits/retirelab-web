@@ -477,3 +477,42 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 @media(max-width:760px){.strategy-policy-grid{grid-template-columns:1fr}}
 
 .strategy-policy-box .strategy-help-popover{margin-top:14px}.strategy-help[aria-expanded="true"]{border-color:var(--strategy)!important;color:#e4d4be!important;background:#241f19!important}
+
+
+/* Release 6.4 — Compare Strategies */
+.comparison-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:20px}
+.comparison-kicker{color:var(--muted-2);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.comparison-hero h2{margin:4px 0 3px;font-family:"Slabo 27px",Georgia,serif;font-size:30px!important;font-weight:400!important}
+.strategy-slot-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.strategy-slot{min-width:0;padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.strategy-slot-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:7px}
+.strategy-slot-head label{margin:0;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.strategy-slot select{width:100%;min-width:0}
+.icon-button{display:inline-grid!important;place-items:center;width:29px!important;height:29px!important;min-width:29px!important;padding:0!important;border:1px solid var(--line)!important;border-radius:8px!important;background:var(--panel3)!important;color:var(--muted)!important;line-height:1!important}
+.icon-button:hover{border-color:#59616d!important;color:var(--ink)!important;background:#20242b!important}
+.comparison-section-heading{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:10px}
+.comparison-section-heading h2{margin-bottom:2px!important}
+.strategy-comparison-table{table-layout:auto;min-width:720px}
+.strategy-comparison-table th:not(:first-child),.strategy-comparison-table td:not(:first-child){text-align:right;white-space:nowrap}
+.strategy-summary-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:15px}
+.strategy-summary-card{min-width:0;padding:13px;border:1px solid var(--line);border-radius:10px;background:var(--panel2)}
+.strategy-summary-card>strong,.strategy-summary-card>span{display:block}
+.strategy-summary-card>span{margin-top:3px;color:var(--muted-2);font-size:10px}
+.strategy-summary-card p{color:var(--muted);font-size:11px;line-height:1.45;max-height:7.2em;overflow:hidden}
+.strategy-library{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.strategy-library-card{min-width:0;padding:14px;border:1px solid var(--line);border-radius:11px;background:var(--panel2)}
+.strategy-library-card.loaded-strategy{border-color:#385d49;box-shadow:inset 3px 0 0 #4f7058}
+.strategy-library-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.strategy-library-head strong,.strategy-library-head span{display:block}
+.strategy-library-head strong{overflow-wrap:anywhere}
+.strategy-library-head span{margin-top:4px;color:var(--muted-2);font-size:10px}
+.strategy-icon-actions{display:flex;gap:6px;flex:0 0 auto}
+.strategy-library-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:13px 0}
+.strategy-library-metrics>div{min-width:0;padding:9px;border:1px solid var(--line2);border-radius:8px;background:#101217}
+.strategy-library-metrics span,.strategy-library-metrics strong{display:block}
+.strategy-library-metrics span{color:var(--muted);font-size:10px}
+.strategy-library-metrics strong{margin-top:5px;font:600 14px Inter,system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.strategy-library-actions{display:flex;gap:8px;flex-wrap:wrap}
+@media(max-width:1050px){.strategy-slot-grid,.strategy-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:760px){.strategy-library{grid-template-columns:1fr}.strategy-library-metrics{grid-template-columns:1fr}.strategy-comparison-wrap{overflow-x:auto!important}}
+@media(max-width:540px){.strategy-slot-grid,.strategy-summary-grid{grid-template-columns:1fr}}

@@ -1,64 +1,99 @@
+const comparisonSlotIds=['compareSelectA','compareSelectB','compareSelectC','compareSelectD'];
+let loadedSimulationRecordId=null;
 
 function getSimulationById(id){
-  return simulationHistoryRecords.find(r=>r.id===id)||null;
+  return simulationHistoryRecords.find(record=>record.id===id)||null;
 }
-function simulationLabel(r){
-  return `${simulationDisplayName(r)} — ${pct(r.objectiveMet)} objective`;
+function simulationLabel(record){
+  return `${simulationDisplayName(record)} — ${pct(record.objectiveMet)} objective`;
 }
+function comparisonSelects(){
+  return comparisonSlotIds.map(id=>document.getElementById(id)).filter(Boolean);
+}
+function selectedComparisonRecords(){
+  const seen=new Set();
+  return comparisonSelects().map(select=>getSimulationById(select.value)).filter(record=>{
+    if(!record||seen.has(record.id))return false;
+    seen.add(record.id);return true;
+  });
+}
+function emptyOption(){return '<option value="">Not selected</option>';}
 function refreshComparisonSelectors(){
-  const a=document.getElementById('compareSelectA');
-  const b=document.getElementById('compareSelectB');
-  if(!a||!b)return;
-  const prevA=a.value,prevB=b.value;
-  const options=simulationHistoryRecords.map(r=>`<option value="${r.id}">${simulationLabel(r)}</option>`).join('');
-  a.innerHTML=options;b.innerHTML=options;
-  if(simulationHistoryRecords.length){
-    a.value=simulationHistoryRecords.some(r=>r.id===prevA)?prevA:simulationHistoryRecords[Math.min(1,simulationHistoryRecords.length-1)].id;
-    b.value=simulationHistoryRecords.some(r=>r.id===prevB)?prevB:simulationHistoryRecords[0].id;
+  const selects=comparisonSelects();
+  if(!selects.length)return;
+  const previous=selects.map(select=>select.value);
+  const options=simulationHistoryRecords.map(record=>`<option value="${record.id}">${escapeSimulationText(simulationLabel(record))}</option>`).join('');
+  selects.forEach((select,index)=>{
+    select.innerHTML=emptyOption()+options;
+    const prior=previous[index];
+    if(prior&&simulationHistoryRecords.some(record=>record.id===prior))select.value=prior;
+  });
+  if(!selects.some(select=>select.value)&&simulationHistoryRecords.length){
+    selects[0].value=simulationHistoryRecords[0].id;
+    if(simulationHistoryRecords[1])selects[1].value=simulationHistoryRecords[1].id;
   }
+  renderComparison();
+  renderStrategyLibrary();
 }
-function deltaClass(value){
-  if(Math.abs(value)<1e-9)return 'delta-neutral';
-  return value>0?'delta-positive':'delta-negative';
+function metricValue(record,key){
+  const cash=+(record.plan?.basics?.cashStart||0);
+  const values={
+    objectiveMet:record.objectiveMet,
+    objectiveMedian:record.objectiveMedian,
+    objectiveGap:record.objectiveMedian-record.objectiveTarget,
+    success:record.success,
+    survive:record.survive,
+    p10:record.p10,
+    median:record.median,
+    p90:record.p90,
+    cash
+  };
+  return values[key];
 }
-function addCompareRow(label,a,b,formatter,goodWhenHigher=true){
-  const diff=b-a;
-  const tr=document.createElement('tr');
-  let cls='delta-neutral';
-  if(Math.abs(diff)>=1e-9){
-    const good=goodWhenHigher?diff>0:diff<0;
-    cls=good?'delta-positive':'delta-negative';
-  }
-  tr.innerHTML=`<td>${label}</td><td>${formatter(a)}</td><td>${formatter(b)}</td><td class="${cls}">${diff>0?'+':''}${formatter(diff)}</td>`;
-  comparisonBody.appendChild(tr);
-}
+const comparisonMetrics=[
+  ['Objective met','objectiveMet',value=>`${(value*100).toFixed(1)}%`],
+  ['Median at objective age','objectiveMedian',gbp],
+  ['Median vs target','objectiveGap',gbp],
+  ['Plan success','success',value=>`${(value*100).toFixed(1)}%`],
+  ['Survival to end age','survive',value=>`${(value*100).toFixed(1)}%`],
+  ['10th percentile at end age','p10',gbp],
+  ['Median at end age','median',gbp],
+  ['90th percentile at end age','p90',gbp],
+  ['Starting Bridge Cash','cash',gbp]
+];
 function renderComparison(){
-  const a=getSimulationById(compareSelectA.value);
-  const b=getSimulationById(compareSelectB.value);
-  if(!a||!b){
+  const records=selectedComparisonRecords();
+  if(!records.length){
     comparisonEmpty.classList.remove('hidden');
     comparisonContent.classList.add('hidden');
     return;
   }
   comparisonEmpty.classList.add('hidden');
   comparisonContent.classList.remove('hidden');
-  compareHeadA.textContent=simulationDisplayName(a);
-  compareHeadB.textContent=simulationDisplayName(b);
-  summaryTitleA.textContent=simulationDisplayName(a);
-  summaryTitleB.textContent=simulationDisplayName(b);
-  summaryA.textContent=a.summary;
-  summaryB.textContent=b.summary;
+  comparisonHead.innerHTML=`<tr><th>Metric</th>${records.map(record=>`<th>${escapeSimulationText(simulationDisplayName(record))}</th>`).join('')}</tr>`;
   comparisonBody.innerHTML='';
-  addCompareRow('Objective met',a.objectiveMet,b.objectiveMet,x=>`${(x*100).toFixed(1)}%`,true);
-  addCompareRow('Median at objective age',a.objectiveMedian,b.objectiveMedian,gbp,true);
-  addCompareRow('Median vs target',a.objectiveMedian-a.objectiveTarget,b.objectiveMedian-b.objectiveTarget,gbp,true);
-  addCompareRow('Plan success',a.success,b.success,x=>`${(x*100).toFixed(1)}%`,true);
-  addCompareRow('Survival to end age',a.survive,b.survive,x=>`${(x*100).toFixed(1)}%`,true);
-  addCompareRow('10th percentile at end age',a.p10,b.p10,gbp,true);
-  addCompareRow('Median at end age',a.median,b.median,gbp,true);
-  addCompareRow('90th percentile at end age',a.p90,b.p90,gbp,true);
-  const cashA=+(a.plan?.basics?.cashStart||0),cashB=+(b.plan?.basics?.cashStart||0);
-  addCompareRow('Starting cash bucket',cashA,cashB,gbp,false);
+  comparisonMetrics.forEach(([label,key,formatter])=>{
+    const row=document.createElement('tr');
+    row.innerHTML=`<td>${label}</td>${records.map(record=>`<td>${formatter(metricValue(record,key))}</td>`).join('')}`;
+    comparisonBody.appendChild(row);
+  });
+  strategySummaryGrid.innerHTML=records.map(record=>`
+    <article class="strategy-summary-card">
+      <strong>${escapeSimulationText(simulationDisplayName(record))}</strong>
+      <span>${escapeSimulationText(record.time||'')}</span>
+      <p>${escapeSimulationText(record.summary||'')}</p>
+      <button type="button" class="secondary small load-library-strategy" data-id="${record.id}">Load into RetireLab</button>
+    </article>`).join('');
+  strategySummaryGrid.querySelectorAll('.load-library-strategy').forEach(button=>button.addEventListener('click',()=>loadSimulationRecord(getSimulationById(button.dataset.id))));
+}
+function addRecordToComparison(record){
+  if(!record)return;
+  const selects=comparisonSelects();
+  if(selects.some(select=>select.value===record.id)){renderComparison();return;}
+  const target=selects.find(select=>!select.value)||selects[selects.length-1];
+  if(target)target.value=record.id;
+  renderComparison();
+  renderStrategyLibrary();
 }
 function restoreRows(tableSelector,rows,addFn){
   document.querySelector(`${tableSelector} tbody`).innerHTML='';
@@ -66,34 +101,78 @@ function restoreRows(tableSelector,rows,addFn){
 }
 function loadSimulationRecord(record){
   if(!record||!record.plan)return;
-  const d=cloneSimple(record.plan);
-  Object.entries(d.basics||{}).forEach(([k,v])=>{
-    const el=document.getElementById(k);
-    if(el)el.value=v;
+  const data=cloneSimple(record.plan);
+  Object.entries(data.basics||{}).forEach(([key,value])=>{
+    const element=document.getElementById(key);
+    if(element)element.value=value;
   });
-  (d.funds||[]).forEach((f,i)=>{
-    if(fundDefs[i])Object.assign(fundDefs[i],f);
-  });
+  (data.funds||[]).forEach((fund,index)=>{if(fundDefs[index])Object.assign(fundDefs[index],fund)});
   renderFunds();
   syncSippToCore();
-  restoreRows('#incomeTable',d.incomes,addIncomeRow);
-  restoreRows('#expenseTable',d.expenses,addExpenseRow);
+  restoreRows('#incomeTable',data.incomes,addIncomeRow);
+  restoreRows('#expenseTable',data.expenses,addExpenseRow);
+  loadedSimulationRecordId=record.id;
+  renderStrategyLibrary();
   openTab('dashboard');
-  alert(`${simulationDisplayName(record)} has been loaded into the app.`);
+  alert(`${simulationDisplayName(record)} has been loaded into RetireLab.`);
+}
+function renameSimulationRecord(record){
+  if(!record)return;
+  const entered=prompt('Name this saved strategy:',simulationDisplayName(record));
+  if(entered===null)return;
+  record.name=entered.trim().slice(0,80)||`Simulation ${record.number}`;
+  persistSimulationHistoryChange();
+  renderSimulationHistory();
+  refreshComparisonSelectors();
 }
 function deleteSimulationRecord(record){
   if(!record)return;
   if(!confirm(`Delete ${simulationDisplayName(record)}?`))return;
-  simulationHistoryRecords=simulationHistoryRecords.filter(r=>r.id!==record.id);
+  simulationHistoryRecords=simulationHistoryRecords.filter(item=>item.id!==record.id);
+  if(loadedSimulationRecordId===record.id)loadedSimulationRecordId=null;
+  persistSimulationHistoryChange();
   renderSimulationHistory();
   refreshComparisonSelectors();
-  renderComparison();
 }
-runComparison.addEventListener('click',renderComparison);
-loadSimulationA.addEventListener('click',()=>loadSimulationRecord(getSimulationById(compareSelectA.value)));
-loadSimulationB.addEventListener('click',()=>loadSimulationRecord(getSimulationById(compareSelectB.value)));
-deleteSimulationA.addEventListener('click',()=>deleteSimulationRecord(getSimulationById(compareSelectA.value)));
-deleteSimulationB.addEventListener('click',()=>deleteSimulationRecord(getSimulationById(compareSelectB.value)));
-compareSelectA.addEventListener('change',renderComparison);
-compareSelectB.addEventListener('change',renderComparison);
+function renderStrategyLibrary(){
+  const host=document.getElementById('strategyLibrary');
+  if(!host)return;
+  if(!simulationHistoryRecords.length){
+    host.innerHTML='<div class="empty-history">Run and save a simulation to create your first strategy.</div>';
+    return;
+  }
+  const selectedIds=new Set(selectedComparisonRecords().map(record=>record.id));
+  host.innerHTML=simulationHistoryRecords.map(record=>`
+    <article class="strategy-library-card${loadedSimulationRecordId===record.id?' loaded-strategy':''}">
+      <div class="strategy-library-head">
+        <div>
+          <strong>${escapeSimulationText(simulationDisplayName(record))}</strong>
+          <span>${escapeSimulationText(record.time||'')}</span>
+        </div>
+        <div class="strategy-icon-actions">
+          <button type="button" class="icon-button rename-library-strategy" data-id="${record.id}" title="Rename strategy" aria-label="Rename ${escapeSimulationText(simulationDisplayName(record))}">✎</button>
+          <button type="button" class="icon-button delete-library-strategy" data-id="${record.id}" title="Delete strategy" aria-label="Delete ${escapeSimulationText(simulationDisplayName(record))}">⌫</button>
+        </div>
+      </div>
+      <div class="strategy-library-metrics">
+        <div><span>Success</span><strong>${pct(record.success)}</strong></div>
+        <div><span>Objective</span><strong>${pct(record.objectiveMet)}</strong></div>
+        <div><span>Median at objective</span><strong>${gbp(record.objectiveMedian)}</strong></div>
+      </div>
+      <div class="strategy-library-actions">
+        <button type="button" class="${selectedIds.has(record.id)?'ghost':'primary'} small add-library-strategy" data-id="${record.id}">${selectedIds.has(record.id)?'In comparison':'Add to comparison'}</button>
+        <button type="button" class="secondary small load-library-strategy" data-id="${record.id}">${loadedSimulationRecordId===record.id?'Loaded':'Load into RetireLab'}</button>
+      </div>
+    </article>`).join('');
+  host.querySelectorAll('.add-library-strategy').forEach(button=>button.addEventListener('click',()=>addRecordToComparison(getSimulationById(button.dataset.id))));
+  host.querySelectorAll('.load-library-strategy').forEach(button=>button.addEventListener('click',()=>loadSimulationRecord(getSimulationById(button.dataset.id))));
+  host.querySelectorAll('.rename-library-strategy').forEach(button=>button.addEventListener('click',()=>renameSimulationRecord(getSimulationById(button.dataset.id))));
+  host.querySelectorAll('.delete-library-strategy').forEach(button=>button.addEventListener('click',()=>deleteSimulationRecord(getSimulationById(button.dataset.id))));
+}
+comparisonSelects().forEach(select=>select.addEventListener('change',()=>{renderComparison();renderStrategyLibrary()}));
+document.querySelectorAll('.clear-strategy-slot').forEach(button=>button.addEventListener('click',()=>{
+  const select=comparisonSelects()[+button.dataset.slot];
+  if(select)select.value='';
+  renderComparison();renderStrategyLibrary();
+}));
 setTimeout(refreshComparisonSelectors,0);

@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 6.3.1</title>
-<link href="css/style-1.css?v=6.3.1" rel="stylesheet"/>
-<link href="css/style-2.css?v=6.3.1" rel="stylesheet"/>
-<link href="css/style-3.css?v=6.3.1" rel="stylesheet"/>
-<link href="css/style-4.css?v=6.3.1" rel="stylesheet"/>
-<link href="css/style-5.css?v=6.3.1" rel="stylesheet"/><link href="css/annual-review.css?v=6.3.1" rel="stylesheet"/></head>
+<title>RetireLab 6.4</title>
+<link href="css/style-1.css?v=6.4" rel="stylesheet"/>
+<link href="css/style-2.css?v=6.4" rel="stylesheet"/>
+<link href="css/style-3.css?v=6.4" rel="stylesheet"/>
+<link href="css/style-4.css?v=6.4" rel="stylesheet"/>
+<link href="css/style-5.css?v=6.4" rel="stylesheet"/><link href="css/annual-review.css?v=6.4" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.3.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.4</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -362,44 +362,53 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </section>
 </div>
 <div class="tabpanel" data-panel="comparison">
-<section class="card full">
-<h2>Compare simulations</h2>
-<div class="compare-grid">
+<section class="card full comparison-hero">
 <div>
-<label>Simulation A</label>
-<select id="compareSelectA"></select>
-</div>
-<div>
-<label>Simulation B</label>
-<select id="compareSelectB"></select>
-</div>
-</div>
-<div class="toolbar">
-<button class="primary" id="runComparison" type="button">Compare selected simulations</button>
+<div class="comparison-kicker">Saved retirement scenarios</div>
+<h2>Compare Strategies</h2>
+<p class="note">Add up to four named strategies. Comparing a strategy does not change the active RetireLab inputs.</p>
 </div>
 </section>
 <section class="card full">
-<h2>Comparison</h2>
-<div class="empty-history" id="comparisonEmpty">Run at least two simulations, then select them above.</div>
+<div class="strategy-slot-grid" id="strategySlotGrid">
+<div class="strategy-slot" data-slot="0">
+<div class="strategy-slot-head"><label for="compareSelectA">Strategy A</label><button aria-label="Remove Strategy A from comparison" class="icon-button clear-strategy-slot" data-slot="0" title="Remove from comparison" type="button">×</button></div>
+<select id="compareSelectA"></select>
+</div>
+<div class="strategy-slot" data-slot="1">
+<div class="strategy-slot-head"><label for="compareSelectB">Strategy B</label><button aria-label="Remove Strategy B from comparison" class="icon-button clear-strategy-slot" data-slot="1" title="Remove from comparison" type="button">×</button></div>
+<select id="compareSelectB"></select>
+</div>
+<div class="strategy-slot" data-slot="2">
+<div class="strategy-slot-head"><label for="compareSelectC">Strategy C</label><button aria-label="Remove Strategy C from comparison" class="icon-button clear-strategy-slot" data-slot="2" title="Remove from comparison" type="button">×</button></div>
+<select id="compareSelectC"></select>
+</div>
+<div class="strategy-slot" data-slot="3">
+<div class="strategy-slot-head"><label for="compareSelectD">Strategy D</label><button aria-label="Remove Strategy D from comparison" class="icon-button clear-strategy-slot" data-slot="3" title="Remove from comparison" type="button">×</button></div>
+<select id="compareSelectD"></select>
+</div>
+</div>
+</section>
+<section class="card full">
+<div class="comparison-section-heading">
+<div><h2>Strategy comparison</h2><p class="note">All figures are the saved outputs from each strategy's own simulation.</p></div>
+</div>
+<div class="empty-history" id="comparisonEmpty">Save at least one simulation, then add it to a strategy slot.</div>
 <div class="hidden" id="comparisonContent">
-<div class="table-wrap">
-<table class="compare-table">
-<thead><tr><th>Metric</th><th id="compareHeadA">Simulation A</th><th id="compareHeadB">Simulation B</th><th>Difference (B − A)</th></tr></thead>
+<div class="table-wrap strategy-comparison-wrap">
+<table class="compare-table strategy-comparison-table">
+<thead id="comparisonHead"></thead>
 <tbody id="comparisonBody"></tbody>
 </table>
 </div>
-<div class="compare-actions">
-<button class="secondary" id="loadSimulationA" type="button">Load Simulation A</button>
-<button class="secondary" id="loadSimulationB" type="button">Load Simulation B</button>
-<button class="danger" id="deleteSimulationA" type="button">Delete Simulation A</button>
-<button class="danger" id="deleteSimulationB" type="button">Delete Simulation B</button>
+<div class="strategy-summary-grid" id="strategySummaryGrid"></div>
 </div>
-<h3>Simulation summaries</h3>
-<div class="compare-grid">
-<div class="compare-card"><strong id="summaryTitleA">Simulation A</strong><div class="sim-summary" id="summaryA"></div></div>
-<div class="compare-card"><strong id="summaryTitleB">Simulation B</strong><div class="sim-summary" id="summaryB"></div></div>
+</section>
+<section class="card full">
+<div class="comparison-section-heading">
+<div><h2>Saved strategy library</h2><p class="note">Add a strategy to the comparison or load its saved inputs into RetireLab. Loading is a separate, deliberate action.</p></div>
 </div>
-</div>
+<div class="strategy-library" id="strategyLibrary"></div>
 </section>
 </div>
 <div class="tabpanel" data-panel="optimiser">
@@ -491,7 +500,7 @@ It does not model tax, trading costs, fund fees separately, intra-year tax timin
 The annual CORE return used by the rule is the investment return before withdrawals.
 </p>
 </section></div></div></main>
-<script src="js/engine-and-ui.js?v=6.3.1"></script>
+<script src="js/engine-and-ui.js?v=6.4"></script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
 <button class="close small" id="closeFundDrawer" type="button">Close</button>
@@ -514,14 +523,14 @@ The annual CORE return used by the rule is the investment return before withdraw
 <p class="note" id="drawerSources"></p>
 <div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
 </aside>
-<script src="js/fund-research.js?v=6.3.1"></script>
-<script src="js/quick-actions.js?v=6.3.1"></script>
-<script src="js/simulation-history.js?v=6.3.1"></script>
-<script src="js/comparison.js?v=6.3.1"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.3.1 · Remaining Investment Portfolio</footer>
-<script src="js/projects-and-storage.js?v=6.3.1"></script>
-<script src="js/dashboard.js?v=6.3.1"></script>
-<script src="js/results-feedback.js?v=6.3.1"></script>
+<script src="js/fund-research.js?v=6.4"></script>
+<script src="js/quick-actions.js?v=6.4"></script>
+<script src="js/simulation-history.js?v=6.4"></script>
+<script src="js/comparison.js?v=6.4"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.4 · Compare Strategies</footer>
+<script src="js/projects-and-storage.js?v=6.4"></script>
+<script src="js/dashboard.js?v=6.4"></script>
+<script src="js/results-feedback.js?v=6.4"></script>
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -534,6 +543,6 @@ The annual CORE return used by the rule is the investment return before withdraw
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-<script src="js/interactive-charts.js?v=6.3.1"></script>
-<script src="js/annual-review.js?v=6.3.1"></script></body>
+<script src="js/interactive-charts.js?v=6.4"></script>
+<script src="js/annual-review.js?v=6.4"></script></body>
 </html>

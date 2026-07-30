@@ -1,15 +1,14 @@
-# RetireLab Release 6.3.1 — Remaining Investment Portfolio
+# RetireLab Release 6.4 — Compare Strategies
 
-## Roadmap correction
-- Annual spending is treated as having left the investment model at the start of the year.
-- Step 4 is renamed **Remaining Investment Portfolio**.
-- Its opening column now shows the post-funding balances, after the year's withdrawal has been taken from Bridge Cash and/or CORE.
-- The section displays only Remaining Portfolio, Bridge Cash and CORE.
-- During-year movements now show investment growth and cash interest only; the annual withdrawal is not counted a second time.
-- The end-of-year value rolls forward naturally into the following annual review.
+## New
+- Comparison renamed **Compare Strategies**.
+- Up to four named saved strategies can be compared side by side.
+- Strategy slots can be cleared without deleting saved data.
+- Saved strategy library provides separate **Add to comparison** and **Load into RetireLab** actions.
+- Rename and delete are compact icon actions beside each saved strategy name.
+- The currently loaded strategy is highlighted.
 
-## Unchanged
-- Four-step Roadmap flow.
-- Median Market and Example Lifetime modes.
-- Named saved simulations and comparisons.
-- Existing withdrawal strategy rules.
+## Preserved
+- Existing saved simulations remain compatible.
+- Custom simulation names continue throughout charts, history and comparison.
+- Loading a strategy remains a deliberate action and does not occur merely by comparing it.

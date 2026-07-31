@@ -53,7 +53,7 @@ function applyPlanSnapshot(d){
   if(!d)return;
   Object.entries(d.basics||{}).forEach(([k,v])=>{
     const el=document.getElementById(k);
-    if(el)el.value=v;
+    if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}
   });
   if(Array.isArray(d.funds)&&d.funds.length){
     fundDefs.splice(0,fundDefs.length,...d.funds.map(f=>({

@@ -139,8 +139,16 @@
       const isGood=priorReturn>inp.trigger;
       let fromCash=0;
       let fromCore=0;
+      let cashRefill=0;
       const sales=funds.map(()=>0);
-      const floor=Math.max(0,inp.cashFloor);
+      const portfolioBeforeFunding=funds.reduce((sum,value)=>sum+value,0)+cash;
+      const floor=bridgeCashFloor(inp,portfolioBeforeFunding);
+      let coreBudget=0;
+      if(isGood){
+        if(inp.goodYearRule==='trigger_amount')coreBudget=Math.max(0,inp.trigger*priorReviewCore);
+        else if(inp.goodYearRule==='actual_gain')coreBudget=Math.max(0,priorGain);
+        else coreBudget=Infinity;
+      }
 
       const takeCash=(requested,respectFloor=true)=>{
         const available=respectFloor?Math.max(0,cash-floor):Math.max(0,cash);
@@ -148,30 +156,44 @@
         cash-=taken;
         return taken;
       };
-      const takeCore=requested=>{
+      const takeCore=(requested,purpose='spending')=>{
         const result=fundWithdrawal(funds,requested,inp.saleMethod,targetWeights);
-        fromCore+=result.amount;
+        if(purpose==='spending')fromCore+=result.amount;
         result.sales.forEach((value,index)=>sales[index]+=value);
         return result.amount;
       };
 
       if(isGood){
-        let coreBudget=0;
-        if(inp.goodYearRule==='trigger_amount')coreBudget=Math.max(0,inp.trigger*priorReviewCore);
-        else if(inp.goodYearRule==='actual_gain')coreBudget=Math.max(0,priorGain);
-        else coreBudget=Infinity;
-        need-=takeCore(Math.min(need,coreBudget));
+        const coreForSpending=takeCore(Math.min(need,coreBudget),'spending');
+        need-=coreForSpending;
+        coreBudget-=coreForSpending;
         if(need>.005){const taken=takeCash(need,true);fromCash+=taken;need-=taken}
-        if(need>.005)need-=takeCore(need);
+        if(need>.005){
+          const extra=takeCore(need,'spending');
+          need-=extra;
+          if(Number.isFinite(coreBudget))coreBudget=Math.max(0,coreBudget-extra);
+        }
       }else if(inp.badYearRule==='core_first'){
-        need-=takeCore(need);
+        need-=takeCore(need,'spending');
         if(need>.005){const taken=takeCash(need,false);fromCash+=taken;need-=taken}
       }else{
         const taken=takeCash(need,false);fromCash+=taken;need-=taken;
-        if(need>.005)need-=takeCore(need);
+        if(need>.005)need-=takeCore(need,'spending');
       }
 
       const unfunded=Math.max(0,need);
+
+      if(isGood&&inp.cashRefillEnabled&&unfunded<=.005){
+        const coreNow=funds.reduce((sum,value)=>sum+value,0);
+        const remainingPortfolio=coreNow+cash;
+        const target=bridgeCashTarget(inp,remainingPortfolio);
+        const targetShortfall=Math.max(0,target-cash);
+        const cap=bridgeCashRefillCap(inp,coreNow);
+        const refillRequest=Math.min(targetShortfall,cap,coreBudget);
+        cashRefill=takeCore(refillRequest,'refill');
+        cash+=cashRefill;
+        if(Number.isFinite(coreBudget))coreBudget=Math.max(0,coreBudget-cashRefill);
+      }
       const coreBeforeReturn=funds.reduce((sum,value)=>sum+value,0);
       const fundReturns=yearlyFundReturns(mode,rng);
       funds=funds.map((value,index)=>value*(1+fundReturns[index]));
@@ -200,6 +222,10 @@
         fundedPortfolio:cashBeforeInterest+coreBeforeReturn,
         fromCash,
         fromCore,
+        cashRefill,
+        totalCoreSale:fromCore+cashRefill,
+        cashTarget:bridgeCashTarget(inp,coreBeforeReturn+cashBeforeInterest),
+        cashFloor:floor,
         unfunded,
         sales,
         priorReturn,
@@ -423,8 +449,15 @@
     arModeSource.textContent=roadmapMode==='median'?'Median assumptions':`Example Lifetime ${exampleNumber}`;
     arPlanExplanation.textContent='Refresh the roadmap to apply the withdrawal strategy year by year.';
     arActionExplanation.textContent='The roadmap will decide how much comes from cash and CORE using the selected trigger and funding rules.';
+    arActionStatus.className='roadmap-action-status';
+    arActionStatus.textContent='Waiting for roadmap';
+    arFinancialActions.innerHTML='<div class="roadmap-action-row"><span class="roadmap-action-check">—</span><span>Refresh the roadmap to calculate this year\'s actions.</span></div>';
+    arCoreSalesToggle.classList.add('hidden');
+    arCoreSalesToggle.setAttribute('aria-expanded','false');
+    arCoreSalesPanel.classList.add('hidden');
+    arTotalCoreSale.textContent=arCoreForSpending.textContent=arCoreForRefill.textContent=arCoreSaleTotalDetail.textContent='—';
     arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
-    arSalesExplanation.textContent=`Suggested sales will follow the Strategy setting: ${saleMethodText()}.`;
+    arSalesExplanation.textContent=`Fund instructions will follow the Strategy setting: ${saleMethodText()}.`;
     drawRoadmapChart();
   }
 
@@ -510,10 +543,36 @@
     if(row.unfunded>.005)actionText+=` ${gbp(row.unfunded)} remains unfunded.`;
     arActionExplanation.textContent=actionText;
 
+    arActionStatus.className=`roadmap-action-status ${row.isGood?'good-year':'weak-year'}`;
+    arActionStatus.textContent=row.isGood
+      ?(row.cashRefill>.005?'Strong year · refill Bridge Cash':'Strong year')
+      :'Weak year · protect CORE where possible';
+
+    const actionRows=[];
+    actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Fund annual spending</b><small>${gbp(row.fromCash)} from Bridge Cash and ${gbp(row.fromCore)} from CORE</small></span><strong>${gbp(row.withdrawal)}</strong></div>`);
+    if(row.cashRefill>.005){
+      actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Refill Bridge Cash</b><small>Target ${gbp(row.cashTarget)} · post-refill balance ${gbp(row.fundedCash)}</small></span><strong>${gbp(row.cashRefill)}</strong></div>`);
+    }else if(row.isGood&&getInputs().cashRefillEnabled){
+      const targetMet=row.fundedCash+0.005>=row.cashTarget;
+      actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Bridge Cash refill</b><small>${targetMet?'Target already met':'No permitted refill capacity remains under the strong-year rule'}</small></span><strong>${gbp(0)}</strong></div>`);
+    }else if(!row.isGood){
+      actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Defer Bridge Cash refill</b><small>Refills are only made after a strong CORE year</small></span><strong>—</strong></div>`);
+    }
+    actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Leave remaining CORE invested</b><small>Continue with the selected target allocation</small></span><strong>${gbp(row.fundedCore)}</strong></div>`);
+    arFinancialActions.innerHTML=actionRows.join('');
+
+    arTotalCoreSale.textContent=gbp(row.totalCoreSale);
+    arCoreForSpending.textContent=gbp(row.fromCore);
+    arCoreForRefill.textContent=gbp(row.cashRefill);
+    arCoreSaleTotalDetail.textContent=gbp(row.totalCoreSale);
     arFundSales.innerHTML='';
-    if(row.fromCore<=.005){
+    if(row.totalCoreSale<=.005){
+      arCoreSalesToggle.classList.add('hidden');
+      arCoreSalesPanel.classList.add('hidden');
+      arCoreSalesToggle.setAttribute('aria-expanded','false');
       arFundSales.innerHTML='<div class="annual-empty">No CORE sale indicated for this year.</div>';
     }else{
+      arCoreSalesToggle.classList.remove('hidden');
       const colours=typeof portfolioPieColours==='function'?portfolioPieColours(fundDefs.length+1).slice(1):fundDefs.map(()=> '#5f91df');
       fundDefs.forEach((fund,index)=>{
         const saleRow=document.createElement('div');
@@ -522,7 +581,7 @@
         arFundSales.appendChild(saleRow);
       });
     }
-    arSalesExplanation.textContent=`Suggested sales follow the Strategy setting: ${saleMethodText()}.`;
+    arSalesExplanation.textContent=`Fund instructions follow the Strategy setting: ${saleMethodText()}. Total fund sales reconcile to ${gbp(row.totalCoreSale)}.`;
     drawRoadmapChart();
   }
 
@@ -565,6 +624,12 @@
     roadmapSeedNumber.value=exampleNumber;
     if(roadmapMode!=='example')setMode('example');else refreshRoadmap();
   });
+  arCoreSalesToggle?.addEventListener('click',()=>{
+    const open=arCoreSalesToggle.getAttribute('aria-expanded')==='true';
+    arCoreSalesToggle.setAttribute('aria-expanded',String(!open));
+    arCoreSalesPanel.classList.toggle('hidden',open);
+  });
+
   refreshAnnualReview.addEventListener('click',refreshRoadmap);
 
   const roadmapCanvas=document.getElementById('roadmapWealthChart');

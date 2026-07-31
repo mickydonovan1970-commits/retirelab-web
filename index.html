@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 6.7.1</title>
-<link href="css/style-1.css?v=6.7.1" rel="stylesheet"/>
-<link href="css/style-2.css?v=6.7.1" rel="stylesheet"/>
-<link href="css/style-3.css?v=6.7.1" rel="stylesheet"/>
-<link href="css/style-4.css?v=6.7.1" rel="stylesheet"/>
-<link href="css/style-5.css?v=6.7.1" rel="stylesheet"/><link href="css/annual-review.css?v=6.7.1" rel="stylesheet"/></head>
+<title>RetireLab 6.8</title>
+<link href="css/style-1.css?v=6.8" rel="stylesheet"/>
+<link href="css/style-2.css?v=6.8" rel="stylesheet"/>
+<link href="css/style-3.css?v=6.8" rel="stylesheet"/>
+<link href="css/style-4.css?v=6.8" rel="stylesheet"/>
+<link href="css/style-5.css?v=6.8" rel="stylesheet"/><link href="css/annual-review.css?v=6.8" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.7.1</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.8</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
@@ -207,17 +207,57 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <select id="badYearRule"><option selected="" value="cash_first">Use cash first, then CORE if cash runs out</option><option value="core_first">Use CORE first</option></select>
 <p class="note">The minimum cash reserve does not restrict essential spending in a weak year.</p>
 <div aria-live="polite" class="strategy-help-popover hidden" id="strategyHelp-weak" role="status"></div></div>
-<div class="strategy-policy-box">
-<div class="strategy-policy-title"><h3>Strong CORE years</h3><button aria-label="Explain strong CORE year rule" class="strategy-help" data-help="strong" type="button">?</button></div>
+<div class="strategy-policy-box bridge-cash-policy">
+<div class="strategy-policy-title"><h3>Strong CORE years &amp; Bridge Cash</h3><button aria-label="Explain strong CORE year and Bridge Cash rules" class="strategy-help" data-help="strong" type="button">?</button></div>
 <label>When CORE return is above trigger</label>
 <select id="goodYearRule">
-<option selected="" value="trigger_amount">Use up to trigger % of start-of-year CORE; rest from cash</option>
-<option value="actual_gain">Use up to the actual annual gain; rest from cash</option>
+<option selected="" value="trigger_amount">Use up to trigger % of start-of-year CORE; rest from Bridge Cash</option>
+<option value="actual_gain">Use up to the actual annual gain; rest from Bridge Cash</option>
 <option value="all_core">Use CORE for the full spending shortfall</option>
 </select>
-<label style="margin-top:12px">Minimum cash reserve to retain (£)</label>
-<input id="cashFloor" min="0" step="1000" type="number" value="0"/>
-<p class="note">In strong years, cash is protected at this level where possible; CORE funds any remaining shortfall.</p>
+
+<div class="cash-policy-section">
+<h4>Bridge Cash target</h4>
+<div class="cash-policy-inline">
+<select aria-label="Bridge Cash target unit" id="cashTargetMode">
+<option selected="" value="amount">£ amount</option>
+<option value="percent">% of remaining portfolio</option>
+</select>
+<input aria-label="Bridge Cash target value" id="cashTargetValue" min="0" step="1000" type="number" value="0"/>
+</div>
+</div>
+
+<div class="cash-policy-section cash-policy-switch-row">
+<label class="form-check form-switch">
+<input checked="" class="form-check-input" id="cashRefillEnabled" type="checkbox"/>
+<span class="form-check-label">Refill Bridge Cash in strong years</span>
+</label>
+</div>
+
+<div class="cash-policy-section" id="cashRefillControls">
+<h4>Maximum annual refill</h4>
+<div class="cash-policy-inline">
+<select aria-label="Maximum annual refill unit" id="cashRefillMaxMode">
+<option selected="" value="amount">£ amount</option>
+<option value="percent">% of CORE</option>
+</select>
+<input aria-label="Maximum annual refill value" id="cashRefillMaxValue" min="0" step="1000" type="number" value="10000"/>
+</div>
+<p class="note">Set to 0 for no annual cap. Refill sales remain within the CORE amount permitted by the selected strong-year rule.</p>
+</div>
+
+<div class="cash-policy-section">
+<h4>Minimum Bridge Cash to retain while funding spending</h4>
+<div class="cash-policy-inline">
+<select aria-label="Minimum Bridge Cash unit" id="cashFloorMode">
+<option selected="" value="amount">£ amount</option>
+<option value="percent">% of remaining portfolio</option>
+</select>
+<input aria-label="Minimum Bridge Cash value" id="cashFloor" min="0" step="1000" type="number" value="0"/>
+</div>
+<p class="note">This reserve is protected where possible in strong years. Essential spending can still use it in weak years.</p>
+</div>
+
 <div aria-live="polite" class="strategy-help-popover hidden" id="strategyHelp-strong" role="status"></div></div>
 </div>
 <p class="note">The model reviews this withdrawal policy annually by default.</p>
@@ -356,12 +396,31 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 </section>
 <div class="roadmap-arrow">↓</div>
-<section class="roadmap-stage">
+<section class="roadmap-stage roadmap-actions-stage">
 <div class="roadmap-stage-number">3</div>
 <div class="roadmap-stage-content">
-<h3>Suggested CORE sales</h3>
+<div class="roadmap-stage-heading">
+<div>
+<h3>Year Start Financial Actions</h3>
+<p class="note roadmap-actions-intro">Actions required after the preceding year's CORE return is known.</p>
+</div>
+<span class="roadmap-action-status" id="arActionStatus">Waiting for roadmap</span>
+</div>
+<div class="roadmap-action-list" id="arFinancialActions">
+<div class="roadmap-action-row"><span class="roadmap-action-check">—</span><span>Refresh the roadmap to calculate this year's actions.</span></div>
+</div>
+<button class="roadmap-core-sales-toggle hidden" id="arCoreSalesToggle" type="button" aria-expanded="false">
+<span>Execute CORE sales</span><strong id="arTotalCoreSale">—</strong><span class="roadmap-toggle-chevron">⌄</span>
+</button>
+<div class="roadmap-core-sales-panel hidden" id="arCoreSalesPanel">
+<div class="roadmap-sale-purpose">
+<div><span>For annual spending</span><strong id="arCoreForSpending">—</strong></div>
+<div><span>For Bridge Cash refill</span><strong id="arCoreForRefill">—</strong></div>
+<div class="roadmap-sale-purpose-total"><span>Total CORE sale</span><strong id="arCoreSaleTotalDetail">—</strong></div>
+</div>
 <div class="annual-sales-list" id="arFundSales"></div>
 <p class="note" id="arSalesExplanation"></p>
+</div>
 </div>
 </section>
 <div class="roadmap-arrow">↓</div>
@@ -539,7 +598,7 @@ It does not model tax, trading costs, fund fees separately, intra-year tax timin
 The annual CORE return used by the rule is the investment return before withdrawals.
 </p>
 </section></div></div></main>
-<script src="js/engine-and-ui.js?v=6.7.1"></script><script src="js/fund-library.js?v=6.7.1"></script><script src="js/diversification.js?v=6.7.1"></script>
+<script src="js/engine-and-ui.js?v=6.8"></script><script src="js/fund-library.js?v=6.8"></script><script src="js/diversification.js?v=6.8"></script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
 <button class="close small" id="closeFundDrawer" type="button">Close</button>
@@ -562,14 +621,14 @@ The annual CORE return used by the rule is the investment return before withdraw
 <p class="note" id="drawerSources"></p>
 <div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
 </aside>
-<script src="js/fund-research.js?v=6.7.1"></script>
-<script src="js/quick-actions.js?v=6.7.1"></script>
-<script src="js/simulation-history.js?v=6.7.1"></script>
-<script src="js/comparison.js?v=6.7.1"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.7.1 · Portfolio Statistics Refresh</footer>
-<script src="js/projects-and-storage.js?v=6.7.1"></script>
-<script src="js/dashboard.js?v=6.7.1"></script>
-<script src="js/results-feedback.js?v=6.7.1"></script>
+<script src="js/fund-research.js?v=6.8"></script>
+<script src="js/quick-actions.js?v=6.8"></script>
+<script src="js/simulation-history.js?v=6.8"></script>
+<script src="js/comparison.js?v=6.8"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.8 · Operational Retirement</footer>
+<script src="js/projects-and-storage.js?v=6.8"></script>
+<script src="js/dashboard.js?v=6.8"></script>
+<script src="js/results-feedback.js?v=6.8"></script>
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -582,6 +641,6 @@ The annual CORE return used by the rule is the investment return before withdraw
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-<script src="js/interactive-charts.js?v=6.7.1"></script>
-<script src="js/annual-review.js?v=6.7.1"></script></body>
+<script src="js/interactive-charts.js?v=6.8"></script>
+<script src="js/annual-review.js?v=6.8"></script></body>
 </html>

@@ -475,3 +475,32 @@
 .roadmap-chart-note{margin:9px 0 0}
 @media(max-width:760px){.roadmap-journey-heading{flex-direction:column}.roadmap-event-legend{justify-content:flex-start}.roadmap-chart-wrap{height:270px}}
 @media(max-width:520px){.roadmap-chart-wrap{height:235px}}
+
+
+/* Release 6.8 — Year Start Financial Actions */
+.roadmap-actions-intro{margin:2px 0 0}
+.roadmap-action-status{display:inline-flex;align-items:center;min-height:27px;padding:5px 9px;border:1px solid var(--line);border-radius:999px;background:var(--panel-2);color:var(--muted);font-size:11px;font-weight:700;white-space:nowrap}
+.roadmap-action-status.good-year{border-color:#385d49;background:#15221b;color:#8fbea1}
+.roadmap-action-status.weak-year{border-color:#4b3e2e;background:#211c16;color:#c5aa7f}
+.roadmap-action-list{display:flex;flex-direction:column;margin-top:3px}
+.roadmap-action-row{display:grid;grid-template-columns:22px minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line-soft)}
+.roadmap-action-row:last-child{border-bottom:0}
+.roadmap-action-check{display:grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--panel-3);color:#8fbea1;font-size:11px;font-weight:800}
+.roadmap-action-row strong{font:700 14px Inter,system-ui,sans-serif;white-space:nowrap}
+.roadmap-action-row small{display:block;margin-top:2px;color:var(--muted);font-size:11px}
+.roadmap-core-sales-toggle{display:grid;grid-template-columns:minmax(0,1fr) auto 18px;gap:10px;align-items:center;width:100%;margin-top:10px;padding:11px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--text);text-align:left;cursor:pointer}
+.roadmap-core-sales-toggle:hover{border-color:#4b5665}
+.roadmap-core-sales-toggle strong{font:700 15px Inter,system-ui,sans-serif}
+.roadmap-toggle-chevron{text-align:center;color:var(--muted);transition:transform .16s ease}
+.roadmap-core-sales-toggle[aria-expanded="true"] .roadmap-toggle-chevron{transform:rotate(180deg)}
+.roadmap-core-sales-panel{margin-top:9px;padding:12px;border:1px solid var(--line-soft);border-radius:9px;background:#101217}
+.roadmap-sale-purpose{display:flex;flex-direction:column;margin-bottom:8px}
+.roadmap-sale-purpose>div{display:flex;justify-content:space-between;gap:16px;padding:7px 0;border-bottom:1px solid var(--line-soft)}
+.roadmap-sale-purpose span{color:var(--muted);font-size:12px}
+.roadmap-sale-purpose strong{font:700 13px Inter,system-ui,sans-serif}
+.roadmap-sale-purpose-total{border-bottom:0!important}
+.roadmap-sale-purpose-total strong{color:#dce4ee;font-size:15px}
+@media(max-width:520px){
+ .roadmap-action-row{grid-template-columns:22px minmax(0,1fr)}
+ .roadmap-action-row>strong{grid-column:2}
+}

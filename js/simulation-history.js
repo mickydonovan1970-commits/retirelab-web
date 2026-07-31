@@ -43,6 +43,7 @@ function buildSimulationSummary(){
     `Trigger: ${(+cashTrigger.value||0).toFixed(1)}%`,
     `Good year: ${goodRuleLabels[inp.goodYearRule]||inp.goodYearRule}`,
     `Bad year: ${badRuleLabels[inp.badYearRule]||inp.badYearRule}`,
+    `Bridge Cash refill: ${inp.cashRefillEnabled?'On':'Off'}`,
     `CORE sales: ${saleLabels[inp.saleMethod]||inp.saleMethod}`,
     `Annual spending: ${gbp(inp.spending)}`,
     `Inflation assumption: ${(+inflMean.value||0).toFixed(1)}%`,

@@ -255,8 +255,35 @@ function getInputs(){return{
  sims:+simCount.value,seed:+seed.value||1,inflMean:+inflMean.value/100,inflVol:+inflVol.value/100,
  sippTotal:+sippTotal.value||0,cashStart:+cashStart.value||0,cashRate:+cashRate.value/100,trigger:+cashTrigger.value/100,
  reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,
- saleMethod:saleMethod.value,cashFloor:+cashFloor.value||0,incomes:incomes(),expenses:expenses()
+ saleMethod:saleMethod.value,
+ cashTargetMode:cashTargetMode.value,cashTargetValue:+cashTargetValue.value||0,
+ cashRefillEnabled:cashRefillEnabled.checked,
+ cashRefillMaxMode:cashRefillMaxMode.value,cashRefillMaxValue:+cashRefillMaxValue.value||0,
+ cashFloorMode:cashFloorMode.value,cashFloor:+cashFloor.value||0,
+ incomes:incomes(),expenses:expenses()
 }}
+
+function policyAmount(mode,value,portfolio,core){
+ const numeric=Math.max(0,+value||0);
+ return mode==='percent'?numeric/100*Math.max(0,mode==='percent'&&core!==undefined?portfolio:portfolio):numeric;
+}
+function bridgeCashTarget(inp,portfolio){
+ return inp.cashTargetMode==='percent'
+   ?Math.max(0,inp.cashTargetValue)/100*Math.max(0,portfolio)
+   :Math.max(0,inp.cashTargetValue);
+}
+function bridgeCashFloor(inp,portfolio){
+ return inp.cashFloorMode==='percent'
+   ?Math.max(0,inp.cashFloor)/100*Math.max(0,portfolio)
+   :Math.max(0,inp.cashFloor);
+}
+function bridgeCashRefillCap(inp,core){
+ if(Math.max(0,inp.cashRefillMaxValue)<=0)return Infinity;
+ return inp.cashRefillMaxMode==='percent'
+   ?Math.max(0,inp.cashRefillMaxValue)/100*Math.max(0,core)
+   :Math.max(0,inp.cashRefillMaxValue);
+}
+
 function successAge(inp){return inp.expenses.length?Math.min(inp.endAge,Math.max(...inp.expenses.map(e=>e.start+e.term))):inp.endAge}
 
 function withdrawFromCore(funds,amount,method,targetWeights){
@@ -331,14 +358,26 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
 
    const reviewNow=inp.reviewFrequency==='monthly'||m===1||((m-1)%12===0);
    if(reviewNow){
-    if(m!==1){reviewStartCore=funds.reduce((a,b)=>a+b,0);reviewReturnFactor=1}
     const annualReturn=reviewReturnFactor-1;
     currentGood=annualReturn>inp.trigger;
     if(currentGood){
       if(inp.goodYearRule==='trigger_amount')goodYearCoreBudget=Math.max(0,inp.trigger*reviewStartCore);
       else if(inp.goodYearRule==='actual_gain')goodYearCoreBudget=Math.max(0,annualReturn*reviewStartCore);
       else goodYearCoreBudget=Infinity;
+
+      if(inp.cashRefillEnabled){
+        const coreForRefill=funds.reduce((a,b)=>a+b,0);
+        const portfolioForTarget=coreForRefill+cash;
+        const target=bridgeCashTarget(inp,portfolioForTarget);
+        const shortfallToTarget=Math.max(0,target-cash);
+        const cap=bridgeCashRefillCap(inp,coreForRefill);
+        const refillRequest=Math.min(shortfallToTarget,cap,goodYearCoreBudget);
+        const refilled=withdrawFromCore(funds,refillRequest,inp.saleMethod,weights);
+        cash+=refilled;
+        goodYearCoreBudget-=refilled;
+      }
     }else goodYearCoreBudget=0;
+    if(m!==1){reviewStartCore=funds.reduce((a,b)=>a+b,0);reviewReturnFactor=1}
    }
 
    const coreTotal=funds.reduce((a,b)=>a+b,0);
@@ -346,7 +385,8 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
     if(currentGood){
       const fromCore=Math.min(shortfall,goodYearCoreBudget,coreTotal);
       const taken=withdrawFromCore(funds,fromCore,inp.saleMethod,weights);shortfall-=taken;goodYearCoreBudget-=taken;
-      const availableCash=Math.max(0,cash-inp.cashFloor),fromCash=Math.min(shortfall,availableCash);cash-=fromCash;shortfall-=fromCash;
+      const floor=bridgeCashFloor(inp,funds.reduce((a,b)=>a+b,0)+cash);
+      const availableCash=Math.max(0,cash-floor),fromCash=Math.min(shortfall,availableCash);cash-=fromCash;shortfall-=fromCash;
       if(shortfall>0){const extra=withdrawFromCore(funds,shortfall,inp.saleMethod,weights);shortfall-=extra}
     }else{
       if(inp.badYearRule==='cash_first'){
@@ -736,11 +776,14 @@ applySuggested.onclick=()=>{
  updateFundDisplay();
 };
 function serialise(){return{
- basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,cashFloor:cashFloor.value},
+ basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,
+ cashTargetMode:cashTargetMode.value,cashTargetValue:cashTargetValue.value,cashRefillEnabled:cashRefillEnabled.checked,
+ cashRefillMaxMode:cashRefillMaxMode.value,cashRefillMaxValue:cashRefillMaxValue.value,
+ cashFloorMode:cashFloorMode.value,cashFloor:cashFloor.value},
  funds:fundDefs,incomes:incomes(),expenses:expenses()
 }}
 saveBtn.onclick=()=>{localStorage.setItem('retirelab-simple-v2',JSON.stringify(serialise()));alert('Saved on this device.')};
-loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el)el.value=v});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow)};
+loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow)};
 resetBtn.onclick=()=>{if(confirm('Reset all inputs?')){localStorage.removeItem('retirelab-simple-v2');location.reload()}};
 function currentEnteredFundPercentages(){
  const inputs=[...document.querySelectorAll('.fund-pct')];
@@ -797,15 +840,29 @@ if(dashboardRunButton){
 
 function strategyHelpText(kind){
  const trigger=(+cashTrigger.value||0).toFixed(1);
- const floor=Math.max(0,+cashFloor.value||0);
+ const portfolio=Math.max(0,+sippTotal.value||0);
+ const core=Math.max(0,portfolio-(+cashStart.value||0));
+ const floor=cashFloorMode.value==='percent'
+   ?`${(+cashFloor.value||0).toFixed(1)}% of remaining portfolio`
+   :gbp(Math.max(0,+cashFloor.value||0));
  if(kind==='weak'){
    const rule=badYearRule.value==='cash_first'
-     ?'the model spends available cash first and then sells CORE for any remaining shortfall'
-     :'the model sells CORE first and uses cash only if CORE cannot meet the full shortfall';
-   return `<strong>Example using your settings</strong><br>If CORE returns ${trigger}% or less, ${rule}. The £${Math.round(floor).toLocaleString('en-GB')} reserve does not block essential spending in a weak year.`;
+     ?'the model spends available Bridge Cash first and then sells CORE for any remaining shortfall'
+     :'the model sells CORE first and uses Bridge Cash only if CORE cannot meet the full shortfall';
+   return `<strong>Example using your settings</strong><br>If CORE returns ${trigger}% or less, ${rule}. The ${floor} reserve does not block essential spending in a weak year.`;
  }
- const rule=goodYearRule.value==='actual_gain'?'uses up to the actual annual CORE gain':goodYearRule.value==='all_core'?'uses CORE for the full shortfall':`uses up to ${trigger}% of start-of-year CORE`;
- return `<strong>Example using your settings</strong><br>Suppose cash is £25,000, spending is £20,000 and the permitted CORE amount is £8,000. The model ${rule}, then uses cash while retaining £${Math.round(floor).toLocaleString('en-GB')} where possible. With a £10,000 reserve, that example becomes £10,000 from CORE and £10,000 from cash.`;
+ const target=cashTargetMode.value==='percent'
+   ?`${(+cashTargetValue.value||0).toFixed(1)}% of remaining portfolio`
+   :gbp(Math.max(0,+cashTargetValue.value||0));
+ const cap=(+cashRefillMaxValue.value||0)<=0?'no annual cap'
+   :cashRefillMaxMode.value==='percent'
+     ?`${(+cashRefillMaxValue.value||0).toFixed(1)}% of CORE`
+     :gbp(+cashRefillMaxValue.value||0);
+ const rule=goodYearRule.value==='actual_gain'?'uses up to the actual annual CORE gain':goodYearRule.value==='all_core'?'uses CORE for the full permitted amount':`uses up to ${trigger}% of start-of-year CORE`;
+ const refill=cashRefillEnabled.checked
+   ?`After funding spending, it refills Bridge Cash towards ${target}, subject to ${cap} and the remaining permitted CORE amount.`
+   :'Bridge Cash refill is switched off.';
+ return `<strong>Example using your settings</strong><br>In a strong year, the model ${rule}. It protects a minimum Bridge Cash reserve of ${floor}. ${refill}`;
 }
 function showStrategyHelp(button,forceOpen=false){
  const kind=button.dataset.help;
@@ -831,3 +888,15 @@ document.querySelectorAll('.strategy-help').forEach(button=>{
    showStrategyHelp(button,!wasOpen);
  });
 });
+
+(function(){
+ const enabled=document.getElementById('cashRefillEnabled');
+ const controls=document.getElementById('cashRefillControls');
+ function updateCashRefillControls(){
+   if(!enabled||!controls)return;
+   controls.classList.toggle('policy-disabled',!enabled.checked);
+   controls.querySelectorAll('input,select').forEach(el=>el.disabled=!enabled.checked);
+ }
+ enabled?.addEventListener('change',updateCashRefillControls);
+ updateCashRefillControls();
+})();

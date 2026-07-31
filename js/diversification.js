@@ -69,7 +69,7 @@
     }
     if(category==='Defensive / Flexible'){
       if(name.includes('ruffer'))return .35;
-      if(name.includes('orbis'))return .62;
+      if(name.includes('orbis'))return .78;
       return .5;
     }
     return 1;
@@ -135,6 +135,13 @@
     if(share>=severe)return 'high';
     if(share>=moderate)return 'watch';
     return 'good';
+  }
+
+  function equityExposureBand(equity){
+    if(equity>=.9)return {label:'Very equity-heavy',status:'high'};
+    if(equity>=.75)return {label:'Equity-heavy',status:'watch'};
+    if(equity>=.5)return {label:'Mixed asset',status:'good'};
+    return {label:'Defensive-leaning',status:'good'};
   }
 
   function dimensionCard(label,status,value,detail){
@@ -212,18 +219,23 @@
           `${topProvider[0]} manages ${(topProvider[1]*100).toFixed(1)}% of CORE. Separate funds from one provider may still share construction, stewardship or operational risks.`]);
       }else if(topProvider[1]>=.45){
         penalty+=6;
-        warnings.push(['watch','Provider overlap',
+        warnings.push(['watch','Provider concentration',
           `${topProvider[0]} manages ${(topProvider[1]*100).toFixed(1)}% of CORE across the selected holdings.`]);
       }
     }
 
-    // Asset-class concentration.
+    // Estimated asset-class exposure.
     const equity=entries.reduce((sum,e)=>sum+e.weight*e.equity,0);
     const defensive=1-equity;
+    const equityBand=equityExposureBand(equity);
     if(equity>=.9){
       penalty+=11;
-      warnings.push(['watch','Equity-heavy portfolio',
-        `Estimated equity exposure is about ${(equity*100).toFixed(0)}%. Diversification is mainly between equity mandates rather than between asset classes.`]);
+      warnings.push(['high','Very equity-heavy exposure',
+        `Estimated equity exposure is about ${(equity*100).toFixed(0)}%. Most diversification is between equity mandates rather than between asset classes.`]);
+    }else if(equity>=.75){
+      penalty+=6;
+      warnings.push(['watch','Equity-heavy exposure',
+        `Estimated equity exposure is about ${(equity*100).toFixed(0)}%. The portfolio remains growth-oriented despite any balanced or defensive holdings.`]);
     }else if(defensive>=.75){
       penalty+=8;
       warnings.push(['watch','Defensive-asset concentration',
@@ -268,11 +280,11 @@
       if(count<2)return;
       if(share>=.55){
         penalty+=10;
-        warnings.push(['high','Likely mandate overlap',
+        warnings.push(['high','Potential holdings overlap',
           `${count} holdings with similar “${group}” mandates make up ${(share*100).toFixed(1)}% of CORE. Their underlying securities may overlap substantially.`]);
       }else if(share>=.3){
         penalty+=5;
-        warnings.push(['watch','Possible mandate overlap',
+        warnings.push(['watch','Potential holdings overlap',
           `${count} holdings with similar “${group}” mandates make up ${(share*100).toFixed(1)}% of CORE.`]);
       }
     });
@@ -286,12 +298,12 @@
     const largeCap=styleMap.get('Large / mega cap')||0;
     if(passive>=.75&&equity>=.75){
       penalty+=4;
-      warnings.push(['watch','Market-cap style concentration',
+      warnings.push(['watch','Likely market-cap style exposure',
         `${(passive*100).toFixed(0)}% of CORE is held in index-like mandates. Multiple trackers may diversify wrappers without materially diversifying the underlying market exposure.`]);
     }
     if(income>=.5){
       penalty+=6;
-      warnings.push(['watch','Equity-income style overlap',
+      warnings.push(['watch','Likely equity-income style overlap',
         `${(income*100).toFixed(0)}% of CORE is in income-oriented equity mandates, which may share dividend, value and sector biases.`]);
     }
     if(largeCap>=.55){
@@ -327,7 +339,7 @@
 
     const fundStatus=levelFromShare(largest.weight,.35,.5);
     const managerStatus=topProvider?levelFromShare(topProvider[1],.45,.65):'good';
-    const assetStatus=(equity>=.9||defensive>=.75)?'watch':'good';
+    const assetStatus=equityBand.status;
     const overlapShare=benchmarks.find(([,share])=>share>=.3)?.[1]||0;
     const overlapStatus=overlapShare>=.55?'high':overlapShare>=.3?'watch':'good';
 
@@ -335,20 +347,20 @@
       dimensionCard('Fund balance',fundStatus,
         `${(largest.weight*100).toFixed(0)}% largest`,
         `${effectiveFunds.toFixed(1)} effective funds`),
-      dimensionCard('Provider balance',managerStatus,
+      dimensionCard('Provider concentration',managerStatus,
         topProvider?`${(topProvider[1]*100).toFixed(0)}% ${topProvider[0]}`:'—',
         `${providers.length} provider${providers.length===1?'':'s'}`),
-      dimensionCard('Asset mix',assetStatus,
-        `${(equity*100).toFixed(0)}% equity`,
-        `${(defensive*100).toFixed(0)}% defensive proxy`),
-      dimensionCard('Mandate overlap',overlapStatus,
-        overlapShare?`${(overlapShare*100).toFixed(0)}% similar`:'Low flagged overlap',
+      dimensionCard('Estimated equity exposure',assetStatus,
+        `~${(equity*100).toFixed(0)}% equity`,
+        `${equityBand.label} · ${(defensive*100).toFixed(0)}% defensive proxy`),
+      dimensionCard('Potential holdings overlap',overlapStatus,
+        overlapShare?`${(overlapShare*100).toFixed(0)}% similar mandates`:'Low flagged overlap',
         'Based on category and benchmark proxies')
     ].join('');
 
     if(!warnings.length){
       warnings.push(['good','No major concentration flags',
-        'The mandate-based screen did not identify a dominant fund, provider, asset class or duplicated benchmark. Underlying holdings may still overlap.']);
+        'The mandate-based screen did not identify a dominant fund, provider, asset-class exposure or duplicated benchmark. Actual underlying holdings may still overlap.']);
     }
     warningsEl.innerHTML=warnings.slice(0,6).map(w=>warningItem(...w)).join('');
 
@@ -356,7 +368,7 @@
       ?`${REGION_LABELS[topRegion[0]]||topRegion[0]} ${(topRegion[1]*100).toFixed(0)}% of estimated equity exposure`
       :'Geographic profile unavailable';
     coverageEl.innerHTML=`<span><strong>Model coverage:</strong> ${(knownWeight*100).toFixed(0)}% library-classified</span>
-      <span><strong>Largest regional proxy:</strong> ${topRegionText}</span>`;
+      <span><strong>Largest estimated geographic exposure:</strong> ${topRegionText}</span>`;
   }
 
   window.renderDiversificationAnalysis=renderDiversificationAnalysis;

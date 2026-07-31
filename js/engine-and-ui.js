@@ -189,6 +189,7 @@ function bindFunds(){
  portfolioTotal.textContent=gbp(actualTotal);
  updateAllocationWarning();
  drawPortfolioPie();
+ if(typeof renderDiversificationAnalysis==='function')renderDiversificationAnalysis();
 }
 equaliseBtn.textContent='Equalise funds';
 equaliseBtn.onclick=()=>{

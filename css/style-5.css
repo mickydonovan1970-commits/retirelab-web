@@ -619,3 +619,149 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 .fund-custom-panel{margin-top:14px;padding:15px;border:1px solid var(--line);border-radius:11px;background:var(--panel)}
 .assumption-fund-meta{display:block;margin-top:4px;color:var(--muted-2);font-size:9px;font-weight:500}
 @media(max-width:760px){.fund-library-grid{grid-template-columns:1fr}.fund-library-header,.fund-library-tools,.fund-library-category-heading{flex-direction:column;align-items:stretch}.fund-library-search-label{max-width:none}}
+
+
+/* Release 6.6 — Diversification check */
+.diversification-panel{
+  margin-top:16px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel-2);
+}
+.diversification-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:20px;
+}
+.diversification-header h3{margin:4px 0 3px}
+.diversification-score-wrap{
+  flex:0 0 auto;
+  min-width:150px;
+  text-align:right;
+}
+.diversification-score-label,
+.diversification-rating{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+#diversificationScore{
+  display:block;
+  margin:1px 0;
+  font:600 34px Inter,system-ui,sans-serif;
+}
+.diversification-rating[data-rating="strong"]{color:#8fbea1}
+.diversification-rating[data-rating="good"]{color:#89a9d8}
+.diversification-rating[data-rating="moderate"]{color:#b39a78}
+.diversification-rating[data-rating="concentrated"]{color:#c98b90}
+.diversification-dimensions{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:9px;
+  margin-top:15px;
+}
+.diversification-dimension{
+  min-width:0;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:9px;
+  background:var(--panel);
+}
+.diversification-dimension::before{
+  content:"";
+  display:block;
+  width:28px;
+  height:2px;
+  margin-bottom:9px;
+  border-radius:999px;
+  background:#5e6876;
+}
+.diversification-dimension.good::before{background:#5f9679}
+.diversification-dimension.watch::before{background:#a48861}
+.diversification-dimension.high::before{background:#9a565c}
+.diversification-dimension span,
+.diversification-dimension small{
+  display:block;
+  color:var(--muted);
+  font-size:11px;
+}
+.diversification-dimension strong{
+  display:block;
+  margin:5px 0 3px;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font:600 16px Inter,system-ui,sans-serif;
+}
+.diversification-warning-list{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-top:12px;
+}
+.diversification-warning{
+  display:grid;
+  grid-template-columns:25px minmax(0,1fr);
+  gap:9px;
+  padding:11px;
+  border:1px solid var(--line-soft);
+  border-radius:9px;
+  background:#101217;
+}
+.diversification-warning-icon{
+  display:grid;
+  place-items:center;
+  width:22px;
+  height:22px;
+  border-radius:50%;
+  color:#cfd5dd;
+  background:#252b33;
+  font:700 12px Inter,system-ui,sans-serif;
+}
+.diversification-warning.watch .diversification-warning-icon{
+  color:#d0b184;
+  background:rgba(164,136,97,.15);
+}
+.diversification-warning.high .diversification-warning-icon{
+  color:#d09599;
+  background:rgba(154,86,92,.16);
+}
+.diversification-warning.good .diversification-warning-icon{
+  color:#94c3a6;
+  background:rgba(95,150,121,.15);
+}
+.diversification-warning strong{font-size:12px}
+.diversification-warning p{
+  margin:3px 0 0;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.45;
+}
+.diversification-coverage{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px 18px;
+  margin-top:11px;
+  color:var(--muted);
+  font-size:11px;
+}
+.diversification-disclaimer{
+  margin:12px 0 0;
+  padding-top:11px;
+  border-top:1px solid var(--line-soft);
+  color:var(--muted-2);
+  font-size:10px;
+  line-height:1.45;
+}
+@media(max-width:900px){
+  .diversification-dimensions{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:680px){
+  .diversification-header{flex-direction:column}
+  .diversification-score-wrap{text-align:left}
+  .diversification-warning-list{grid-template-columns:1fr}
+}
+@media(max-width:460px){
+  .diversification-dimensions{grid-template-columns:1fr}
+}

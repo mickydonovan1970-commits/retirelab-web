@@ -124,18 +124,34 @@ function restoreRows(tableSelector,rows,addFn){
 function loadSimulationRecord(record){
   if(!record||!record.plan)return;
   const data=cloneSimple(record.plan);
-  Object.entries(data.basics||{}).forEach(([key,value])=>{
-    const element=document.getElementById(key);
-    if(element)element.value=value;
-  });
-  (data.funds||[]).forEach((fund,index)=>{if(fundDefs[index])Object.assign(fundDefs[index],fund)});
-  renderFunds();
-  syncSippToCore();
-  restoreRows('#incomeTable',data.incomes,addIncomeRow);
-  restoreRows('#expenseTable',data.expenses,addExpenseRow);
+
+  // Use the same complete restoration path as project loading. This is
+  // essential now that portfolios can contain any number of library or
+  // custom funds: index-by-index assignment cannot reconstruct a strategy.
+  if(typeof applyPlanSnapshot==='function')applyPlanSnapshot(data);
+  else{
+    Object.entries(data.basics||{}).forEach(([key,value])=>{
+      const element=document.getElementById(key);
+      if(element)element.value=value;
+    });
+    if(Array.isArray(data.funds)&&data.funds.length){
+      fundDefs.splice(0,fundDefs.length,...data.funds.map(fund=>({...fund})));
+    }
+    renderFunds();
+    syncSippToCore();
+    restoreRows('#incomeTable',data.incomes,addIncomeRow);
+    restoreRows('#expenseTable',data.expenses,addExpenseRow);
+  }
+
+  if(typeof renderFundLibrary==='function')renderFundLibrary();
+  if(typeof renderAssumptionsTable==='function')renderAssumptionsTable();
+  if(typeof updatePortfolioStatsV21==='function')updatePortfolioStatsV21();
+  if(typeof renderDiversificationCheck==='function')renderDiversificationCheck();
+
   loadedSimulationRecordId=record.id;
   renderStrategyLibrary();
-  openTab('dashboard');
+  if(typeof scheduleProjectSave==='function')scheduleProjectSave();
+  openTab('strategy');
   alert(`${simulationDisplayName(record)} has been loaded into RetireLab.`);
 }
 function renameSimulationRecord(record){

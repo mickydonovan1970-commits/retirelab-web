@@ -3,6 +3,8 @@
   let roadmap = null;
   let roadmapMode = 'median';
   let exampleNumber = 1;
+  let roadmapChartPoints = [];
+  let roadmapChartHoverIndex = null;
 
   function clampLocal(value,min,max){return Math.min(max,Math.max(min,value))}
 
@@ -233,6 +235,145 @@
     return 'sales from the most overweight fund first';
   }
 
+
+  function roadmapEventsAtAge(age){
+    const inp=getInputs();
+    const events=[];
+    inp.expenses.forEach(expense=>{
+      if(age+1e-9<expense.start||age>=expense.start+expense.term-1e-9)return;
+      const annual=expense.term<=1?expense.amount:expense.amount/expense.term;
+      events.push({type:'expenditure',label:expense.name||'Planned expenditure',amount:annual});
+    });
+    inp.incomes.forEach(income=>{
+      if(Math.abs(age-income.start)>.001)return;
+      events.push({type:'income',label:income.name||'Guaranteed income begins',amount:income.amount});
+    });
+    return events;
+  }
+
+  function chartCurrency(value){
+    if(!Number.isFinite(value))return '—';
+    return new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(value);
+  }
+
+  function drawRoadmapChart(){
+    const canvas=document.getElementById('roadmapWealthChart');
+    const wrap=document.getElementById('roadmapChartWrap');
+    const description=document.getElementById('roadmapJourneyDescription');
+    if(!canvas||!wrap||!description)return;
+    const rows=Array.isArray(roadmap)?roadmap:[];
+    description.textContent=roadmapMode==='median'
+      ?'Median Market — the smooth planning path used by the Roadmap.'
+      :`Example Lifetime ${exampleNumber} — this exact seeded market and inflation sequence.`;
+
+    const cssWidth=Math.max(320,wrap.clientWidth);
+    const cssHeight=Math.max(220,wrap.clientHeight);
+    const dpr=Math.max(1,window.devicePixelRatio||1);
+    canvas.width=Math.round(cssWidth*dpr);
+    canvas.height=Math.round(cssHeight*dpr);
+    const ctx=canvas.getContext('2d');
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,cssWidth,cssHeight);
+
+    if(!rows.length){
+      ctx.fillStyle='#7d8795';ctx.font='12px Inter, system-ui, sans-serif';ctx.textAlign='center';
+      ctx.fillText('Refresh the Roadmap to display the wealth journey.',cssWidth/2,cssHeight/2);
+      roadmapChartPoints=[];return;
+    }
+
+    const pad={left:61,right:20,top:24,bottom:42};
+    const plotW=cssWidth-pad.left-pad.right,plotH=cssHeight-pad.top-pad.bottom;
+    const values=rows.map(row=>Math.max(0,row.closingPortfolio));
+    const maximum=Math.max(...values,1),minimum=Math.min(...values,0),range=Math.max(1,maximum-minimum);
+    const yMax=maximum+range*.12,yMin=Math.max(0,minimum-range*.08),yRange=Math.max(1,yMax-yMin);
+    const xFor=index=>pad.left+(rows.length<=1?plotW/2:index/(rows.length-1)*plotW);
+    const yFor=value=>pad.top+(yMax-value)/yRange*plotH;
+
+    ctx.lineWidth=1;ctx.font='10px Inter, system-ui, sans-serif';ctx.textAlign='right';ctx.textBaseline='middle';
+    for(let tick=0;tick<=4;tick++){
+      const ratio=tick/4,y=pad.top+ratio*plotH,value=yMax-ratio*yRange;
+      ctx.strokeStyle='rgba(119,130,145,.16)';ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(cssWidth-pad.right,y);ctx.stroke();
+      ctx.fillStyle='#778291';ctx.fillText(`£${Math.round(value/1000)}k`,pad.left-8,y);
+    }
+    ctx.textAlign='center';ctx.textBaseline='top';
+    const labelEvery=rows.length>28?5:rows.length>18?3:rows.length>12?2:1;
+    rows.forEach((row,index)=>{
+      if(index%labelEvery!==0&&index!==rows.length-1)return;
+      ctx.fillStyle='#778291';ctx.fillText(String(row.age),xFor(index),cssHeight-pad.bottom+12);
+    });
+
+    const gradient=ctx.createLinearGradient(0,pad.top,0,pad.top+plotH);
+    gradient.addColorStop(0,'rgba(95,145,223,.20)');gradient.addColorStop(1,'rgba(95,145,223,0)');
+    ctx.beginPath();
+    rows.forEach((row,index)=>{const x=xFor(index),y=yFor(row.closingPortfolio);index===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.lineTo(xFor(rows.length-1),pad.top+plotH);ctx.lineTo(xFor(0),pad.top+plotH);ctx.closePath();
+    ctx.fillStyle=gradient;ctx.fill();
+
+    ctx.beginPath();
+    rows.forEach((row,index)=>{const x=xFor(index),y=yFor(row.closingPortfolio);index===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.strokeStyle='#6f9ce0';ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+
+    roadmapChartPoints=rows.map((row,index)=>({x:xFor(index),y:yFor(row.closingPortfolio),row,events:roadmapEventsAtAge(row.age)}));
+
+    roadmapChartPoints.forEach(point=>{
+      point.events.forEach((event,eventIndex)=>{
+        const markerY=Math.max(pad.top+7,point.y-12-eventIndex*12);
+        ctx.strokeStyle=event.type==='expenditure'?'rgba(179,154,120,.62)':'rgba(143,190,161,.62)';
+        ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(point.x,point.y);ctx.lineTo(point.x,markerY);ctx.stroke();
+        ctx.beginPath();ctx.arc(point.x,markerY,4.5,0,Math.PI*2);
+        ctx.fillStyle=event.type==='expenditure'?'#b39a78':'#8fbea1';ctx.fill();
+        ctx.strokeStyle='#101217';ctx.lineWidth=1.5;ctx.stroke();
+      });
+    });
+
+    const selectedIndex=rows.findIndex(row=>row.age===selectedAge);
+    if(selectedIndex>=0){
+      const point=roadmapChartPoints[selectedIndex];
+      ctx.strokeStyle='rgba(137,169,216,.32)';ctx.lineWidth=1;ctx.setLineDash([4,4]);
+      ctx.beginPath();ctx.moveTo(point.x,pad.top);ctx.lineTo(point.x,pad.top+plotH);ctx.stroke();ctx.setLineDash([]);
+      ctx.beginPath();ctx.arc(point.x,point.y,5.5,0,Math.PI*2);ctx.fillStyle='#89a9d8';ctx.fill();
+      ctx.strokeStyle='#dbe6f5';ctx.lineWidth=1.5;ctx.stroke();
+    }
+    if(Number.isInteger(roadmapChartHoverIndex)&&roadmapChartPoints[roadmapChartHoverIndex]){
+      const point=roadmapChartPoints[roadmapChartHoverIndex];
+      ctx.beginPath();ctx.arc(point.x,point.y,4.5,0,Math.PI*2);ctx.fillStyle='#dbe6f5';ctx.fill();
+      ctx.strokeStyle='#6f9ce0';ctx.lineWidth=2;ctx.stroke();
+    }
+  }
+
+  function chartPointFromEvent(event){
+    const canvas=document.getElementById('roadmapWealthChart');
+    if(!canvas||!roadmapChartPoints.length)return null;
+    const rect=canvas.getBoundingClientRect();
+    const clientX=event.touches?.[0]?.clientX??event.clientX;
+    const x=clientX-rect.left;
+    let best=null,bestDistance=Infinity;
+    roadmapChartPoints.forEach((point,index)=>{
+      const distance=Math.abs(point.x-x);
+      if(distance<bestDistance){bestDistance=distance;best={...point,index}}
+    });
+    return best;
+  }
+
+  function showRoadmapTooltip(point){
+    const tooltip=document.getElementById('roadmapChartTooltip');
+    const wrap=document.getElementById('roadmapChartWrap');
+    if(!tooltip||!wrap||!point)return;
+    const eventLines=point.events.map(event=>
+      `<span class="roadmap-tooltip-event">${event.type==='expenditure'?'Planned expenditure':'Income begins'}: ${event.label}${Number.isFinite(event.amount)?` · ${chartCurrency(event.amount)}`:''}</span>`
+    ).join('');
+    tooltip.innerHTML=`<strong>Age ${point.row.age}</strong><span class="roadmap-tooltip-value">${chartCurrency(point.row.closingPortfolio)}</span><span class="roadmap-tooltip-event">End-of-year wealth remaining</span>${eventLines}`;
+    tooltip.classList.remove('hidden');
+    const left=Math.min(wrap.clientWidth-tooltip.offsetWidth-8,Math.max(8,point.x+12));
+    const top=Math.min(wrap.clientHeight-tooltip.offsetHeight-8,Math.max(8,point.y-18));
+    tooltip.style.left=`${left}px`;tooltip.style.top=`${top}px`;
+  }
+
+  function hideRoadmapTooltip(){
+    document.getElementById('roadmapChartTooltip')?.classList.add('hidden');
+    roadmapChartHoverIndex=null;drawRoadmapChart();
+  }
+
   function setMode(mode){
     roadmapMode=mode;
     roadmapModeMedian.classList.toggle('active',mode==='median');
@@ -284,6 +425,7 @@
     arActionExplanation.textContent='The roadmap will decide how much comes from cash and CORE using the selected trigger and funding rules.';
     arFundSales.innerHTML='<div class="annual-empty">Refresh the roadmap to calculate fund sales.</div>';
     arSalesExplanation.textContent=`Suggested sales will follow the Strategy setting: ${saleMethodText()}.`;
+    drawRoadmapChart();
   }
 
   function signedGBP(value){
@@ -381,6 +523,7 @@
       });
     }
     arSalesExplanation.textContent=`Suggested sales follow the Strategy setting: ${saleMethodText()}.`;
+    drawRoadmapChart();
   }
 
   function refreshRoadmap(){
@@ -423,6 +566,23 @@
     if(roadmapMode!=='example')setMode('example');else refreshRoadmap();
   });
   refreshAnnualReview.addEventListener('click',refreshRoadmap);
+
+  const roadmapCanvas=document.getElementById('roadmapWealthChart');
+  roadmapCanvas?.addEventListener('mousemove',event=>{
+    const point=chartPointFromEvent(event);if(!point)return;
+    roadmapChartHoverIndex=point.index;drawRoadmapChart();showRoadmapTooltip(point);
+  });
+  roadmapCanvas?.addEventListener('mouseleave',hideRoadmapTooltip);
+  roadmapCanvas?.addEventListener('click',event=>{
+    const point=chartPointFromEvent(event);if(!point)return;
+    selectedAge=point.row.age;renderAgeStrip();renderAnnualReview();showRoadmapTooltip(point);
+  });
+  roadmapCanvas?.addEventListener('touchstart',event=>{
+    const point=chartPointFromEvent(event);if(!point)return;
+    event.preventDefault();roadmapChartHoverIndex=point.index;selectedAge=point.row.age;
+    renderAgeStrip();renderAnnualReview();showRoadmapTooltip(point);
+  },{passive:false});
+  window.addEventListener('resize',()=>requestAnimationFrame(drawRoadmapChart));
 
   document.addEventListener('input',event=>{
     if(event.target.closest('[data-panel="annual-review"]'))return;

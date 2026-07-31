@@ -1,19 +1,15 @@
-# RetireLab Release 6.6.2 — Exposure Clarity
+# RetireLab Release 6.7 — Roadmap Journey Chart
 
-## Fixed
-- Orbis Global Balanced is now modelled at approximately 78% equity exposure rather than 62%.
+## New
+- The Roadmap now includes a Wealth Remaining chart.
+- Median Market displays the current smooth median planning path.
+- Example Lifetime displays the exact selected seeded lifetime.
+- Planned large expenditures are marked on the chart.
+- Guaranteed-income and pension start dates are marked separately.
+- Hovering or tapping shows age, end-of-year wealth and event details.
+- Clicking or tapping a year selects that age in the Roadmap.
 
-## Improved
-- Asset-allocation wording now uses estimated exposure bands:
-  - 90%+ — Very equity-heavy
-  - 75–89% — Equity-heavy
-  - 50–74% — Mixed asset
-  - Below 50% — Defensive-leaning
-- “Equity allocation” is now “Estimated equity exposure”.
-- “Provider overlap” is now “Provider concentration”.
-- “Mandate overlap” is now “Potential holdings overlap”.
-- Geographic wording now makes clear that it is an estimated exposure proxy.
-- Warnings are more precise and avoid implying holdings-level certainty.
+## Interpretation
+The line shows end-of-year wealth remaining after that year's spending has been funded and the remaining CORE and Bridge Cash have experienced their modelled returns.
 
-## Important
-Diversification estimates remain based on fund mandates, categories and planning metadata rather than a full look-through of current underlying holdings.
+Event markers explain important planned changes; they are not additional deductions beyond those already included in the Roadmap calculation.

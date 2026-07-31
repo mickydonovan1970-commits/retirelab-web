@@ -1,15 +1,22 @@
-# RetireLab Release 6.7 — Roadmap Journey Chart
+# RetireLab Release 6.7.1 — Portfolio Statistics Refresh
 
-## New
-- The Roadmap now includes a Wealth Remaining chart.
-- Median Market displays the current smooth median planning path.
-- Example Lifetime displays the exact selected seeded lifetime.
-- Planned large expenditures are marked on the chart.
-- Guaranteed-income and pension start dates are marked separately.
-- Hovering or tapping shows age, end-of-year wealth and event details.
-- Clicking or tapping a year selects that age in the Roadmap.
+## Fixed
+The Strategy summary cards now recalculate whenever the active portfolio changes:
 
-## Interpretation
-The line shows end-of-year wealth remaining after that year's spending has been funded and the remaining CORE and Bridge Cash have experienced their modelled returns.
+- fund values
+- fund percentages
+- cash allocation
+- total SIPP value
+- Equalise funds
+- Normalise to 100%
+- funds added or removed
+- saved strategies loaded into RetireLab
 
-Event markers explain important planned changes; they are not additional deductions beyond those already included in the Roadmap calculation.
+The refreshed cards are:
+
+- Expected nominal return
+- Expected real return
+- Expected volatility
+- CORE allocation total
+
+This fixes stale figures remaining visible when switching between materially different portfolios.

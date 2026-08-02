@@ -20,6 +20,7 @@ function captureCurrentProject(){
   const p=currentProject();
   if(!p||!projectSystemReady)return;
   p.plan=safePlanSnapshot();
+  p.currency=typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP';
   p.history=cloneSimple(simulationHistoryRecords||[]);
   p.nextSimulationNumber=nextSimulationNumber||1;
   p.lastTab=currentTabName();
@@ -79,6 +80,7 @@ function loadProjectById(id){
   const p=projectStore.projects.find(x=>x.id===id);
   if(!p)return;
   projectStore.activeProjectId=id;
+  if(typeof setRetireLabCurrency==='function')setRetireLabCurrency(p.currency||'GBP',{save:false});
   applyPlanSnapshot(cloneSimple(p.plan));
   simulationHistoryRecords=cloneSimple(p.history||[]);
   nextSimulationNumber=p.nextSimulationNumber||(
@@ -101,6 +103,7 @@ function createProject(name,sourceProject=null){
     id,
     name:name||'Untitled project',
     plan:sourceProject?cloneSimple(sourceProject.plan):blankProjectPlan(),
+    currency:sourceProject?(sourceProject.currency||'GBP'):(typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP'),
     history:sourceProject?cloneSimple(sourceProject.history||[]):[],
     nextSimulationNumber:sourceProject?(sourceProject.nextSimulationNumber||1):1,
     lastTab:'dashboard',

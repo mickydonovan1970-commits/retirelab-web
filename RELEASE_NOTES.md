@@ -1,23 +1,18 @@
-# RetireLab Release 6.8.1 — Vanguard LifeStrategy Global
+# RetireLab Release 6.8.2 — Display Currency
 
 ## Added
-The complete Vanguard LifeStrategy Global range:
+A project-wide display currency selector on the Dashboard:
 
-- Vanguard LifeStrategy Global 20% Equity Fund
-- Vanguard LifeStrategy Global 40% Equity Fund
-- Vanguard LifeStrategy Global 60% Equity Fund
-- Vanguard LifeStrategy Global 80% Equity Fund
-- Vanguard LifeStrategy Global 100% Equity Fund
+- GBP (£)
+- USD ($)
+- EUR (€)
 
-## Fund Library
-- All five funds appear under Multi-Asset.
-- They are also included in Popular.
-- Each has editable RetireLab planning defaults for expected return, volatility and correlation.
-- The regular UK-tilted LifeStrategy range remains available separately.
+## Behaviour
+- Display formatting only: no exchange-rate conversion is performed.
+- Inputs and results are assumed to use the selected currency consistently.
+- Simulation maths, returns, volatility and percentages are unchanged.
+- Currency is saved separately with each project.
+- Loading an individual saved strategy does not change the project's currency.
 
-## Diversification Check
-- LifeStrategy Global funds are grouped separately from the regular LifeStrategy range.
-- Their geographic proxy reflects a global-market allocation with only a small UK weighting.
-- Equity exposure is read directly from the 20%, 40%, 60%, 80% or 100% fund mandate.
-
-Planning assumptions are editable estimates, not forecasts or statements of expected future performance.
+## Coverage
+The central money formatter updates monetary labels, values, result cards, saved strategies, comparisons, Roadmap instructions, charts and tooltips.

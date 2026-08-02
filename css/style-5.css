@@ -776,3 +776,14 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 .cash-policy-switch-row{padding-bottom:1px}
 .cash-policy-switch-row .form-check{margin:0}
 @media(max-width:520px){.cash-policy-inline{grid-template-columns:1fr}}
+
+
+/* Release 6.8.2 — project display currency */
+.currency-setting{grid-column:span 2}
+.currency-selector{display:inline-flex;gap:5px;padding:4px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2)}
+.currency-option{display:inline-flex;align-items:center;gap:5px;min-height:34px;padding:6px 11px;border:1px solid transparent;border-radius:7px;background:transparent;color:var(--muted);font:700 12px Inter,system-ui,sans-serif;cursor:pointer}
+.currency-option:hover{color:var(--text);background:var(--panel-3)}
+.currency-option.active{border-color:#4c6688;background:#1b2635;color:#a9c4e8}
+.currency-option span{font-size:10px;letter-spacing:.04em}
+.currency-setting .note{margin:6px 0 0}
+@media(max-width:620px){.currency-setting{grid-column:span 1}.currency-selector{width:100%}.currency-option{flex:1;justify-content:center}}

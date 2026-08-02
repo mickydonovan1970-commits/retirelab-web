@@ -13,7 +13,70 @@ function buildCorrelationMatrix(){
  }));
 }
 let suggestedAllocation=null;
-const gbp=x=>!isFinite(x)?'—':new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(x);
+const RETIRELAB_CURRENCIES={
+ GBP:{code:'GBP',symbol:'£',locale:'en-GB'},
+ USD:{code:'USD',symbol:'$',locale:'en-US'},
+ EUR:{code:'EUR',symbol:'€',locale:'en-IE'}
+};
+let retireLabCurrency='GBP';
+
+function currencyConfig(){return RETIRELAB_CURRENCIES[retireLabCurrency]||RETIRELAB_CURRENCIES.GBP}
+function money(x,maximumFractionDigits=0){
+ if(!isFinite(x))return '—';
+ const cfg=currencyConfig();
+ return new Intl.NumberFormat(cfg.locale,{
+  style:'currency',currency:cfg.code,currencyDisplay:'narrowSymbol',
+  maximumFractionDigits,minimumFractionDigits:0
+ }).format(x);
+}
+const gbp=(x,maximumFractionDigits=0)=>money(x,maximumFractionDigits);
+function currencySymbol(){return currencyConfig().symbol}
+
+function updateStaticCurrencyLabels(){
+ const symbol=currencySymbol();
+ const walker=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT);
+ const nodes=[];
+ while(walker.nextNode())nodes.push(walker.currentNode);
+ nodes.forEach(node=>{
+  const parent=node.parentElement;
+  if(!parent||parent.closest('script,style,#currencySelector'))return;
+  if(/[£$€]/.test(node.nodeValue))node.nodeValue=node.nodeValue.replace(/[£$€]/g,symbol);
+ });
+ document.querySelectorAll('input[type="text"][readonly]').forEach(input=>{
+  if(/[£$€]/.test(input.value))input.value=input.value.replace(/[£$€]/g,symbol);
+ });
+}
+function refreshCurrencyDisplay(){
+ updateStaticCurrencyLabels();
+ if(typeof renderFunds==='function')renderFunds();
+ if(typeof updateFundDisplay==='function')updateFundDisplay();
+ if(typeof renderDashboard==='function')renderDashboard();
+ if(typeof renderSimulationHistory==='function')renderSimulationHistory();
+ if(typeof renderComparison==='function')renderComparison();
+ if(typeof renderAnnualReview==='function')renderAnnualReview();
+ if(typeof drawRoadmapChart==='function')drawRoadmapChart();
+ if(typeof drawPortfolioPie==='function')drawPortfolioPie();
+ document.querySelectorAll('.currency-option').forEach(button=>{
+  const active=button.dataset.currency===retireLabCurrency;
+  button.classList.toggle('active',active);
+  button.setAttribute('aria-pressed',String(active));
+ });
+}
+function setRetireLabCurrency(code,{save=true}={}){
+ retireLabCurrency=RETIRELAB_CURRENCIES[code]?code:'GBP';
+ refreshCurrencyDisplay();
+ if(save&&typeof scheduleProjectSave==='function')scheduleProjectSave();
+}
+window.money=money;
+window.gbp=gbp;
+window.setRetireLabCurrency=setRetireLabCurrency;
+window.getRetireLabCurrency=()=>retireLabCurrency;
+
+document.addEventListener('click',event=>{
+ const button=event.target.closest('.currency-option');
+ if(button)setRetireLabCurrency(button.dataset.currency);
+});
+
 const pct=x=>(100*x).toFixed(1)+'%';
 const clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
 function totalCore(){return fundDefs.reduce((s,f)=>s+(+f.value||0),0)}

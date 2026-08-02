@@ -278,8 +278,7 @@
   }
 
   function chartCurrency(value){
-    if(!Number.isFinite(value))return '—';
-    return new Intl.NumberFormat('en-GB',{style:'currency',currency:'GBP',maximumFractionDigits:0}).format(value);
+    return typeof money==='function'?money(value):gbp(value);
   }
 
   function drawRoadmapChart(){

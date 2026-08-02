@@ -1,27 +1,23 @@
-# RetireLab Release 6.8 — Operational Retirement
+# RetireLab Release 6.8.1 — Vanguard LifeStrategy Global
 
-## Bridge Cash Management Policy
-- Set a Bridge Cash target as either a £ amount or a percentage of the remaining portfolio.
-- Enable or disable refilling after strong CORE years.
-- Cap each annual refill as either a £ amount or a percentage of CORE.
-- Set the minimum Bridge Cash reserve as either a £ amount or a percentage of the remaining portfolio.
-- A zero maximum refill means no annual cap.
-- Refill sales remain subject to the amount of CORE permitted by the selected strong-year rule.
+## Added
+The complete Vanguard LifeStrategy Global range:
 
-## Year Start Financial Actions
-Roadmap Step 3 now presents an operational checklist:
-- fund annual spending
-- refill or defer Bridge Cash
-- execute CORE sales
-- leave remaining CORE invested
+- Vanguard LifeStrategy Global 20% Equity Fund
+- Vanguard LifeStrategy Global 40% Equity Fund
+- Vanguard LifeStrategy Global 60% Equity Fund
+- Vanguard LifeStrategy Global 80% Equity Fund
+- Vanguard LifeStrategy Global 100% Equity Fund
 
-## Fund-level sale instructions
-- CORE sales are expandable.
-- Spending and Bridge Cash refill purposes are shown separately.
-- Individual fund instructions follow Equal, Proportional or Most Overweight First.
-- Fund sales reconcile to the total CORE sale.
+## Fund Library
+- All five funds appear under Multi-Asset.
+- They are also included in Popular.
+- Each has editable RetireLab planning defaults for expected return, volatility and correlation.
+- The regular UK-tilted LifeStrategy range remains available separately.
 
-## Engine and storage
-- Monte Carlo simulations now apply the Bridge Cash refill policy.
-- Saved projects and strategies retain all new £/% policy settings.
-- The annual strong-year review now evaluates the preceding return before resetting its review baseline.
+## Diversification Check
+- LifeStrategy Global funds are grouped separately from the regular LifeStrategy range.
+- Their geographic proxy reflects a global-market allocation with only a small UK weighting.
+- Equity exposure is read directly from the 20%, 40%, 60%, 80% or 100% fund mandate.
+
+Planning assumptions are editable estimates, not forecasts or statements of expected future performance.

@@ -29,6 +29,11 @@
     'lifestrategy60':'Vanguard LifeStrategy',
     'lifestrategy80':'Vanguard LifeStrategy',
     'lifestrategy100':'Vanguard LifeStrategy',
+    'lifestrategy-global20':'Vanguard LifeStrategy Global',
+    'lifestrategy-global40':'Vanguard LifeStrategy Global',
+    'lifestrategy-global60':'Vanguard LifeStrategy Global',
+    'lifestrategy-global80':'Vanguard LifeStrategy Global',
+    'lifestrategy-global100':'Vanguard LifeStrategy Global',
     'artemis-global-income':'Global equity income',
     'bny-global-income':'Global equity income',
     'fidelity-global-dividend':'Global equity income'
@@ -87,7 +92,10 @@
     if(category==='Emerging Markets')return {emerging:1};
     if(category==='Global Equity')return broadGlobal;
     if(category==='Income')return {us:.46,uk:.14,europe:.22,japan:.06,emerging:.07,other:.05};
-    if(category==='Multi-Asset')return {us:.48,uk:.18,europe:.14,japan:.06,emerging:.09,other:.05};
+    if(category==='Multi-Asset'){
+      if(name.includes('lifestrategy global'))return {us:.62,uk:.035,europe:.145,japan:.06,emerging:.10,other:.04};
+      return {us:.48,uk:.18,europe:.14,japan:.06,emerging:.09,other:.05};
+    }
     if(category==='Defensive / Flexible'){
       if(name.includes('orbis'))return {us:.38,uk:.11,europe:.20,japan:.10,emerging:.11,other:.10};
       return {us:.35,uk:.25,europe:.20,japan:.05,emerging:.05,other:.10};

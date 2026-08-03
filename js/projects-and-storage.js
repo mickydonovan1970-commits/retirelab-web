@@ -74,6 +74,7 @@ function applyPlanSnapshot(d){
   (d.incomes||[]).forEach(addIncomeRow);
   document.querySelector('#expenseTable tbody').innerHTML='';
   (d.expenses||[]).forEach(addExpenseRow);
+  if(window.applyAccumulationState)window.applyAccumulationState(d.accumulation);
 }
 function loadProjectById(id){
   if(projectSystemReady)captureCurrentProject();

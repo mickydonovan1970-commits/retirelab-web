@@ -4,20 +4,20 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 6.8.2</title>
-<link href="css/style-1.css?v=6.8.2" rel="stylesheet"/>
-<link href="css/style-2.css?v=6.8.2" rel="stylesheet"/>
-<link href="css/style-3.css?v=6.8.2" rel="stylesheet"/>
-<link href="css/style-4.css?v=6.8.2" rel="stylesheet"/>
-<link href="css/style-5.css?v=6.8.2" rel="stylesheet"/><link href="css/annual-review.css?v=6.8.2" rel="stylesheet"/></head>
+<title>RetireLab 6.9</title>
+<link href="css/style-1.css?v=6.9" rel="stylesheet"/>
+<link href="css/style-2.css?v=6.9" rel="stylesheet"/>
+<link href="css/style-3.css?v=6.9" rel="stylesheet"/>
+<link href="css/style-4.css?v=6.9" rel="stylesheet"/>
+<link href="css/style-5.css?v=6.9" rel="stylesheet"/><link href="css/annual-review.css?v=6.9" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.8.2</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 6.9</p></header><nav aria-label="RetireLab sections" class="tabbar"><button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button><button class="tabbtn accumulation-tab-button" data-tab="accumulation" type="button">Accumulation</button><button class="tabbtn" data-tab="income" type="button">Income</button><button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button><button class="tabbtn" data-tab="strategy" type="button">Strategy</button><button class="tabbtn" data-tab="results" type="button">Results</button><button class="tabbtn" data-tab="annual-review" type="button">Roadmap</button><button class="tabbtn" data-tab="comparison" type="button">Comparison</button><button class="tabbtn" data-tab="optimiser" type="button">Optimiser</button><button class="tabbtn" data-tab="assumptions" type="button">Assumptions</button></nav>
 <main><div class="grid"><div class="tabpanel active" data-panel="dashboard">
 <section class="dashboard-summary" id="dashboardSummary">
 <div class="summary-item"><span class="summary-label">Current project</span><span class="summary-value" id="dashProject">Main Retirement Plan</span></div>
 <div class="summary-item"><span class="summary-label">Objective</span><span class="summary-value" id="dashObjective">£120,000 at age 69</span></div>
 <div class="summary-item"><span class="summary-label">Last objective result</span><span class="summary-value" id="dashLastResult">No simulation yet</span></div>
-<div class="summary-item"><span class="summary-label">Auto-save</span><span class="summary-value" id="dashSaveStatus">On</span></div>
+<div class="summary-item accumulation-summary-item"><span class="summary-label">Projected retirement pot</span><span class="summary-value" id="dashAccumulationPot">Not calculated</span></div><div class="summary-item"><span class="summary-label">Auto-save</span><span class="summary-value" id="dashSaveStatus">On</span></div>
 </section><section class="card full" id="projectManagerCard">
 <h2>Projects</h2>
 <div class="fields">
@@ -51,6 +51,7 @@
 <button class="currency-option" data-currency="EUR" type="button">€ <span>EUR</span></button>
 </div><p class="note">Display only — no currency conversion is performed.</p></div>
 <div><label>End age</label><input id="endAge" max="110" min="50" type="number" value="90"/></div>
+<div class="accumulation-dashboard-setting"><label class="form-check form-switch"><input checked="" class="form-check-input" id="calculateAccumulation" type="checkbox"/><span class="form-check-label">Calculate accumulation</span></label><p class="note">Model the period before retirement using a separate accumulation portfolio.</p></div>
 <div><label>Annual spending need (£, today's money)</label><input id="annualSpending" min="0" step="500" type="number" value="40000"/></div>
 <div><label>Spending indexation</label><select id="spendingIndex"><option selected="" value="inflation">Inflation-linked</option><option value="fixed">Fixed nominal £</option></select></div>
 <div><label>Simulations</label><select id="simCount"><option value="5000">5,000</option><option selected="" value="10000">10,000</option><option value="25000">25,000</option><option value="50000">50,000</option></select></div>
@@ -72,7 +73,40 @@
 </div>
 <div class="run-status">Ready to run</div>
 </div>
-</section></div><div class="tabpanel" data-panel="income"><section class="card full">
+</section></div><div class="tabpanel accumulation-panel" data-panel="accumulation">
+<section class="accumulation-hero">
+<div><span class="accumulation-eyebrow">Stage 1 · Building wealth</span><h2>Accumulation</h2><p>Project how your current pension and regular investment might grow before retirement. This portfolio is independent of your retirement CORE strategy.</p></div>
+<div class="accumulation-phase-badge">BUILD</div>
+</section>
+<div class="accumulation-disabled-overlay hidden" id="accumulationDisabled"><div><h3>Accumulation calculation is switched off</h3><p>Enable <strong>Calculate accumulation</strong> on the Dashboard to use this stage.</p><button class="primary" data-goto="dashboard" type="button">Open Dashboard</button></div></div>
+<section class="card full accumulation-card">
+<h2>Current position and contributions</h2>
+<div class="fields accumulation-fields">
+<div><label>Current age</label><input id="accumulationCurrentAge" min="18" max="89" type="number" value="56"/></div>
+<div><label>Planned retirement age</label><input id="accumulationRetirementAge" min="19" max="90" type="number" value="59"/></div>
+<div><label>Current pension value</label><input id="accumulationCurrentPot" min="0" step="1000" type="number" value="150000"/></div>
+<div><label>Regular monthly pension investment</label><input id="accumulationMonthlyContribution" min="0" step="50" type="number" value="1000"/><p class="note">Include the total amount that reaches your pension each month, including your own contributions, employer contributions and any tax relief or rebates.</p></div>
+<div><label>Continue investing until age</label><input id="accumulationContributionEndAge" min="18" max="90" type="number" value="59"/></div>
+<div><label class="form-check form-switch"><input class="form-check-input" id="accumulationIndexContributions" type="checkbox"/><span class="form-check-label">Increase investment with inflation</span></label><p class="note">Uses the inflation assumption from the Assumptions tab.</p></div>
+</div>
+</section>
+<section class="card full accumulation-card">
+<div class="accumulation-section-heading"><div><h2>Accumulation portfolio</h2><p class="note">Separate from the retirement portfolio. Allocations should total 100%.</p></div><div class="toolbar"><button class="primary small" id="openAccumulationLibrary" type="button">Fund Library</button><button class="secondary small" id="normaliseAccumulation" type="button">Normalise to 100%</button></div></div>
+<div class="table-wrap"><table class="accumulation-fund-table" id="accumulationFundTable"><thead><tr><th>Fund</th><th>Allocation</th><th>Expected return</th><th>Volatility</th><th>Correlation proxy</th><th></th></tr></thead><tbody></tbody><tfoot><tr><th>Total</th><th id="accumulationAllocationTotal">100.0%</th><th colspan="4"></th></tr></tfoot></table></div>
+<div class="fund-library hidden accumulation-library" id="accumulationFundLibrary"><div class="fund-library-header"><div><h3>Accumulation Fund Library</h3><p>Choose funds for the pre-retirement portfolio.</p></div><button class="ghost small" id="closeAccumulationLibrary" type="button">Close</button></div><div class="fund-library-search-row"><input id="accumulationLibrarySearch" placeholder="Search funds, providers or categories" type="search"/><button class="secondary small" id="showAccumulationCustomFund" type="button">Add custom fund</button></div><div class="fund-library-tree" id="accumulationLibraryTree"></div><div class="fund-builder hidden" id="accumulationFundBuilder"><h4>Custom accumulation fund</h4><div class="fields"><div><label>Fund name</label><input id="accumulationNewFundName" type="text"/></div><div><label>Expected return (%)</label><input id="accumulationNewFundReturn" type="number" step="0.1" value="7.0"/></div><div><label>Volatility (%)</label><input id="accumulationNewFundVolatility" type="number" step="0.1" value="15.0"/></div></div><div class="toolbar"><button class="primary small" id="confirmAccumulationFund" type="button">Add fund</button><button class="ghost small" id="cancelAccumulationFund" type="button">Cancel</button></div></div></div>
+</section>
+<section class="card full accumulation-card accumulation-results-card">
+<div class="accumulation-section-heading"><div><h2>Projected retirement pot</h2><p class="note">Run a separate Monte Carlo projection from the current age to the planned retirement age.</p></div><button class="accumulation-run-button" id="runAccumulation" type="button">Run accumulation projection</button></div>
+<div class="accumulation-result-grid">
+<article><span>Conservative</span><strong id="accumulationP10">—</strong><small>10th percentile</small></article>
+<article class="median"><span>Expected</span><strong id="accumulationMedian">—</strong><small>Median · half finish above</small></article>
+<article><span>Optimistic</span><strong id="accumulationP90">—</strong><small>90th percentile</small></article>
+</div>
+<div class="accumulation-chart-wrap"><canvas id="accumulationChart" aria-label="Accumulation projection chart"></canvas><div class="accumulation-chart-tooltip hidden" id="accumulationChartTooltip"></div></div>
+<div class="accumulation-breakdown" id="accumulationBreakdown"><span>Total invested: —</span><span>Median investment growth: —</span></div>
+<p class="note">The Expected value is the median of all simulated paths. Half of the simulations finish above it and half below it.</p>
+</section>
+</div><div class="tabpanel" data-panel="income"><section class="card full">
 <h2>Income</h2>
 <div class="table-wrap"><table id="incomeTable"><thead><tr><th>Name</th><th>Annual net income (£)</th><th>Amount basis</th><th>Start age</th><th>End age</th><th>Annual indexation (%)</th><th></th></tr></thead><tbody></tbody></table></div>
 <div class="toolbar"><button class="secondary small" id="addIncome">Add income</button></div>
@@ -114,7 +148,11 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </div>
 <p class="note">Uses the current entries from every tab and opens the relevant results page automatically.</p>
 </section>
-</div><div class="tabpanel" data-panel="strategy"><section class="card full" id="portfolioStructureCard">
+</div><div class="tabpanel" data-panel="strategy"><section class="card full retirement-handoff-card" id="retirementHandoffCard">
+<div class="retirement-handoff-phase"><span>Stage 2 · Managing wealth</span><strong>RETIRE</strong></div>
+<div class="retirement-handoff-content"><div><h2>Retirement starting portfolio</h2><p class="note">Choose whether drawdown begins with the median accumulation result or a retirement pot you enter yourself.</p></div>
+<div class="retirement-handoff-controls"><label class="form-check form-switch"><input checked="" class="form-check-input" id="useAccumulationMedian" type="checkbox"/><span class="form-check-label">Use median pot from accumulation</span></label><div><label>Retirement starting pot</label><input id="retirementPotOverride" min="0" step="1000" type="number" value="210000"/></div><div class="retirement-handoff-value"><span>Applied to Strategy</span><strong id="retirementPotApplied">£210,000</strong></div></div></div>
+</section><section class="card full" id="portfolioStructureCard">
 <h2>Portfolio structure</h2>
 <div class="portfolio-structure-grid">
 <div class="portfolio-structure-controls">
@@ -603,7 +641,7 @@ It does not model tax, trading costs, fund fees separately, intra-year tax timin
 The annual CORE return used by the rule is the investment return before withdrawals.
 </p>
 </section></div></div></main>
-<script src="js/engine-and-ui.js?v=6.8.2"></script><script src="js/fund-library.js?v=6.8.2"></script><script src="js/diversification.js?v=6.8.2"></script>
+<script src="js/engine-and-ui.js?v=6.9"></script><script src="js/fund-library.js?v=6.9"></script><script src="js/accumulation.js?v=6.9"></script><script src="js/diversification.js?v=6.9"></script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
 <button class="close small" id="closeFundDrawer" type="button">Close</button>
@@ -626,14 +664,14 @@ The annual CORE return used by the rule is the investment return before withdraw
 <p class="note" id="drawerSources"></p>
 <div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
 </aside>
-<script src="js/fund-research.js?v=6.8.2"></script>
-<script src="js/quick-actions.js?v=6.8.2"></script>
-<script src="js/simulation-history.js?v=6.8.2"></script>
-<script src="js/comparison.js?v=6.8.2"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.8.2 · Display Currency</footer>
-<script src="js/projects-and-storage.js?v=6.8.2"></script>
-<script src="js/dashboard.js?v=6.8.2"></script>
-<script src="js/results-feedback.js?v=6.8.2"></script>
+<script src="js/fund-research.js?v=6.9"></script>
+<script src="js/quick-actions.js?v=6.9"></script>
+<script src="js/simulation-history.js?v=6.9"></script>
+<script src="js/comparison.js?v=6.9"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 6.9 · Complete Retirement Journey</footer>
+<script src="js/projects-and-storage.js?v=6.9"></script>
+<script src="js/dashboard.js?v=6.9"></script>
+<script src="js/results-feedback.js?v=6.9"></script>
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -646,6 +684,6 @@ The annual CORE return used by the rule is the investment return before withdraw
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-<script src="js/interactive-charts.js?v=6.8.2"></script>
-<script src="js/annual-review.js?v=6.8.2"></script></body>
+<script src="js/interactive-charts.js?v=6.9"></script>
+<script src="js/annual-review.js?v=6.9"></script></body>
 </html>

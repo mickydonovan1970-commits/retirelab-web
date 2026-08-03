@@ -56,6 +56,7 @@ function refreshCurrencyDisplay(){
  if(typeof renderAnnualReview==='function')renderAnnualReview();
  if(typeof drawRoadmapChart==='function')drawRoadmapChart();
  if(typeof drawPortfolioPie==='function')drawPortfolioPie();
+ if(typeof window.renderAccumulationCurrency==='function')window.renderAccumulationCurrency();
  document.querySelectorAll('.currency-option').forEach(button=>{
   const active=button.dataset.currency===retireLabCurrency;
   button.classList.toggle('active',active);
@@ -843,10 +844,10 @@ function serialise(){return{
  cashTargetMode:cashTargetMode.value,cashTargetValue:cashTargetValue.value,cashRefillEnabled:cashRefillEnabled.checked,
  cashRefillMaxMode:cashRefillMaxMode.value,cashRefillMaxValue:cashRefillMaxValue.value,
  cashFloorMode:cashFloorMode.value,cashFloor:cashFloor.value},
- funds:fundDefs,incomes:incomes(),expenses:expenses()
+ funds:fundDefs,incomes:incomes(),expenses:expenses(),accumulation:window.captureAccumulationState?window.captureAccumulationState():null
 }}
 saveBtn.onclick=()=>{localStorage.setItem('retirelab-simple-v2',JSON.stringify(serialise()));alert('Saved on this device.')};
-loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow)};
+loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow);if(window.applyAccumulationState)window.applyAccumulationState(d.accumulation)};
 resetBtn.onclick=()=>{if(confirm('Reset all inputs?')){localStorage.removeItem('retirelab-simple-v2');location.reload()}};
 function currentEnteredFundPercentages(){
  const inputs=[...document.querySelectorAll('.fund-pct')];

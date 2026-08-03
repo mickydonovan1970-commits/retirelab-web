@@ -24,6 +24,7 @@ function applyAccumulationState(state){
  if(Array.isArray(state.funds)&&state.funds.length)accumulationFunds.splice(0,accumulationFunds.length,...state.funds.map(f=>({...f,allocation:Number(f.allocation)||0,ret:Number(f.ret)||0,vol:Math.max(0,Number(f.vol)||0),corr:Math.max(0,Math.min(.99,Number(f.corr)||.8))})));
  accumulationResult=state.result||null;
  renderAll();
+ toggleEnabled();
 }
 window.applyAccumulationState=applyAccumulationState;
 window.getAccumulationResult=()=>accumulationResult;
@@ -110,11 +111,27 @@ function applyHandoff(){
  $('retirementPotApplied').textContent=money(value);
  if($('sippTotal')&&value>=0){$('sippTotal').value=Math.round(value);if($('accumulationRetirementAge'))$('currentAge').value=$('accumulationRetirementAge').value;syncSippToCore?.()}
 }
-function toggleEnabled(){const on=enabled();$('accumulationDisabled')?.classList.toggle('hidden',on);document.querySelector('.accumulation-tab-button')?.classList.toggle('tab-disabled',!on);if(!on&&document.querySelector('.tabpanel[data-panel="accumulation"]')?.classList.contains('active'))openTab('dashboard');applyHandoff();scheduleProjectSave?.()}
+function toggleEnabled(){
+ const on=enabled();
+ const overlay=$('accumulationDisabled');
+ if(overlay){
+   overlay.classList.toggle('hidden',on);
+   overlay.setAttribute('aria-hidden',String(on));
+ }
+ const tab=document.querySelector('.accumulation-tab-button');
+ if(tab){
+   tab.classList.toggle('tab-disabled',!on);
+   tab.setAttribute('aria-disabled',String(!on));
+ }
+ if(!on&&document.querySelector('.tabpanel[data-panel="accumulation"]')?.classList.contains('active'))openTab('dashboard');
+ applyHandoff();
+ scheduleProjectSave?.();
+}
 function invalidate(){accumulationResult=null;renderResults();scheduleProjectSave?.()}
 function renderAll(){renderFunds();renderLibrary();renderResults();toggleEnabled();applyHandoff()}
 
-$('openAccumulationLibrary')?.addEventListener('click',()=>{$('accumulationFundLibrary').classList.remove('hidden');renderLibrary();$('accumulationFundLibrary').scrollIntoView({behavior:'smooth'})});$('closeAccumulationLibrary')?.addEventListener('click',()=>$('accumulationFundLibrary').classList.add('hidden'));$('accumulationLibrarySearch')?.addEventListener('input',renderLibrary);$('normaliseAccumulation')?.addEventListener('click',normalise);$('runAccumulation')?.addEventListener('click',runProjection);$('calculateAccumulation')?.addEventListener('change',toggleEnabled);$('useAccumulationMedian')?.addEventListener('change',()=>{applyHandoff();scheduleProjectSave?.()});$('retirementPotOverride')?.addEventListener('input',()=>{applyHandoff();scheduleProjectSave?.()});
+$('openAccumulationLibrary')?.addEventListener('click',()=>{$('accumulationFundLibrary').classList.remove('hidden');renderLibrary();$('accumulationFundLibrary').scrollIntoView({behavior:'smooth'})});$('closeAccumulationLibrary')?.addEventListener('click',()=>$('accumulationFundLibrary').classList.add('hidden'));$('accumulationLibrarySearch')?.addEventListener('input',renderLibrary);$('normaliseAccumulation')?.addEventListener('click',normalise);$('runAccumulation')?.addEventListener('click',runProjection);$('calculateAccumulation')?.addEventListener('change',toggleEnabled);
+$('calculateAccumulation')?.addEventListener('input',toggleEnabled);$('useAccumulationMedian')?.addEventListener('change',()=>{applyHandoff();scheduleProjectSave?.()});$('retirementPotOverride')?.addEventListener('input',()=>{applyHandoff();scheduleProjectSave?.()});
 ['accumulationCurrentAge','accumulationRetirementAge','accumulationCurrentPot','accumulationMonthlyContribution','accumulationContributionEndAge','accumulationIndexContributions'].forEach(id=>$(id)?.addEventListener('input',invalidate));
 $('showAccumulationCustomFund')?.addEventListener('click',()=>$('accumulationFundBuilder').classList.remove('hidden'));$('cancelAccumulationFund')?.addEventListener('click',()=>$('accumulationFundBuilder').classList.add('hidden'));$('confirmAccumulationFund')?.addEventListener('click',()=>{const name=$('accumulationNewFundName').value.trim();if(!name){alert('Enter a fund name.');return}accumulationFunds.push({id:'acc-custom-'+Date.now(),name,allocation:0,ret:num('accumulationNewFundReturn'),vol:num('accumulationNewFundVolatility'),corr:.8,category:'Custom'});$('accumulationFundBuilder').classList.add('hidden');renderFunds();invalidate()});
 window.addEventListener('resize',()=>requestAnimationFrame(drawChart));

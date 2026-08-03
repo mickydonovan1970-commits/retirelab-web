@@ -803,3 +803,9 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 .retirement-handoff-card{border-color:#365849!important;background:linear-gradient(135deg,#141d19,#171d1a)!important}.retirement-handoff-phase{display:flex;justify-content:space-between;color:#86b49a;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.retirement-handoff-content{display:grid;grid-template-columns:minmax(0,1fr) minmax(360px,1fr);gap:20px;align-items:center;margin-top:10px}.retirement-handoff-content h2{margin-bottom:3px}.retirement-handoff-controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end}.retirement-handoff-controls>.form-check{grid-column:1/-1}.retirement-handoff-value{padding:9px 11px;border:1px solid #355849;border-radius:8px;background:#15241b}.retirement-handoff-value span{display:block;color:#7fa08b;font-size:10px;text-transform:uppercase}.retirement-handoff-value strong{display:block;margin-top:4px;color:#9bceb0;font-size:17px}
 @media(max-width:850px){.accumulation-fields{grid-template-columns:repeat(2,minmax(0,1fr))}.retirement-handoff-content{grid-template-columns:1fr}.retirement-handoff-controls{grid-template-columns:1fr 1fr}}
 @media(max-width:600px){.accumulation-hero{align-items:flex-start}.accumulation-phase-badge{width:55px;height:55px;font-size:11px}.accumulation-fields,.accumulation-result-grid,.retirement-handoff-controls{grid-template-columns:1fr}.accumulation-section-heading{flex-direction:column}.accumulation-chart-wrap{height:260px}.accumulation-dashboard-setting{grid-column:span 1}}
+
+
+/* Release 6.9.1 — accumulation availability fix */
+.accumulation-disabled-overlay.hidden{display:none!important}
+.accumulation-tab-button.tab-disabled{opacity:.5}
+.accumulation-tab-button:not(.tab-disabled){opacity:1}

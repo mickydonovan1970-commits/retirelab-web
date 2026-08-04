@@ -1,19 +1,21 @@
-# RetireLab Release 7.1 — Maximum Expenditure Optimiser
+# RetireLab Release 7.1.1 — Unfunded Plan Balance
 
-## Annual expenditure modes
-- Enter manually
-- Maximise for objective success
-- Maximise for plan success
+## Engine
+- Investment funds and Bridge Cash remain floored at zero.
+- Any spending that cannot be funded is accumulated separately as an unfunded plan balance.
+- Later unmet spending increases that balance.
+- Later income surpluses repay the unfunded balance before rebuilding cash.
+- Market returns cannot make a depleted plan appear to recover.
 
-## Optimisation
-- Editable required-success target, defaulting to 95%.
-- Uses the selected Faster, Standard or Slower simulation population.
-- Every spending trial uses the same full set of simulated market and inflation paths.
-- Binary search finds the highest £50 increment meeting the target.
-- The result automatically populates Annual expenditure.
-- Final verification reports the achieved success rate.
-- Progress feedback explains the current search stage.
-- Material plan changes mark the prior optimisation as out of date.
+## Results charts
+- Wealth percentiles can now continue below zero.
+- Negative sections are drawn in red.
+- A dashed red zero/depletion line is shown.
+- Negative values represent cumulative unmet expenditure, not negative fund holdings.
 
-## Important
-The fixed-path approach means “the same thousands of simulated lifetimes”, not one example lifetime. It isolates the effect of changing expenditure while retaining the full Monte Carlo distribution.
+## Roadmap
+- Median Market and Example Lifetime charts use the same signed plan-balance logic.
+- The line turns red below zero.
+- Tooltips distinguish remaining investments from cumulative unfunded expenditure.
+- Year Start Financial Actions explicitly show any expenditure that cannot be funded.
+- Step 4 adds an Unfunded plan balance row when required.

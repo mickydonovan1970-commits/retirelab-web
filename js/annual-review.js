@@ -133,7 +133,13 @@
       const spend=spendingForYear(inp,age,inflationIndex);
       const income=incomeForYear(inp,age,inflationIndex,incomeStartFactors);
       let need=Math.max(0,spend.total-income);
-      const surplus=Math.max(0,income-spend.total);
+      let surplus=Math.max(0,income-spend.total);
+      const openingUnfunded=cumulativeUnfunded;
+      if(surplus>0&&cumulativeUnfunded>0){
+        const arrearsPaid=Math.min(surplus,cumulativeUnfunded);
+        cumulativeUnfunded-=arrearsPaid;
+        surplus-=arrearsPaid;
+      }
       cash+=surplus;
 
       const isGood=priorReturn>inp.trigger;
@@ -182,8 +188,9 @@
       }
 
       const unfunded=Math.max(0,need);
+      cumulativeUnfunded+=unfunded;
 
-      if(isGood&&inp.cashRefillEnabled&&unfunded<=.005){
+      if(isGood&&inp.cashRefillEnabled&&unfunded<=.005&&cumulativeUnfunded<=.005){
         const coreNow=funds.reduce((sum,value)=>sum+value,0);
         const remainingPortfolio=coreNow+cash;
         const target=bridgeCashTarget(inp,remainingPortfolio);
@@ -234,6 +241,9 @@
         closingCash:cash,
         closingCore,
         closingPortfolio:cash+closingCore,
+        openingUnfunded,
+        cumulativeUnfunded,
+        planBalance:cash+closingCore-cumulativeUnfunded,
         surplus,
         annualGain,
         cashInterest,
@@ -308,9 +318,9 @@
 
     const pad={left:61,right:20,top:24,bottom:42};
     const plotW=cssWidth-pad.left-pad.right,plotH=cssHeight-pad.top-pad.bottom;
-    const values=rows.map(row=>Math.max(0,row.closingPortfolio));
+    const values=rows.map(row=>row.planBalance);
     const maximum=Math.max(...values,1),minimum=Math.min(...values,0),range=Math.max(1,maximum-minimum);
-    const yMax=maximum+range*.12,yMin=Math.max(0,minimum-range*.08),yRange=Math.max(1,yMax-yMin);
+    const yMax=maximum+range*.12,yMin=minimum-range*.08,yRange=Math.max(1,yMax-yMin);
     const xFor=index=>pad.left+(rows.length<=1?plotW/2:index/(rows.length-1)*plotW);
     const yFor=value=>pad.top+(yMax-value)/yRange*plotH;
 
@@ -318,8 +328,11 @@
     for(let tick=0;tick<=4;tick++){
       const ratio=tick/4,y=pad.top+ratio*plotH,value=yMax-ratio*yRange;
       ctx.strokeStyle='rgba(119,130,145,.16)';ctx.beginPath();ctx.moveTo(pad.left,y);ctx.lineTo(cssWidth-pad.right,y);ctx.stroke();
-      ctx.fillStyle='#778291';ctx.fillText(`£${Math.round(value/1000)}k`,pad.left-8,y);
+      ctx.fillStyle=value<0?'#d45f68':'#778291';ctx.fillText(`${value<0?'-':''}£${Math.round(Math.abs(value)/1000)}k`,pad.left-8,y);
     }
+    const zeroY=yFor(0);
+    ctx.save();ctx.strokeStyle='rgba(190,93,101,.72)';ctx.lineWidth=1.3;ctx.setLineDash([6,5]);
+    ctx.beginPath();ctx.moveTo(pad.left,zeroY);ctx.lineTo(cssWidth-pad.right,zeroY);ctx.stroke();ctx.restore();
     ctx.textAlign='center';ctx.textBaseline='top';
     const labelEvery=rows.length>28?5:rows.length>18?3:rows.length>12?2:1;
     rows.forEach((row,index)=>{
@@ -330,15 +343,18 @@
     const gradient=ctx.createLinearGradient(0,pad.top,0,pad.top+plotH);
     gradient.addColorStop(0,'rgba(95,145,223,.20)');gradient.addColorStop(1,'rgba(95,145,223,0)');
     ctx.beginPath();
-    rows.forEach((row,index)=>{const x=xFor(index),y=yFor(row.closingPortfolio);index===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
-    ctx.lineTo(xFor(rows.length-1),pad.top+plotH);ctx.lineTo(xFor(0),pad.top+plotH);ctx.closePath();
+    rows.forEach((row,index)=>{const x=xFor(index),y=yFor(Math.max(0,row.planBalance));index===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
+    ctx.lineTo(xFor(rows.length-1),zeroY);ctx.lineTo(xFor(0),zeroY);ctx.closePath();
     ctx.fillStyle=gradient;ctx.fill();
 
-    ctx.beginPath();
-    rows.forEach((row,index)=>{const x=xFor(index),y=yFor(row.closingPortfolio);index===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});
-    ctx.strokeStyle='#6f9ce0';ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';ctx.stroke();
+    ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';
+    for(let index=1;index<rows.length;index++){
+      const a=rows[index-1],b=rows[index];
+      ctx.strokeStyle=(a.planBalance<0||b.planBalance<0)?'#d45f68':'#6f9ce0';
+      ctx.beginPath();ctx.moveTo(xFor(index-1),yFor(a.planBalance));ctx.lineTo(xFor(index),yFor(b.planBalance));ctx.stroke();
+    }
 
-    roadmapChartPoints=rows.map((row,index)=>({x:xFor(index),y:yFor(row.closingPortfolio),row,events:roadmapEventsAtAge(row.age)}));
+    roadmapChartPoints=rows.map((row,index)=>({x:xFor(index),y:yFor(row.planBalance),row,events:roadmapEventsAtAge(row.age)}));
 
     roadmapChartPoints.forEach(point=>{
       point.events.forEach((event,eventIndex)=>{
@@ -387,7 +403,10 @@
     const eventLines=point.events.map(event=>
       `<span class="roadmap-tooltip-event">${event.type==='expenditure'?'Planned expenditure':'Income begins'}: ${event.label}${Number.isFinite(event.amount)?` · ${chartCurrency(event.amount)}`:''}</span>`
     ).join('');
-    tooltip.innerHTML=`<strong>Age ${point.row.age}</strong><span class="roadmap-tooltip-value">${chartCurrency(point.row.closingPortfolio)}</span><span class="roadmap-tooltip-event">End-of-year wealth remaining</span>${eventLines}`;
+    const shortfallLine=point.row.cumulativeUnfunded>0
+      ?`<span class="roadmap-tooltip-event roadmap-tooltip-shortfall">Cumulative unfunded expenditure: ${chartCurrency(point.row.cumulativeUnfunded)}</span>`
+      :'';
+    tooltip.innerHTML=`<strong>Age ${point.row.age}</strong><span class="roadmap-tooltip-value">${chartCurrency(point.row.planBalance)}</span><span class="roadmap-tooltip-event">Plan balance shown on chart</span><span class="roadmap-tooltip-event">Remaining investment portfolio: ${chartCurrency(point.row.closingPortfolio)}</span>${shortfallLine}${eventLines}`;
     tooltip.classList.remove('hidden');
     const left=Math.min(wrap.clientWidth-tooltip.offsetWidth-8,Math.max(8,point.x+12));
     const top=Math.min(wrap.clientHeight-tooltip.offsetHeight-8,Math.max(8,point.y-18));
@@ -438,6 +457,8 @@
     arPortfolio.textContent='Refresh roadmap';
     arCash.textContent=arCore.textContent=arCashTarget.textContent=arCoreSale.textContent=arClosingPortfolio.textContent='—';
     arClosingCash.textContent=arClosingCore.textContent='—';
+    arShortfallRow?.classList.add('hidden');
+    if(window.arOpeningShortfall)arOpeningShortfall.textContent=arShortfallMovement.textContent=arClosingShortfall.textContent=arShortfallChange.textContent='—';
     arPortfolioMovement.textContent=arCashMovement.textContent=arCoreMovement.textContent='—';
     arPortfolioChange.textContent=arCashChange.textContent=arCoreChange.textContent='—';
     arCashPct.textContent=arCorePct.textContent='—';
@@ -501,6 +522,15 @@
     arClosingPortfolio.textContent=gbp(row.closingPortfolio);
     arClosingCash.textContent=gbp(row.closingCash);
     arClosingCore.textContent=gbp(row.closingCore);
+    if(row.cumulativeUnfunded>.005||row.openingUnfunded>.005){
+      arShortfallRow.classList.remove('hidden');
+      arOpeningShortfall.textContent=row.openingUnfunded>0?`−${gbp(row.openingUnfunded)}`:gbp(0);
+      arShortfallMovement.innerHTML=movementLines([{label:'New unmet spending',value:-row.unfunded},{label:'Arrears repaid',value:Math.max(0,row.openingUnfunded+row.unfunded-row.cumulativeUnfunded)}]);
+      arClosingShortfall.textContent=`−${gbp(row.cumulativeUnfunded)}`;
+      renderChange(arShortfallChange,-(row.cumulativeUnfunded-row.openingUnfunded),Math.max(1,row.openingUnfunded));
+    }else{
+      arShortfallRow.classList.add('hidden');
+    }
 
     const portfolioChange=row.closingPortfolio-row.fundedPortfolio;
     const cashChange=row.closingCash-row.fundedCash;
@@ -542,10 +572,10 @@
     if(row.unfunded>.005)actionText+=` ${gbp(row.unfunded)} remains unfunded.`;
     arActionExplanation.textContent=actionText;
 
-    arActionStatus.className=`roadmap-action-status ${row.isGood?'good-year':'weak-year'}`;
-    arActionStatus.textContent=row.isGood
-      ?(row.cashRefill>.005?'Strong year · refill Bridge Cash':'Strong year')
-      :'Weak year · protect CORE where possible';
+    arActionStatus.className=`roadmap-action-status ${row.cumulativeUnfunded>.005?'shortfall-year':(row.isGood?'good-year':'weak-year')}`;
+    arActionStatus.textContent=row.cumulativeUnfunded>.005
+      ?`Plan shortfall · ${gbp(row.cumulativeUnfunded)} unfunded`
+      :(row.isGood?(row.cashRefill>.005?'Strong year · refill Bridge Cash':'Strong year'):'Weak year · protect CORE where possible');
 
     const actionRows=[];
     actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Fund annual spending</b><small>${gbp(row.fromCash)} from Bridge Cash and ${gbp(row.fromCore)} from CORE</small></span><strong>${gbp(row.withdrawal)}</strong></div>`);
@@ -556,6 +586,9 @@
       actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Bridge Cash refill</b><small>${targetMet?'Target already met':'No permitted refill capacity remains under the strong-year rule'}</small></span><strong>${gbp(0)}</strong></div>`);
     }else if(!row.isGood){
       actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Defer Bridge Cash refill</b><small>Refills are only made after a strong CORE year</small></span><strong>—</strong></div>`);
+    }
+    if(row.unfunded>.005){
+      actionRows.push(`<div class="roadmap-action-row roadmap-action-shortfall"><span class="roadmap-action-check">!</span><span><b>Unable to fund expenditure</b><small>Cumulative unfunded balance ${gbp(row.cumulativeUnfunded)}</small></span><strong>−${gbp(row.unfunded)}</strong></div>`);
     }
     actionRows.push(`<div class="roadmap-action-row"><span class="roadmap-action-check">✓</span><span><b>Leave remaining CORE invested</b><small>Continue with the selected target allocation</small></span><strong>${gbp(row.fundedCore)}</strong></div>`);
     arFinancialActions.innerHTML=actionRows.join('');

@@ -865,3 +865,42 @@ label:has(> input[type="checkbox"]),label:has(> input[type="radio"]){align-items
  .simulation-speed-options{grid-template-columns:1fr}
  .analyse-plan-button{width:100%;min-width:0}
 }
+
+
+/* RetireLab 7.0.1 — consistent workflow page headers */
+.workflow-page-header{
+  padding:20px 24px;
+  margin-bottom:14px;
+  border:1px solid #385d49;
+  border-radius:13px;
+  background:linear-gradient(145deg,#142019,#15191f);
+}
+.workflow-page-header>span{
+  display:block;
+  margin-bottom:8px;
+  color:#8fbea1;
+  font-size:13px;
+  font-weight:800;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+}
+.workflow-page-header h2{
+  margin:0 0 6px;
+  font-size:26px;
+}
+.workflow-page-header p{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+}
+.retirement-handoff-phase span{
+  color:#8fbea1;
+  letter-spacing:.07em;
+  text-transform:uppercase;
+}
+.getting-started-card li button{
+  padding-left:10px;
+}
+.getting-started-card li button::before{
+  display:none;
+}

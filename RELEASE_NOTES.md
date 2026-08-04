@@ -1,42 +1,17 @@
-# RetireLab Release 7.0 — Drawdown-first Workflow
+# RetireLab Release 7.0.1 — Workflow Header Consistency
 
-## Easier to get started
-The Dashboard now begins with a concise guide:
+## Improved
+The main drawdown workflow now uses the same wording and visual treatment everywhere:
 
-- Already know your retirement pot? Follow Income → Expenditure → Retirement Strategy.
-- Still estimating it? Use the optional Accumulation stage.
+- Step 1 • Income
+- Step 2 • Expenditure
+- Step 3 • Retirement Strategy
 
-## Drawdown remains the main experience
-- Accumulation is now the final navigation tab.
-- Strategy is labelled Retirement Strategy.
-- Compare Strategies is named explicitly in navigation.
-- The lifecycle remains visually distinct: green for retirement planning and blue/teal for accumulation.
+These labels now appear consistently on both the Dashboard guide and the relevant page headers.
 
-## Cleaner Dashboard
-The Dashboard now focuses on:
-
-- getting started
-- project management
-- current and end ages
-- display currency
-- optional accumulation
-- objective age and target
-- random seed
-
-Regular spending controls have moved to Expenditure.
-
-## Expenditure
-Annual spending and spending indexation now sit at the top of the Expenditure page, alongside large planned expenditures.
-
-## Retirement Strategy
-The only visible simulation controls now appear at the bottom of Retirement Strategy:
-
-- Analyse My Retirement Plan
-- View Results
-- Find a better CORE allocation
-- Faster / Standard / Slower simulation speed
-
-The speed explanation makes clear that more simulated paths may reduce random variation but cannot make future markets or assumptions more certain.
-
-## Interface polish
-Checkboxes and radio controls now sit directly beside their labels with consistent alignment throughout RetireLab.
+## Page structure
+- Income now has a proper workflow page header.
+- Expenditure now has the page title “Expenditure”; “Annual expenditure” remains its first sub-section.
+- Retirement Strategy no longer uses “Stage 2 • Managing Wealth” as its page identity.
+- The retirement handoff card now says “Retirement begins”.
+- Accumulation is labelled “Optional • Accumulation” rather than being included in the numbered drawdown workflow.

@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 7.0</title>
-<link href="css/style-1.css?v=7.0" rel="stylesheet"/>
-<link href="css/style-2.css?v=7.0" rel="stylesheet"/>
-<link href="css/style-3.css?v=7.0" rel="stylesheet"/>
-<link href="css/style-4.css?v=7.0" rel="stylesheet"/>
-<link href="css/style-5.css?v=7.0" rel="stylesheet"/><link href="css/annual-review.css?v=7.0" rel="stylesheet"/></head>
+<title>RetireLab 7.0.1</title>
+<link href="css/style-1.css?v=7.0.1" rel="stylesheet"/>
+<link href="css/style-2.css?v=7.0.1" rel="stylesheet"/>
+<link href="css/style-3.css?v=7.0.1" rel="stylesheet"/>
+<link href="css/style-4.css?v=7.0.1" rel="stylesheet"/>
+<link href="css/style-5.css?v=7.0.1" rel="stylesheet"/><link href="css/annual-review.css?v=7.0.1" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 7.0</p></header><nav aria-label="RetireLab sections" class="tabbar">
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 7.0.1</p></header><nav aria-label="RetireLab sections" class="tabbar">
 <button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button>
 <button class="tabbtn" data-tab="income" type="button">Income</button>
 <button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button>
@@ -37,9 +37,9 @@
 <span class="route-question">Already know your retirement pot?</span>
 <h3>Yes — plan your drawdown</h3>
 <ol>
-<li><button data-goto="income" type="button">Income</button><span>Enter pensions and other reliable retirement income.</span></li>
-<li><button data-goto="expenditure" type="button">Expenditure</button><span>Set annual spending and planned larger costs.</span></li>
-<li><button data-goto="strategy" type="button">Retirement Strategy</button><span>Build the portfolio and withdrawal policy, then analyse the plan.</span></li>
+<li><button data-goto="income" type="button">Step 1 • Income</button><span>Enter pensions and other reliable retirement income.</span></li>
+<li><button data-goto="expenditure" type="button">Step 2 • Expenditure</button><span>Set annual spending and planned larger costs.</span></li>
+<li><button data-goto="strategy" type="button">Step 3 • Retirement Strategy</button><span>Build the portfolio and withdrawal policy, then analyse the plan.</span></li>
 </ol>
 <button class="primary route-action" data-goto="income" type="button">Start with Income</button>
 </article>
@@ -108,7 +108,7 @@
 <button class="hidden" id="rebalanceBtn" type="button">Find a better CORE allocation</button>
 </div><div class="tabpanel accumulation-panel" data-panel="accumulation">
 <section class="accumulation-hero">
-<div><span class="accumulation-eyebrow">Stage 1 · Building wealth</span><h2>Accumulation</h2><p>Project how your current pension and regular investment might grow before retirement. This portfolio is independent of your retirement CORE strategy.</p></div>
+<div><span class="accumulation-eyebrow">Optional • Accumulation</span><h2>Accumulation</h2><p>Project how your current pension and regular investment might grow before retirement. This portfolio is independent of your retirement CORE strategy.</p></div>
 <div class="accumulation-phase-badge">BUILD</div>
 </section>
 <div class="accumulation-disabled-overlay hidden" id="accumulationDisabled"><div><h3>Accumulation calculation is switched off</h3><p>Enable <strong>Calculate accumulation</strong> on the Dashboard to use this stage.</p><button class="primary" data-goto="dashboard" type="button">Open Dashboard</button></div></div>
@@ -139,8 +139,13 @@
 <div class="accumulation-breakdown" id="accumulationBreakdown"><span>Total invested: —</span><span>Median investment growth: —</span></div>
 <p class="note">The Expected value is the median of all simulated paths. Half of the simulations finish above it and half below it.</p>
 </section>
-</div><div class="tabpanel" data-panel="income"><section class="card full">
+</div><div class="tabpanel" data-panel="income">
+<section class="workflow-page-header retirement-workflow-header">
+<span>Step 1 • Income</span>
 <h2>Income</h2>
+<p>Enter pensions and other reliable retirement income.</p>
+</section>
+<section class="card full">
 <div class="table-wrap"><table id="incomeTable"><thead><tr><th>Name</th><th>Annual net income (£)</th><th>Amount basis</th><th>Start age</th><th>End age</th><th>Annual indexation (%)</th><th></th></tr></thead><tbody></tbody></table></div>
 <div class="toolbar"><button class="secondary small" id="addIncome">Add income</button></div>
 <div class="alert" style="margin-top:12px">
@@ -150,8 +155,14 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </section>
 
 </div><div class="tabpanel" data-panel="expenditure">
+<section class="workflow-page-header retirement-workflow-header">
+<span>Step 2 • Expenditure</span>
+<h2>Expenditure</h2>
+<p>Set regular annual spending and any planned larger costs.</p>
+</section>
 <section class="card full expenditure-basics-card">
-<div class="workflow-stage-heading"><span>Step 2</span><div><h2>Annual expenditure</h2><p class="note">Set the regular spending requirement used throughout the drawdown plan.</p></div></div>
+<h2>Annual expenditure</h2>
+<p class="note">Set the regular spending requirement used throughout the drawdown plan.</p>
 <div class="fields">
 <div><label>Annual spending need (today's money)</label><input id="annualSpending" min="0" step="500" type="number" value="40000"/></div>
 <div><label>Spending indexation</label><select id="spendingIndex"><option selected="" value="inflation">Inflation-linked</option><option value="fixed">Fixed nominal amount</option></select></div>
@@ -164,8 +175,14 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 <div class="toolbar"><button class="secondary small" id="addExpense">Add expenditure</button></div>
 </section>
 
-</div><div class="tabpanel" data-panel="strategy"><section class="card full retirement-handoff-card" id="retirementHandoffCard">
-<div class="retirement-handoff-phase"><span>Stage 2 · Managing wealth</span><strong>RETIRE</strong></div>
+</div><div class="tabpanel" data-panel="strategy">
+<section class="workflow-page-header retirement-workflow-header">
+<span>Step 3 • Retirement Strategy</span>
+<h2>Retirement Strategy</h2>
+<p>Choose the retirement portfolio, Bridge Cash policy and withdrawal rules to analyse.</p>
+</section>
+<section class="card full retirement-handoff-card" id="retirementHandoffCard">
+<div class="retirement-handoff-phase"><span>Retirement begins</span><strong>MANAGE</strong></div>
 <div class="retirement-handoff-content"><div><h2>Retirement starting portfolio</h2><p class="note">Choose whether drawdown begins with the median accumulation result or a retirement pot you enter yourself.</p></div>
 <div class="retirement-handoff-controls"><label class="form-check form-switch"><input checked="" class="form-check-input" id="useAccumulationMedian" type="checkbox"/><span class="form-check-label">Use median pot from accumulation</span></label><div><label>Retirement starting pot</label><input id="retirementPotOverride" min="0" step="1000" type="number" value="210000"/></div><div class="retirement-handoff-value"><span>Applied to Strategy</span><strong id="retirementPotApplied">£210,000</strong></div></div></div>
 </section><section class="card full" id="portfolioStructureCard">
@@ -675,7 +692,7 @@ It does not model tax, trading costs, fund fees separately, intra-year tax timin
 The annual CORE return used by the rule is the investment return before withdrawals.
 </p>
 </section></div></div></main>
-<script src="js/engine-and-ui.js?v=7.0"></script><script src="js/fund-library.js?v=7.0"></script><script src="js/accumulation.js?v=7.0"></script><script src="js/diversification.js?v=7.0"></script>
+<script src="js/engine-and-ui.js?v=7.0.1"></script><script src="js/fund-library.js?v=7.0.1"></script><script src="js/accumulation.js?v=7.0.1"></script><script src="js/diversification.js?v=7.0.1"></script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
 <button class="close small" id="closeFundDrawer" type="button">Close</button>
@@ -698,14 +715,14 @@ The annual CORE return used by the rule is the investment return before withdraw
 <p class="note" id="drawerSources"></p>
 <div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
 </aside>
-<script src="js/fund-research.js?v=7.0"></script>
-<script src="js/quick-actions.js?v=7.0"></script>
-<script src="js/simulation-history.js?v=7.0"></script>
-<script src="js/comparison.js?v=7.0"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 7.0 · Drawdown-first Workflow</footer>
-<script src="js/projects-and-storage.js?v=7.0"></script>
-<script src="js/dashboard.js?v=7.0"></script>
-<script src="js/results-feedback.js?v=7.0"></script>
+<script src="js/fund-research.js?v=7.0.1"></script>
+<script src="js/quick-actions.js?v=7.0.1"></script>
+<script src="js/simulation-history.js?v=7.0.1"></script>
+<script src="js/comparison.js?v=7.0.1"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 7.0.1 · Workflow Header Consistency</footer>
+<script src="js/projects-and-storage.js?v=7.0.1"></script>
+<script src="js/dashboard.js?v=7.0.1"></script>
+<script src="js/results-feedback.js?v=7.0.1"></script>
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -718,6 +735,6 @@ The annual CORE return used by the rule is the investment return before withdraw
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-<script src="js/interactive-charts.js?v=7.0"></script>
-<script src="js/annual-review.js?v=7.0"></script><script src="js/workflow-7.js?v=7.0"></script></body>
+<script src="js/interactive-charts.js?v=7.0.1"></script>
+<script src="js/annual-review.js?v=7.0.1"></script><script src="js/workflow-7.js?v=7.0.1"></script></body>
 </html>

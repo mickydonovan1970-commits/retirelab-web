@@ -651,7 +651,7 @@ runBtn.onclick=()=>{
    resultsCard.classList.remove('hidden');
    snapshotSimulationResult(r);
    setRunFeedbackState('complete','Results ready');
-   runBtn.disabled=false;runBtn.textContent='Run Monte Carlo';
+   runBtn.disabled=false;runBtn.textContent='Analyse My Retirement Plan';
  },30)
 };
 function randomAllocation(rng){let a=Array.from({length:4},()=>-Math.log(Math.max(rng(),1e-9))),s=a.reduce((x,y)=>x+y,0);return a.map(x=>x/s)}

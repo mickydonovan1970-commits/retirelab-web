@@ -809,3 +809,59 @@ canvas,.sim-chart{background:#0d0f13!important;border:1px solid var(--line)!impo
 .accumulation-disabled-overlay.hidden{display:none!important}
 .accumulation-tab-button.tab-disabled{opacity:.5}
 .accumulation-tab-button:not(.tab-disabled){opacity:1}
+
+
+/* RetireLab 7.0 — drawdown-first workflow */
+.dashboard-welcome{padding:22px 24px;margin-bottom:14px;border:1px solid #385d49;border-radius:13px;background:linear-gradient(135deg,#14211a,#15191f)}
+.dashboard-welcome-kicker{display:block;margin-bottom:5px;color:#8fbea1;font-size:11px;font-weight:800;letter-spacing:.09em;text-transform:uppercase}
+.dashboard-welcome h2{margin:0 0 7px;font-size:24px}
+.dashboard-welcome p{max-width:760px;margin:0;color:var(--muted)}
+.getting-started-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:14px;margin-bottom:14px}
+.getting-started-card{padding:19px;border:1px solid var(--line);border-radius:12px;background:var(--panel)}
+.getting-started-card.retirement-route{border-color:#385d49}
+.getting-started-card.accumulation-route{border-color:#28515a;background:linear-gradient(145deg,#121c20,#15191f)}
+.route-question{display:block;margin-bottom:5px;color:var(--muted);font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}
+.getting-started-card h3{margin:0 0 11px;font-size:17px}
+.getting-started-card ol{display:flex;flex-direction:column;gap:9px;margin:0 0 16px;padding:0;list-style:none;counter-reset:route}
+.getting-started-card li{display:grid;grid-template-columns:150px minmax(0,1fr);gap:11px;align-items:center;counter-increment:route}
+.getting-started-card li button{position:relative;width:100%;padding:8px 9px 8px 31px;border:1px solid var(--line);border-radius:8px;background:var(--panel-2);color:var(--text);text-align:left;font-weight:700;cursor:pointer}
+.getting-started-card li button::before{content:counter(route);position:absolute;left:9px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:16px;height:16px;border-radius:50%;background:#274634;color:#a9d4b8;font-size:9px}
+.getting-started-card li span{color:var(--muted);font-size:12px}
+.route-action{margin-top:3px}
+.accumulation-route .route-action{border-color:#315b62;color:#a7e1e2}
+.dashboard-project-fields{align-items:start}
+.workflow-stage-heading{display:flex;gap:12px;align-items:flex-start;margin-bottom:14px}
+.workflow-stage-heading>span{display:grid;place-items:center;min-width:66px;height:25px;padding:0 8px;border:1px solid #385d49;border-radius:999px;background:#15221b;color:#8fbea1;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em}
+.workflow-stage-heading h2{margin:0 0 3px}
+.strategy-analysis-card{border-color:#385d49!important;background:linear-gradient(150deg,#141d17,#15191f)}
+.simulation-speed-block{margin:13px 0;padding:14px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2)}
+.simulation-speed-title{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.simulation-speed-title h3{margin:0 0 3px;font-size:14px}
+.simulation-speed-title p{margin:0}
+.simulation-speed-options{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:11px}
+.simulation-speed-options label{display:flex!important;align-items:center!important;gap:9px!important;min-height:58px;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:#101217;cursor:pointer}
+.simulation-speed-options label:has(input:checked){border-color:#4c6688;background:#172230}
+.simulation-speed-options input[type="radio"]{flex:0 0 auto!important;width:16px!important;height:16px!important;margin:0!important;padding:0!important}
+.simulation-speed-options span{display:flex;flex-direction:column;gap:2px}
+.simulation-speed-options strong{font-size:12px}
+.simulation-speed-options small{color:var(--muted);font-size:10px}
+.strategy-analysis-actions{margin-top:14px}
+.analyse-plan-button{min-width:240px}
+
+/* Checkbox and radio alignment audit */
+input[type="checkbox"],input[type="radio"]{width:16px!important;min-width:16px!important;height:16px!important;margin:0!important;padding:0!important;vertical-align:middle;accent-color:#5f91df}
+.form-check,.form-switch{display:inline-flex!important;align-items:center!important;gap:8px!important;width:auto!important;min-height:20px}
+.form-check-input{position:static!important;float:none!important;flex:0 0 auto!important}
+.form-check-label{display:inline!important;margin:0!important;line-height:1.25!important}
+label:has(> input[type="checkbox"]),label:has(> input[type="radio"]){align-items:center}
+.accumulation-dashboard-setting .form-check{display:flex!important}
+
+@media(max-width:820px){
+ .getting-started-grid{grid-template-columns:1fr}
+ .getting-started-card li{grid-template-columns:140px minmax(0,1fr)}
+}
+@media(max-width:620px){
+ .getting-started-card li{grid-template-columns:1fr}
+ .simulation-speed-options{grid-template-columns:1fr}
+ .analyse-plan-button{width:100%;min-width:0}
+}

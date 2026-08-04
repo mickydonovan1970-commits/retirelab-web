@@ -1,21 +1,6 @@
-# RetireLab Release 7.1.1 — Unfunded Plan Balance
+# RetireLab Release 7.1.2 — Roadmap Shortfall Fix
 
-## Engine
-- Investment funds and Bridge Cash remain floored at zero.
-- Any spending that cannot be funded is accumulated separately as an unfunded plan balance.
-- Later unmet spending increases that balance.
-- Later income surpluses repay the unfunded balance before rebuilding cash.
-- Market returns cannot make a depleted plan appear to recover.
+## Fixed
+The Roadmap shortfall engine referenced its cumulative unfunded balance before that balance had been initialised. This caused every Roadmap refresh to fail with a generic model-input alert.
 
-## Results charts
-- Wealth percentiles can now continue below zero.
-- Negative sections are drawn in red.
-- A dashed red zero/depletion line is shown.
-- Negative values represent cumulative unmet expenditure, not negative fund holdings.
-
-## Roadmap
-- Median Market and Example Lifetime charts use the same signed plan-balance logic.
-- The line turns red below zero.
-- Tooltips distinguish remaining investments from cumulative unfunded expenditure.
-- Year Start Financial Actions explicitly show any expenditure that cannot be funded.
-- Step 4 adds an Unfunded plan balance row when required.
+The cumulative unfunded balance is now initialised to zero at the start of each Roadmap calculation. Median Market and Example Lifetime can both be calculated normally, including the signed below-zero chart behaviour introduced in 7.1.1.

@@ -125,6 +125,7 @@
     const incomeStartFactors=inp.incomes.map(()=>null);
     const rng=mulberry32(((inp.seed||1)+(Math.max(1,example)-1)*100003+620000)>>>0);
     const rows=[];
+    let cumulativeUnfunded=0;
 
     for(let age=start;age<=end;age++){
       const openingFunds=[...funds];

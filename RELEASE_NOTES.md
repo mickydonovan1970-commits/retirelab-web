@@ -1,6 +1,16 @@
-# RetireLab Release 7.1.2 — Roadmap Shortfall Fix
+# RetireLab Release 7.1.3 — Dashboard Route Clarity
 
-## Fixed
-The Roadmap shortfall engine referenced its cumulative unfunded balance before that balance had been initialised. This caused every Roadmap refresh to fail with a generic model-input alert.
+## Improved Dashboard guidance
+The question “Already know your retirement pot?” now sits above both route cards.
 
-The cumulative unfunded balance is now initialised to zero at the start of each Roadmap calculation. Median Market and Example Lifetime can both be calculated normally, including the signed below-zero chart behaviour introduced in 7.1.1.
+The two responses are now:
+
+- YES — Plan your retirement
+- NO — Estimate your retirement pot
+
+This removes the conflicting second question and makes the two routes read as direct answers to the same prompt.
+
+## Visual polish
+- YES and NO use the same green workflow accent.
+- The accumulation route is vertically balanced against the main retirement workflow card.
+- Supporting copy has been shortened and clarified.

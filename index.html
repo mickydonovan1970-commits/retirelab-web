@@ -4,14 +4,14 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<title>RetireLab 7.0.2</title>
-<link href="css/style-1.css?v=7.0.2" rel="stylesheet"/>
-<link href="css/style-2.css?v=7.0.2" rel="stylesheet"/>
-<link href="css/style-3.css?v=7.0.2" rel="stylesheet"/>
-<link href="css/style-4.css?v=7.0.2" rel="stylesheet"/>
-<link href="css/style-5.css?v=7.0.2" rel="stylesheet"/><link href="css/annual-review.css?v=7.0.2" rel="stylesheet"/></head>
+<title>RetireLab 7.1</title>
+<link href="css/style-1.css?v=7.1" rel="stylesheet"/>
+<link href="css/style-2.css?v=7.1" rel="stylesheet"/>
+<link href="css/style-3.css?v=7.1" rel="stylesheet"/>
+<link href="css/style-4.css?v=7.1" rel="stylesheet"/>
+<link href="css/style-5.css?v=7.1" rel="stylesheet"/><link href="css/annual-review.css?v=7.1" rel="stylesheet"/></head>
 <body>
-<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 7.0.2</p></header><nav aria-label="RetireLab sections" class="tabbar">
+<header><h1>RetireLab</h1><p>Retirement Decision Laboratory · Release 7.1</p></header><nav aria-label="RetireLab sections" class="tabbar">
 <button class="tabbtn active" data-tab="dashboard" type="button">Dashboard</button>
 <button class="tabbtn" data-tab="income" type="button">Income</button>
 <button class="tabbtn" data-tab="expenditure" type="button">Expenditure</button>
@@ -162,12 +162,55 @@ For each later-starting income, choose whether the amount entered is <strong>tod
 </section>
 <section class="card full expenditure-basics-card">
 <h2>Annual expenditure</h2>
-<p class="note">Set the regular spending requirement used throughout the drawdown plan.</p>
-<div class="fields">
-<div><label>Annual spending need (today's money)</label><input id="annualSpending" min="0" step="500" type="number" value="40000"/></div>
+<p class="note">Enter spending manually or ask RetireLab to estimate the maximum compatible with your chosen success threshold.</p>
+
+<select class="hidden" id="expenditureMode" aria-hidden="true"><option value="manual">Manual</option><option value="objective">Objective</option><option value="plan">Plan</option></select><div class="expenditure-mode-grid" role="radiogroup" aria-label="Annual expenditure mode">
+<label class="expenditure-mode-option">
+<input checked="" name="expenditureMode" type="radio" value="manual"/>
+<span><strong>Enter manually</strong><small>Use the annual amount you choose.</small></span>
+</label>
+<label class="expenditure-mode-option">
+<input name="expenditureMode" type="radio" value="objective"/>
+<span><strong>Maximise for objective success</strong><small>Protect the required wealth at the objective age.</small></span>
+</label>
+<label class="expenditure-mode-option">
+<input name="expenditureMode" type="radio" value="plan"/>
+<span><strong>Maximise for plan success</strong><small>Fund the plan through its final required expenditure.</small></span>
+</label>
+</div>
+
+<div class="fields expenditure-input-fields">
+<div><label>Annual spending need (today's money)</label><input id="annualSpending" min="0" step="50" type="number" value="40000"/></div>
 <div><label>Spending indexation</label><select id="spendingIndex"><option selected="" value="inflation">Inflation-linked</option><option value="fixed">Fixed nominal amount</option></select></div>
 </div>
-<p class="note">Enter the net amount you expect to spend. RetireLab does not calculate tax.</p>
+
+<div class="expenditure-optimiser-panel hidden" id="expenditureOptimiserPanel">
+<div class="fields expenditure-optimiser-fields">
+<div><label>Required success (%)</label><input id="expenditureSuccessTarget" min="1" max="99.9" step="0.1" type="number" value="95.0"/></div>
+<div><label>Search tolerance</label><input id="expenditureSearchTolerance" readonly="" type="text" value="£50"/></div>
+</div>
+<div class="toolbar">
+<button class="primary" id="calculateMaximumExpenditure" type="button">Calculate Maximum Expenditure</button>
+</div>
+<div class="expenditure-optimiser-progress hidden" id="expenditureOptimiserProgress" aria-live="polite">
+<div class="run-progress-track"><div class="run-progress-bar" id="expenditureOptimiserProgressBar"></div></div>
+<div class="run-status" id="expenditureOptimiserProgressText">Preparing optimisation…</div>
+</div>
+<div class="expenditure-optimiser-result hidden" id="expenditureOptimiserResult">
+<div class="expenditure-result-main"><span>Maximum annual expenditure</span><strong id="maximumExpenditureResult">—</strong></div>
+<div class="expenditure-result-details">
+<div><span>Target</span><strong id="expenditureTargetSummary">—</strong></div>
+<div><span>Modelled result</span><strong id="expenditureAchievedSummary">—</strong></div>
+<div><span>Fixed path population</span><strong id="expenditurePathSummary">—</strong></div>
+</div>
+<p class="note" id="expenditureOptimiserExplanation"></p>
+</div>
+<div class="alert expenditure-optimiser-stale hidden" id="expenditureOptimiserStale">
+The optimised expenditure is out of date because a material plan input has changed. Recalculate before relying on it.
+</div>
+</div>
+
+<p class="note">RetireLab does not calculate tax. Optimisation uses the same complete set of simulated lifetimes for every spending trial, so only the spending amount changes during the search.</p>
 </section>
 <section class="card full">
 <h2>Large expenditures and financing</h2>
@@ -692,7 +735,7 @@ It does not model tax, trading costs, fund fees separately, intra-year tax timin
 The annual CORE return used by the rule is the investment return before withdrawals.
 </p>
 </section></div></div></main>
-<script src="js/engine-and-ui.js?v=7.0.2"></script><script src="js/fund-library.js?v=7.0.2"></script><script src="js/accumulation.js?v=7.0.2"></script><script src="js/diversification.js?v=7.0.2"></script>
+<script src="js/engine-and-ui.js?v=7.1"></script><script src="js/fund-library.js?v=7.1"></script><script src="js/accumulation.js?v=7.1"></script><script src="js/diversification.js?v=7.1"></script>
 <div class="drawer-backdrop" id="fundBackdrop"></div>
 <aside aria-hidden="true" class="drawer" id="fundDrawer">
 <button class="close small" id="closeFundDrawer" type="button">Close</button>
@@ -715,14 +758,14 @@ The annual CORE return used by the rule is the investment return before withdraw
 <p class="note" id="drawerSources"></p>
 <div class="alert"><strong>Important:</strong> expected return is a forward-looking planning assumption, not the fund's historical return and not a promise of future performance.</div>
 </aside>
-<script src="js/fund-research.js?v=7.0.2"></script>
-<script src="js/quick-actions.js?v=7.0.2"></script>
-<script src="js/simulation-history.js?v=7.0.2"></script>
-<script src="js/comparison.js?v=7.0.2"></script>
-<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 7.0.2 · Analysis Button Label Fix</footer>
-<script src="js/projects-and-storage.js?v=7.0.2"></script>
-<script src="js/dashboard.js?v=7.0.2"></script>
-<script src="js/results-feedback.js?v=7.0.2"></script>
+<script src="js/fund-research.js?v=7.1"></script>
+<script src="js/quick-actions.js?v=7.1"></script>
+<script src="js/simulation-history.js?v=7.1"></script>
+<script src="js/comparison.js?v=7.1"></script>
+<footer style="max-width:1220px;margin:0 auto 30px;padding:0 18px;color:#637083;font-size:12px;text-align:center">RetireLab · Release 7.1 · Maximum Expenditure Optimiser</footer>
+<script src="js/projects-and-storage.js?v=7.1"></script>
+<script src="js/dashboard.js?v=7.1"></script>
+<script src="js/results-feedback.js?v=7.1"></script>
 <div aria-hidden="true" class="chart-modal hidden" id="chartModal">
 <div class="chart-modal-panel">
 <div class="chart-modal-header">
@@ -735,6 +778,6 @@ The annual CORE return used by the rule is the investment return before withdraw
 <canvas height="720" id="expandedChart" width="1400"></canvas>
 </div>
 </div>
-<script src="js/interactive-charts.js?v=7.0.2"></script>
-<script src="js/annual-review.js?v=7.0.2"></script><script src="js/workflow-7.js?v=7.0.2"></script></body>
+<script src="js/interactive-charts.js?v=7.1"></script>
+<script src="js/annual-review.js?v=7.1"></script><script src="js/workflow-7.js?v=7.1"></script><script src="js/expenditure-optimiser.js?v=7.1"></script></body>
 </html>

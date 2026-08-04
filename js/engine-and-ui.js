@@ -840,7 +840,7 @@ applySuggested.onclick=()=>{
  updateFundDisplay();
 };
 function serialise(){return{
- basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,
+ basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,expenditureMode:(document.getElementById('expenditureMode')?.value||document.querySelector('input[name="expenditureMode"]:checked')?.value||'manual'),expenditureSuccessTarget:(document.getElementById('expenditureSuccessTarget')?.value||'95'),simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,
  cashTargetMode:cashTargetMode.value,cashTargetValue:cashTargetValue.value,cashRefillEnabled:cashRefillEnabled.checked,
  cashRefillMaxMode:cashRefillMaxMode.value,cashRefillMaxValue:cashRefillMaxValue.value,
  cashFloorMode:cashFloorMode.value,cashFloor:cashFloor.value},

@@ -240,7 +240,9 @@ importProjectFile.addEventListener('change',async()=>{
     captureCurrentProject();
     const imported=cloneSimple(payload.project);
     imported.id=makeProjectId();
-    imported.name=imported.name||'Imported Project';
+    imported.name=String(file.name||'Imported Project')
+      .replace(/\.json$/i,'')
+      .trim()||'Imported Project';
     imported.currency=imported.currency||'GBP';
     imported.history=Array.isArray(imported.history)?imported.history:[];
     imported.nextSimulationNumber=imported.nextSimulationNumber||(

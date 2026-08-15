@@ -1,14 +1,13 @@
-# RetireLab Release 7.1.5 — Import Name Fix
+# RetireLab Release 7.1.7 — Import Filename Naming
 
-## Fixed
-Importing a RetireLab project now preserves the project name stored inside the exported JSON file.
+## Changed
+Imported projects are now named from the JSON filename rather than the project name stored inside the file.
 
-Previously each import appended `(Imported)`, so repeated export/import cycles could produce names such as:
+Examples:
 
-`59+ Plan (Imported) (Imported)`
+- `59_Plan_17k.json` → `59_Plan_17k`
+- `test_project_to_delete.json` → `test_project_to_delete`
 
-The import process is now lossless with respect to the project name:
+The `.json` extension is removed and no `(Imported)` suffix is added.
 
-`59+ Plan` → export → import → `59+ Plan`
-
-The JSON filename does not replace the saved project name.
+This makes the filename the user's explicit label for the imported copy.

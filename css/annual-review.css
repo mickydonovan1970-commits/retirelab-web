@@ -504,3 +504,13 @@
  .roadmap-action-row{grid-template-columns:22px minmax(0,1fr)}
  .roadmap-action-row>strong{grid-column:2}
 }
+
+
+/* Release 7.1.1 — unfunded plan balance */
+.shortfall-row{border-color:#61363b!important;background:rgba(91,38,44,.16)!important}
+.shortfall-row strong,.shortfall-row .roadmap-position-component strong{color:#d66b73!important}
+.roadmap-action-status.shortfall-year{border-color:#6d3940;background:#2a171a;color:#e07b83}
+.roadmap-action-shortfall{background:rgba(112,42,49,.16)}
+.roadmap-action-shortfall .roadmap-action-check{background:#4a2227;color:#e07b83}
+.roadmap-action-shortfall strong{color:#e07b83}
+.roadmap-chart-tooltip .roadmap-tooltip-shortfall{color:#e07b83;font-weight:700}

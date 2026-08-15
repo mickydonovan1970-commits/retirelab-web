@@ -56,6 +56,7 @@ function refreshCurrencyDisplay(){
  if(typeof renderAnnualReview==='function')renderAnnualReview();
  if(typeof drawRoadmapChart==='function')drawRoadmapChart();
  if(typeof drawPortfolioPie==='function')drawPortfolioPie();
+ if(typeof window.renderAccumulationCurrency==='function')window.renderAccumulationCurrency();
  document.querySelectorAll('.currency-option').forEach(button=>{
   const active=button.dataset.currency===retireLabCurrency;
   button.classList.toggle('active',active);
@@ -382,7 +383,7 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
  let success=0,survive=0,objectiveMet=0,objectiveValues=[],finals=[],finalCash=[],snapshots=collectPaths?Array.from({length:months+1},()=>[]):null,snapEvery=Math.max(1,Math.floor(sims/1000));
  const objectiveMonth=Math.max(0,Math.min(months,Math.round((inp.objectiveAge-inp.currentAge)*12)));
  for(let s=0;s<sims;s++){
-  let funds=weights.map(w=>core0*w),cash=cash0,inflIndex=1,aliveSuccess=true,aliveEnd=true,objectiveRecorded=false;
+  let funds=weights.map(w=>core0*w),cash=cash0,inflIndex=1,aliveSuccess=true,aliveEnd=true,objectiveRecorded=false,cumulativeUnfunded=0;
   const incomeStartFactors=inp.incomes.map(()=>null);
   let reviewStartCore=core0,reviewReturnFactor=1,goodYearCoreBudget=0,currentGood=false;
   if(collectPaths&&s%snapEvery===0)snapshots[0].push(core0+cash);
@@ -417,7 +418,13 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
    let large=0;
    inp.expenses.forEach(e=>{const startM=Math.round((e.start-inp.currentAge)*12),termM=Math.max(1,Math.round(e.term*12));if(m>=startM&&m<startM+termM){const pay=e.term<=1?(m===startM?e.amount:0):e.amount/termM;large+=pay*(e.indexed?inflIndex:1)}});
    let shortfall=Math.max(0,need+large-inc);
-   let surplus=Math.max(0,inc-need-large);cash+=surplus;
+   let surplus=Math.max(0,inc-need-large);
+   if(surplus>0&&cumulativeUnfunded>0){
+     const arrearsPaid=Math.min(surplus,cumulativeUnfunded);
+     cumulativeUnfunded-=arrearsPaid;
+     surplus-=arrearsPaid;
+   }
+   cash+=surplus;
 
    const reviewNow=inp.reviewFrequency==='monthly'||m===1||((m-1)%12===0);
    if(reviewNow){
@@ -461,13 +468,16 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
       }
     }
    }
+   if(shortfall>0.01)cumulativeUnfunded+=shortfall;
    const total=funds.reduce((a,b)=>a+b,0)+cash;
-   if(!objectiveRecorded&&m>=objectiveMonth){const ov=Math.max(0,total);objectiveValues.push(ov);if(ov>=inp.objectiveTarget)objectiveMet++;objectiveRecorded=true;}
+   const planBalance=total-cumulativeUnfunded;
+   if(!objectiveRecorded&&m>=objectiveMonth){const ov=planBalance;objectiveValues.push(ov);if(ov>=inp.objectiveTarget)objectiveMet++;objectiveRecorded=true;}
    if(shortfall>0.01||total<=0){if(m<=sMonth)aliveSuccess=false;aliveEnd=false}
-   if(collectPaths&&s%snapEvery===0)snapshots[m].push(Math.max(0,total));
+   if(collectPaths&&s%snapEvery===0)snapshots[m].push(planBalance);
   }
   const final=funds.reduce((a,b)=>a+b,0)+cash;
-  if(aliveSuccess)success++;if(aliveEnd)survive++;finals.push(Math.max(0,final));finalCash.push(Math.max(0,cash));
+  const finalPlanBalance=final-cumulativeUnfunded;
+  if(aliveSuccess)success++;if(aliveEnd)survive++;finals.push(finalPlanBalance);finalCash.push(Math.max(0,cash));
  }
  return{success:success/sims,survive:survive/sims,
  objectiveMet:objectiveMet/sims,objectiveMedian:quantile(objectiveValues,.5),
@@ -502,7 +512,11 @@ function renderSimulationCanvas(canvas,res,hoverMonth=null){
  if(!pts.length)return;
 
  const target=Math.max(0,res.objectiveTarget||0);
- const ymax=Math.max(...pts.map(p=>p.p90),target,1)*1.08;
+ const rawMax=Math.max(...pts.map(p=>p.p90),target,1);
+ const rawMin=Math.min(...pts.map(p=>p.p10),0);
+ const padRange=Math.max(1,rawMax-rawMin);
+ const ymax=rawMax+padRange*.08;
+ const ymin=rawMin-padRange*.08;
  const expanded=canvas.id==='expandedChart';
  const Lm=expanded?96:84,Rm=expanded?130:96,Tm=expanded?34:24,Bm=expanded?58:44;
  const axisFont=expanded?'600 18px Inter, system-ui':'600 14px Inter, system-ui';
@@ -512,16 +526,25 @@ function renderSimulationCanvas(canvas,res,hoverMonth=null){
  for(let i=0;i<=5;i++){
    const yy=Tm+(H-Tm-Bm)*i/5;
    ctx.beginPath();ctx.moveTo(Lm,yy);ctx.lineTo(W-Rm,yy);ctx.stroke();
-   ctx.fillText(compactGBP(ymax*(1-i/5)),8,yy+5);
+   const tickValue=ymax-(ymax-ymin)*i/5;
+   ctx.fillText(compactGBP(tickValue),8,yy+5);
  }
 
  const x=m=>Lm+(W-Lm-Rm)*m/Math.max(res.months,1);
- const y=v=>Tm+(H-Tm-Bm)*(1-v/ymax);
+ const y=v=>Tm+(H-Tm-Bm)*(ymax-v)/(ymax-ymin);
+
+ const zeroY=y(0);
+ ctx.save();ctx.strokeStyle='rgba(190,93,101,.72)';ctx.lineWidth=1.5;ctx.setLineDash([6,5]);
+ ctx.beginPath();ctx.moveTo(Lm,zeroY);ctx.lineTo(W-Rm,zeroY);ctx.stroke();ctx.restore();
 
  [['p90','#8f99aa'],['p50','#5f91df'],['p10','#a75e65']].forEach(([k,col])=>{
-   ctx.strokeStyle=col;ctx.lineWidth=k==='p50'?(expanded?4:3):(expanded?3:2);ctx.beginPath();
-   pts.forEach((p,i)=>{const xx=x(p.m),yy=y(p[k]);i===0?ctx.moveTo(xx,yy):ctx.lineTo(xx,yy)});
-   ctx.stroke();
+   ctx.lineWidth=k==='p50'?(expanded?4:3):(expanded?3:2);
+   for(let i=1;i<pts.length;i++){
+     const a=pts[i-1],b=pts[i];
+     const negative=a[k]<0||b[k]<0;
+     ctx.strokeStyle=negative?'#d45f68':col;
+     ctx.beginPath();ctx.moveTo(x(a.m),y(a[k]));ctx.lineTo(x(b.m),y(b[k]));ctx.stroke();
+   }
  });
 
  const ageStep=expanded?1:5;
@@ -650,7 +673,7 @@ runBtn.onclick=()=>{
    resultsCard.classList.remove('hidden');
    snapshotSimulationResult(r);
    setRunFeedbackState('complete','Results ready');
-   runBtn.disabled=false;runBtn.textContent='Run Monte Carlo';
+   runBtn.disabled=false;runBtn.textContent='Analyse My Retirement Plan';
  },30)
 };
 function randomAllocation(rng){let a=Array.from({length:4},()=>-Math.log(Math.max(rng(),1e-9))),s=a.reduce((x,y)=>x+y,0);return a.map(x=>x/s)}
@@ -839,14 +862,14 @@ applySuggested.onclick=()=>{
  updateFundDisplay();
 };
 function serialise(){return{
- basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,
+ basics:{currentAge:currentAge.value,endAge:endAge.value,objectiveAge:objectiveAge.value,objectiveTarget:objectiveTarget.value,annualSpending:annualSpending.value,spendingIndex:spendingIndex.value,expenditureMode:(document.getElementById('expenditureMode')?.value||document.querySelector('input[name="expenditureMode"]:checked')?.value||'manual'),expenditureSuccessTarget:(document.getElementById('expenditureSuccessTarget')?.value||'95'),simCount:simCount.value,seed:seed.value,inflMean:inflMean.value,inflVol:inflVol.value,sippTotal:sippTotal.value,cashStart:cashStart.value,cashRate:cashRate.value,cashTrigger:cashTrigger.value,reviewFrequency:reviewFrequency.value,badYearRule:badYearRule.value,goodYearRule:goodYearRule.value,saleMethod:saleMethod.value,
  cashTargetMode:cashTargetMode.value,cashTargetValue:cashTargetValue.value,cashRefillEnabled:cashRefillEnabled.checked,
  cashRefillMaxMode:cashRefillMaxMode.value,cashRefillMaxValue:cashRefillMaxValue.value,
  cashFloorMode:cashFloorMode.value,cashFloor:cashFloor.value},
- funds:fundDefs,incomes:incomes(),expenses:expenses()
+ funds:fundDefs,incomes:incomes(),expenses:expenses(),accumulation:window.captureAccumulationState?window.captureAccumulationState():null
 }}
 saveBtn.onclick=()=>{localStorage.setItem('retirelab-simple-v2',JSON.stringify(serialise()));alert('Saved on this device.')};
-loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow)};
+loadBtn.onclick=()=>{const raw=localStorage.getItem('retirelab-simple-v2');if(!raw){alert('No saved v2 inputs found.');return}const d=JSON.parse(raw);Object.entries(d.basics||{}).forEach(([k,v])=>{const el=document.getElementById(k);if(el){if(el.type==='checkbox')el.checked=!!v;else el.value=v}});if(Array.isArray(d.funds)&&d.funds.length)fundDefs.splice(0,fundDefs.length,...d.funds);renderFunds();document.querySelector('#incomeTable tbody').innerHTML='';(d.incomes||[]).forEach(addIncomeRow);document.querySelector('#expenseTable tbody').innerHTML='';(d.expenses||[]).forEach(addExpenseRow);if(window.applyAccumulationState)window.applyAccumulationState(d.accumulation)};
 resetBtn.onclick=()=>{if(confirm('Reset all inputs?')){localStorage.removeItem('retirelab-simple-v2');location.reload()}};
 function currentEnteredFundPercentages(){
  const inputs=[...document.querySelectorAll('.fund-pct')];

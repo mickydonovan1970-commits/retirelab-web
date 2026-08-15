@@ -469,7 +469,9 @@ const FUND_LIBRARY=[
   }
 ];
 const FUND_LIBRARY_REVIEWED='30 July 2026';
+window.FUND_LIBRARY=FUND_LIBRARY;
 const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Defensive / Flexible','Bonds and Cash'];
+window.FUND_CATEGORY_ORDER=FUND_CATEGORY_ORDER;
 
 function libraryFundById(id){return FUND_LIBRARY.find(f=>f.id===id)||null}
 function activeLibraryIds(){return new Set(fundDefs.map(f=>f.libraryId).filter(Boolean))}

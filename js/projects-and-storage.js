@@ -3,6 +3,7 @@ const RETIRELAB_STORAGE_KEY='retirelab-v2.9-projects';
 let projectStore={version:1,activeProjectId:null,projects:[]};
 let projectSystemReady=false;
 let projectSaveTimer=null;
+let projectLoadInProgress=false;
 
 function makeProjectId(){
   return 'project-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);
@@ -18,7 +19,7 @@ function currentProject(){
 }
 function captureCurrentProject(){
   const p=currentProject();
-  if(!p||!projectSystemReady)return;
+  if(!p||!projectSystemReady||projectLoadInProgress)return;
   p.plan=safePlanSnapshot();
   p.currency=typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP';
   p.history=cloneSimple(simulationHistoryRecords||[]);
@@ -27,7 +28,7 @@ function captureCurrentProject(){
   p.updatedAt=new Date().toISOString();
 }
 function persistProjectStore(showStatus=true){
-  if(!projectSystemReady)return;
+  if(!projectSystemReady||projectLoadInProgress)return;
   captureCurrentProject();
   try{
     localStorage.setItem(RETIRELAB_STORAGE_KEY,JSON.stringify(projectStore));
@@ -40,7 +41,7 @@ function persistProjectStore(showStatus=true){
   }
 }
 function scheduleProjectSave(){
-  if(!projectSystemReady)return;
+  if(!projectSystemReady||projectLoadInProgress)return;
   autoSaveStatus.value='Saving…';
   clearTimeout(projectSaveTimer);
   projectSaveTimer=setTimeout(()=>persistProjectStore(true),350);
@@ -74,46 +75,74 @@ function applyPlanSnapshot(d){
   (d.incomes||[]).forEach(addIncomeRow);
   document.querySelector('#expenseTable tbody').innerHTML='';
   (d.expenses||[]).forEach(addExpenseRow);
+  if(window.applyAccumulationState)window.applyAccumulationState(d.accumulation);
+  if(window.applyExpenditureOptimiserState)window.applyExpenditureOptimiserState();
 }
-function loadProjectById(id){
-  if(projectSystemReady)captureCurrentProject();
+function loadProjectById(id,{capturePrevious=false}={}){
   const p=projectStore.projects.find(x=>x.id===id);
-  if(!p)return;
-  projectStore.activeProjectId=id;
-  if(typeof setRetireLabCurrency==='function')setRetireLabCurrency(p.currency||'GBP',{save:false});
-  applyPlanSnapshot(cloneSimple(p.plan));
-  simulationHistoryRecords=cloneSimple(p.history||[]);
-  nextSimulationNumber=p.nextSimulationNumber||(
-    simulationHistoryRecords.length?Math.max(...simulationHistoryRecords.map(r=>r.number||0))+1:1
-  );
-  renderSimulationHistory();
-  refreshComparisonSelectors();
-  if(simulationHistoryRecords.length>=2)renderComparison();
-  refreshProjectSelector();
-  openTab(p.lastTab||'dashboard');
-  autoSaveStatus.value='Loaded';
-  persistProjectStore(false);
+  if(!p)return false;
+
+  // Capture only the project that the current UI actually represents.
+  // Never capture after activeProjectId has already been changed to the destination.
+  if(capturePrevious&&projectSystemReady&&projectStore.activeProjectId!==id){
+    captureCurrentProject();
+  }
+
+  clearTimeout(projectSaveTimer);
+  projectLoadInProgress=true;
+  try{
+    projectStore.activeProjectId=id;
+    if(typeof setRetireLabCurrency==='function')setRetireLabCurrency(p.currency||'GBP',{save:false});
+    applyPlanSnapshot(cloneSimple(p.plan));
+    simulationHistoryRecords=cloneSimple(p.history||[]);
+    nextSimulationNumber=p.nextSimulationNumber||(
+      simulationHistoryRecords.length?Math.max(...simulationHistoryRecords.map(r=>r.number||0))+1:1
+    );
+    renderSimulationHistory();
+    refreshComparisonSelectors();
+    if(simulationHistoryRecords.length>=2)renderComparison();
+    refreshProjectSelector();
+    openTab(p.lastTab||'dashboard');
+    autoSaveStatus.value='Loaded';
+  }finally{
+    projectLoadInProgress=false;
+  }
+
+  // Persist the active-project pointer without re-capturing the freshly loaded UI.
+  try{
+    localStorage.setItem(RETIRELAB_STORAGE_KEY,JSON.stringify(projectStore));
+  }catch(err){
+    autoSaveStatus.value='Save failed — storage may be full';
+    console.error(err);
+  }
+  return true;
 }
 function blankProjectPlan(){
   return safePlanSnapshot();
 }
 function createProject(name,sourceProject=null){
+  // Make sure the source project contains the latest UI before cloning it.
+  if(projectSystemReady&&!projectLoadInProgress)captureCurrentProject();
+
+  const source=sourceProject
+    ?projectStore.projects.find(p=>p.id===sourceProject.id)||sourceProject
+    :null;
   const id=makeProjectId();
   const p={
     id,
     name:name||'Untitled project',
-    plan:sourceProject?cloneSimple(sourceProject.plan):blankProjectPlan(),
-    currency:sourceProject?(sourceProject.currency||'GBP'):(typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP'),
-    history:sourceProject?cloneSimple(sourceProject.history||[]):[],
-    nextSimulationNumber:sourceProject?(sourceProject.nextSimulationNumber||1):1,
+    plan:source?cloneSimple(source.plan):blankProjectPlan(),
+    currency:source?(source.currency||'GBP'):(typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP'),
+    history:source?cloneSimple(source.history||[]):[],
+    nextSimulationNumber:source?(source.nextSimulationNumber||1):1,
     lastTab:'dashboard',
     createdAt:new Date().toISOString(),
     updatedAt:new Date().toISOString()
   };
   projectStore.projects.push(p);
-  projectStore.activeProjectId=id;
   refreshProjectSelector();
-  loadProjectById(id);
+  loadProjectById(id,{capturePrevious:false});
+  persistProjectStore(true);
 }
 function initialiseProjectSystem(){
   let loaded=null;
@@ -135,6 +164,7 @@ function initialiseProjectSystem(){
         id,
         name:'Main Retirement Plan',
         plan:safePlanSnapshot(),
+        currency:typeof getRetireLabCurrency==='function'?getRetireLabCurrency():'GBP',
         history:cloneSimple(simulationHistoryRecords||[]),
         nextSimulationNumber:nextSimulationNumber||1,
         lastTab:'dashboard',
@@ -145,21 +175,23 @@ function initialiseProjectSystem(){
   }
   projectSystemReady=true;
   refreshProjectSelector();
-  loadProjectById(projectStore.activeProjectId);
+  // Startup UI still contains HTML defaults, so never capture it here.
+  loadProjectById(projectStore.activeProjectId,{capturePrevious:false});
   autoSaveStatus.value='Auto-save on';
 }
 
 projectSelector.addEventListener('change',()=>{
+  const destinationId=projectSelector.value;
+  captureCurrentProject();
+  loadProjectById(destinationId,{capturePrevious:false});
   persistProjectStore(false);
-  loadProjectById(projectSelector.value);
 });
 newProjectBtn.addEventListener('click',()=>{
-  persistProjectStore(false);
   const name=prompt('Name the new project:','New Retirement Plan');
   if(name&&name.trim())createProject(name.trim());
 });
 duplicateProjectBtn.addEventListener('click',()=>{
-  persistProjectStore(false);
+  captureCurrentProject();
   const source=currentProject();
   if(!source)return;
   const name=prompt('Name the duplicate:',source.name+' Copy');
@@ -179,13 +211,14 @@ deleteProjectBtn.addEventListener('click',()=>{
     return;
   }
   if(!confirm(`Delete "${p.name}" and all its simulations?`))return;
+  const destinationId=projectStore.projects.find(x=>x.id!==p.id)?.id;
   projectStore.projects=projectStore.projects.filter(x=>x.id!==p.id);
-  projectStore.activeProjectId=projectStore.projects[0].id;
   refreshProjectSelector();
-  loadProjectById(projectStore.activeProjectId);
+  loadProjectById(destinationId,{capturePrevious:false});
   persistProjectStore(true);
 });
 exportProjectBtn.addEventListener('click',()=>{
+  captureCurrentProject();
   persistProjectStore(false);
   const p=currentProject();if(!p)return;
   const payload={format:'RetireLab Project',version:1,exportedAt:new Date().toISOString(),project:cloneSimple(p)};
@@ -203,15 +236,22 @@ importProjectFile.addEventListener('change',async()=>{
   try{
     const payload=JSON.parse(await file.text());
     if(!payload.project||!payload.project.plan)throw new Error('Not a valid RetireLab project file');
+    if(payload.format&&payload.format!=='RetireLab Project')throw new Error('Not a valid RetireLab project file');
+    captureCurrentProject();
     const imported=cloneSimple(payload.project);
     imported.id=makeProjectId();
     imported.name=(imported.name||'Imported Project')+' (Imported)';
+    imported.currency=imported.currency||'GBP';
+    imported.history=Array.isArray(imported.history)?imported.history:[];
+    imported.nextSimulationNumber=imported.nextSimulationNumber||(
+      imported.history.length?Math.max(...imported.history.map(r=>r.number||0))+1:1
+    );
+    imported.lastTab=imported.lastTab||'dashboard';
     imported.createdAt=new Date().toISOString();
     imported.updatedAt=new Date().toISOString();
     projectStore.projects.push(imported);
-    projectStore.activeProjectId=imported.id;
     refreshProjectSelector();
-    loadProjectById(imported.id);
+    loadProjectById(imported.id,{capturePrevious:false});
     persistProjectStore(true);
   }catch(err){
     alert('Import failed: '+err.message);

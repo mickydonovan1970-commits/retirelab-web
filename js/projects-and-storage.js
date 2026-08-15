@@ -240,7 +240,7 @@ importProjectFile.addEventListener('change',async()=>{
     captureCurrentProject();
     const imported=cloneSimple(payload.project);
     imported.id=makeProjectId();
-    imported.name=(imported.name||'Imported Project')+' (Imported)';
+    imported.name=imported.name||'Imported Project';
     imported.currency=imported.currency||'GBP';
     imported.history=Array.isArray(imported.history)?imported.history:[];
     imported.nextSimulationNumber=imported.nextSimulationNumber||(

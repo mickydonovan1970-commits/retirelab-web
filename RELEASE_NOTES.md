@@ -1,19 +1,14 @@
-# RetireLab Release 7.1.8 — Fund Library Additions
+# RetireLab Release 7.1.9 — Optimiser Constraint Fix
 
-## Added to the curated Fund Library
+## Fixed
 
-### State Street SPDR MSCI World Value UCITS ETF
-- LSE GBP ticker: VALW
-- ISIN: IE00BJXRT813
-- Category: Global Equity
-- Style: Developed-world value equity
-- RetireLab planning defaults: 7.4% nominal return, 16.0% volatility, 0.80 correlation proxy
+- Fixed an optimiser edge case where the **current portfolio** could remain the suggested allocation even when it breached the entered **Maximum allocation to any one fund**.
+- The current portfolio is still used as the comparison benchmark, but all optimiser candidates now begin from a constraint-compliant allocation.
+- Cash optimisation now also uses that constraint-compliant allocation rather than an over-cap current mix.
+- Added a final defensive validation before displaying a recommendation so a suggested fund weight cannot exceed the entered concentration cap.
 
-### Artemis Short-Duration Strategic Bond Fund
-- Share class: I Acc GBP
-- ISIN: GB00BJXPPH66
-- Category: Bonds and Cash
-- Style: Active short-duration strategic bond
-- RetireLab planning defaults: 4.6% nominal return, 4.5% volatility, 0.22 correlation proxy
+### Example fixed
 
-All RetireLab return, volatility and correlation figures remain editable planning assumptions rather than forecasts.
+A current 75% / 25% two-fund allocation with a 40% maximum may still appear as **75% current** (correctly describing the portfolio), but **Suggested** will now be constructed only from allocations in which no fund exceeds 40%.
+
+No Monte Carlo assumptions, objective scoring weights, fund-library assumptions, or portfolio data have been changed in this release.

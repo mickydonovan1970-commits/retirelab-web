@@ -753,23 +753,31 @@ rebalanceBtn.onclick=async()=>{
    Math.log1p(Math.max(0,r.objectiveMedian-r.objectiveTarget)/Math.max(inp.sippTotal,1))*.05;
 
  const base=runSimulation(current,comparisonSims,comparisonSeedOffset,false,currentCash);
- let best={w:[...current],cash:currentCash,r:base};
 
- // Stage 1: optimise cash while keeping current allocation.
+ // The current portfolio is the comparison benchmark, even if it breaches a newly
+ // entered concentration cap. Optimiser candidates, however, must always be feasible.
+ // Starting `best` from the unconstrained current mix allowed an invalid incumbent
+ // (for example 75% in one fund with a 40% cap) to survive when it scored better than
+ // every constrained candidate.
+ const feasibleCurrent=constrainedAllocation(current,maxWeight);
+ const feasibleBase=runSimulation(feasibleCurrent,comparisonSims,comparisonSeedOffset,false,currentCash);
+ let best={w:[...feasibleCurrent],cash:currentCash,r:feasibleBase};
+
+ // Stage 1: optimise cash while keeping a constraint-compliant allocation.
  const cashCandidates=[];
  for(let c=cashMin;c<=cashMax+0.01;c+=cashStep)cashCandidates.push(Math.min(c,inp.sippTotal));
  if(!cashCandidates.some(c=>Math.abs(c-currentCash)<1))cashCandidates.push(currentCash);
 
  for(let i=0;i<cashCandidates.length;i++){
    const c=cashCandidates[i];
-   const r=runSimulation(current,comparisonSims,comparisonSeedOffset,false,c);
-   if(scoreOf(r)>scoreOf(best.r)+1e-12)best={w:[...current],cash:c,r};
+   const r=runSimulation(feasibleCurrent,comparisonSims,comparisonSeedOffset,false,c);
+   if(scoreOf(r)>scoreOf(best.r)+1e-12)best={w:[...feasibleCurrent],cash:c,r};
    setOptimiserProgress(5+25*(i+1)/cashCandidates.length,`Testing cash bucket ${i+1} of ${cashCandidates.length}…`);
    await yieldToBrowser();
  }
 
  // Stage 2: coarse allocation search around the best cash level.
- let centre=constrainedAllocation(current,maxWeight);
+ let centre=[...feasibleCurrent];
  const coarseSteps=[.10,.05];
  let completed=0;
  const totalPasses=coarseSteps.length*3;
@@ -805,6 +813,14 @@ rebalanceBtn.onclick=async()=>{
 
  setOptimiserProgress(97,'Preparing recommendation…');
  await yieldToBrowser();
+
+ // Defensive invariant: a suggested allocation must satisfy the concentration cap.
+ // Re-normalise through the constraint helper if numerical drift or a future search
+ // change ever produces a weight above the permitted maximum.
+ if(best.w.some(w=>w>maxWeight+1e-9||w<0)){
+   const safeWeights=constrainedAllocation(best.w,maxWeight);
+   best={w:safeWeights,cash:best.cash,r:runSimulation(safeWeights,comparisonSims,comparisonSeedOffset,false,best.cash)};
+ }
 
  const maxWeightDifference=Math.max(...best.w.map((w,i)=>Math.abs(w-current[i])));
  const cashDifference=Math.abs(best.cash-currentCash);

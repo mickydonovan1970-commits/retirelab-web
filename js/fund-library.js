@@ -78,6 +78,19 @@ const FUND_LIBRARY=[
     "description": "Developed and emerging-market large, mid and small companies."
   },
   {
+    "id": "spdr-msci-world-value",
+    "name": "State Street SPDR MSCI World Value UCITS ETF",
+    "provider": "State Street SPDR",
+    "category": "Global Equity",
+    "type": "Developed-world value equity ETF",
+    "identifier": "VALW · IE00BJXRT813",
+    "ret": 7.4,
+    "vol": 16.0,
+    "corr": 0.80,
+    "popular": true,
+    "description": "Developed-market equities tilted towards companies with lower valuation characteristics."
+  },
+  {
     "id": "vanguard-sp500",
     "name": "Vanguard S&P 500 UCITS ETF",
     "provider": "Vanguard",
@@ -429,6 +442,19 @@ const FUND_LIBRARY=[
     "description": "Global dividend and quality-oriented equity strategy."
   },
   {
+    "id": "artemis-short-duration-strategic-bond",
+    "name": "Artemis Short-Duration Strategic Bond Fund",
+    "provider": "Artemis",
+    "category": "Bonds and Cash",
+    "type": "Active short-duration strategic bond fund",
+    "identifier": "GB00BJXPPH66",
+    "ret": 4.6,
+    "vol": 4.5,
+    "corr": 0.22,
+    "popular": true,
+    "description": "Flexible global bond strategy with aggregate portfolio duration below four years and most currency exposure hedged to sterling."
+  },
+  {
     "id": "vanguard-global-bond",
     "name": "Vanguard Global Bond Index Fund GBP Hedged",
     "provider": "Vanguard",
@@ -468,7 +494,7 @@ const FUND_LIBRARY=[
     "description": "Low-volatility sterling money-market holding."
   }
 ];
-const FUND_LIBRARY_REVIEWED='30 July 2026';
+const FUND_LIBRARY_REVIEWED='31 August 2026';
 window.FUND_LIBRARY=FUND_LIBRARY;
 const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Defensive / Flexible','Bonds and Cash'];
 window.FUND_CATEGORY_ORDER=FUND_CATEGORY_ORDER;

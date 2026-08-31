@@ -1,13 +1,19 @@
-# RetireLab Release 7.1.7 — Import Filename Naming
+# RetireLab Release 7.1.8 — Fund Library Additions
 
-## Changed
-Imported projects are now named from the JSON filename rather than the project name stored inside the file.
+## Added to the curated Fund Library
 
-Examples:
+### State Street SPDR MSCI World Value UCITS ETF
+- LSE GBP ticker: VALW
+- ISIN: IE00BJXRT813
+- Category: Global Equity
+- Style: Developed-world value equity
+- RetireLab planning defaults: 7.4% nominal return, 16.0% volatility, 0.80 correlation proxy
 
-- `59_Plan_17k.json` → `59_Plan_17k`
-- `test_project_to_delete.json` → `test_project_to_delete`
+### Artemis Short-Duration Strategic Bond Fund
+- Share class: I Acc GBP
+- ISIN: GB00BJXPPH66
+- Category: Bonds and Cash
+- Style: Active short-duration strategic bond
+- RetireLab planning defaults: 4.6% nominal return, 4.5% volatility, 0.22 correlation proxy
 
-The `.json` extension is removed and no `(Imported)` suffix is added.
-
-This makes the filename the user's explicit label for the imported copy.
+All RetireLab return, volatility and correlation figures remain editable planning assumptions rather than forecasts.

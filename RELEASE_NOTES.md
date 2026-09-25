@@ -1,14 +1,13 @@
-# RetireLab Release 7.1.9 — Optimiser Constraint Fix
+# RetireLab Release 7.1.10 — DGRG Fund Library Addition
 
-## Fixed
+## Added
 
-- Fixed an optimiser edge case where the **current portfolio** could remain the suggested allocation even when it breached the entered **Maximum allocation to any one fund**.
-- The current portfolio is still used as the comparison benchmark, but all optimiser candidates now begin from a constraint-compliant allocation.
-- Cash optimisation now also uses that constraint-compliant allocation rather than an over-cap current mix.
-- Added a final defensive validation before displaying a recommendation so a suggested fund weight cannot exceed the entered concentration cap.
+- Added **WisdomTree US Quality Dividend Growth UCITS ETF** to the Fund Library.
+- LSE ticker: **DGRG**
+- ISIN: **IE00BZ56RG20**
+- Category: **US Equity**
+- Type: **US quality dividend-growth equity ETF**
+- RetireLab planning defaults: **7.5% nominal return / 16.0% volatility / 0.88 correlation proxy**.
+- The fund description reflects its rules-based focus on profitable, dividend-paying US companies with quality and growth characteristics and its dividend-weighted methodology.
 
-### Example fixed
-
-A current 75% / 25% two-fund allocation with a 40% maximum may still appear as **75% current** (correctly describing the portfolio), but **Suggested** will now be constructed only from allocations in which no fund exceeds 40%.
-
-No Monte Carlo assumptions, objective scoring weights, fund-library assumptions, or portfolio data have been changed in this release.
+These figures are editable planning assumptions for Monte Carlo modelling, not forecasts. No optimiser logic, existing fund assumptions, project persistence, or retirement-plan calculations have been changed.

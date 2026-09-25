@@ -91,6 +91,19 @@ const FUND_LIBRARY=[
     "description": "Developed-market equities tilted towards companies with lower valuation characteristics."
   },
   {
+    "id": "wisdomtree-us-quality-dividend-growth",
+    "name": "WisdomTree US Quality Dividend Growth UCITS ETF",
+    "provider": "WisdomTree",
+    "category": "US Equity",
+    "type": "US quality dividend-growth equity ETF",
+    "identifier": "DGRG · IE00BZ56RG20",
+    "ret": 7.5,
+    "vol": 16.0,
+    "corr": 0.88,
+    "popular": true,
+    "description": "Rules-based US equity ETF focused on profitable, dividend-paying companies with quality and growth characteristics; dividend-weighted rather than market-cap weighted."
+  },
+  {
     "id": "vanguard-sp500",
     "name": "Vanguard S&P 500 UCITS ETF",
     "provider": "Vanguard",
@@ -494,7 +507,7 @@ const FUND_LIBRARY=[
     "description": "Low-volatility sterling money-market holding."
   }
 ];
-const FUND_LIBRARY_REVIEWED='31 August 2026';
+const FUND_LIBRARY_REVIEWED='25 September 2026';
 window.FUND_LIBRARY=FUND_LIBRARY;
 const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Defensive / Flexible','Bonds and Cash'];
 window.FUND_CATEGORY_ORDER=FUND_CATEGORY_ORDER;

@@ -1,7 +1,8 @@
 # RetireLab
 
-**7.1.9:** Optimiser constraint fix — suggested fund weights now always obey the entered maximum allocation, even when the current portfolio is already above that cap.
+**7.1.10:** Added WisdomTree US Quality Dividend Growth UCITS ETF (DGRG) to the Fund Library.
 
-Retirement Decision Laboratory — Release 7.1.9.
+Retirement Decision Laboratory — Release 7.1.10.
 
-Plain HTML, CSS and JavaScript for GitHub Pages. No build tools are required.
+## Upload
+Unzip this package and copy its contents into the existing `retirelab-web` repository folder, replacing matching files. Commit and push the changes with GitHub Desktop.

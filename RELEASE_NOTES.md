@@ -1,3 +1,10 @@
+# RetireLab Release 7.1.11 — Current Age State Fix
+
+- Fixed a state-sync bug that could reset Dashboard Current Age when Starting SIPP Cash was adjusted.
+- Passive accumulation handoff refreshes now preserve Dashboard Current Age.
+- Explicit accumulation handoff changes can still align Current Age with the selected retirement age.
+- No changes to Monte Carlo methodology, optimiser scoring, fund assumptions, or saved project data.
+
 # RetireLab Release 7.1.10 — DGRG Fund Library Addition
 
 ## Added

@@ -1,3 +1,13 @@
+# RetireLab Release 7.1.12 — Defensive Reserve Strategy
+
+- Added **Use cash, then defensive reserve, then CORE** as a Weak CORE Years strategy.
+- Any CORE fund can be explicitly designated as a **Defensive reserve** in the CORE allocation table.
+- In a weak year, spending uses Bridge Cash first; if cash is insufficient, designated defensive funds are sold next; only then does RetireLab fall back to the selected normal CORE sale method.
+- Strong-year sales and Bridge Cash refills continue to use the existing CORE sale method.
+- Defensive-reserve status is stored with the fund in saved projects.
+- The first version deliberately does **not** automatically rebuild the defensive reserve after recovery years.
+- Existing withdrawal strategies, Monte Carlo assumptions, optimiser scoring and fund assumptions are otherwise unchanged.
+
 # RetireLab Release 7.1.11 — Current Age State Fix
 
 - Fixed a state-sync bug that could reset Dashboard Current Age when Starting SIPP Cash was adjusted.

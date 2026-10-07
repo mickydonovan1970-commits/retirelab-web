@@ -941,3 +941,7 @@ label:has(> input[type="checkbox"]),label:has(> input[type="radio"]){align-items
 .accumulation-route{display:flex;align-items:center}
 .accumulation-route-inner{width:100%}
 .getting-started-card h3{margin-bottom:8px}
+
+/* 7.1.12 defensive reserve */
+.defensive-reserve-toggle{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:#aeb7c4;font-size:13px;font-weight:600}
+.defensive-reserve-toggle input{width:17px;height:17px;margin:0;accent-color:#6f9b7a}

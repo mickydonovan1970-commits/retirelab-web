@@ -189,6 +189,7 @@ function renderFunds(){
   tr.innerHTML=`<td><strong>${f.name}</strong></td>
   <td><input class="fund-value" data-i="${i}" type="number" min="0" step="1000" value="${f.value}"></td>
   <td><input class="fund-pct" data-i="${i}" type="number" min="0" max="100" step="0.1"></td>
+  <td><label class="defensive-reserve-toggle" title="Use this fund before other CORE holdings when the defensive-reserve weak-year rule is selected"><input class="fund-defensive" data-i="${i}" type="checkbox" ${f.defensiveReserve?'checked':''}> <span>Reserve</span></label></td>
   <td><button type="button" class="ghost small fund-details-btn" data-i="${i}">Details</button></td>
   <td><button type="button" class="danger small remove-fund-btn" data-i="${i}" ${fundDefs.length<=1?'disabled':''}>Remove</button></td>`;
   tb.appendChild(tr);
@@ -234,6 +235,10 @@ function bindFunds(){
    fundDefs[i].value=core*entered/100;
    document.querySelector(`.fund-value[data-i="${i}"]`).value=Math.round(fundDefs[i].value);
    updateFundDisplay(false);
+ });
+ document.querySelectorAll('.fund-defensive').forEach(el=>el.onchange=e=>{
+   const i=+e.target.dataset.i; fundDefs[i].defensiveReserve=!!e.target.checked;
+   if(typeof scheduleProjectSave==='function')scheduleProjectSave();
  });
  document.querySelectorAll('.fund-details-btn').forEach(el=>el.onclick=e=>openFundDrawerV21(+e.target.dataset.i));
  document.querySelectorAll('.remove-fund-btn').forEach(el=>el.onclick=e=>{
@@ -375,6 +380,23 @@ function withdrawFromCore(funds,amount,method,targetWeights){
  return taken;
 }
 
+function withdrawFromDefensiveReserve(funds,amount){
+ amount=Math.max(0,amount);let taken=0;
+ const indexes=fundDefs.map((f,i)=>f.defensiveReserve?i:null).filter(i=>i!==null&&funds[i]>0);
+ let remaining=amount;
+ while(remaining>0.01&&indexes.some(i=>funds[i]>0.01)){
+   const available=indexes.reduce((sum,i)=>sum+Math.max(0,funds[i]),0);
+   if(available<=0.01)break;
+   indexes.forEach(i=>{
+     if(remaining<=0.01||funds[i]<=0)return;
+     const share=Math.min(funds[i],remaining*Math.max(0,funds[i])/available);
+     funds[i]-=share;taken+=share;
+   });
+   remaining=amount-taken;
+ }
+ return taken;
+}
+
 function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPaths=true,cashOverride=null){
  const inp=getInputs(),n=fundDefs.length,weights=allocation||fundDefs.map(f=>f.value/targetCoreValue()),sims=simsOverride||inp.sims;
  const L=cholesky(buildCorrelationMatrix());
@@ -459,8 +481,9 @@ function runSimulation(allocation=null,simsOverride=null,seedOffset=0,collectPat
       const availableCash=Math.max(0,cash-floor),fromCash=Math.min(shortfall,availableCash);cash-=fromCash;shortfall-=fromCash;
       if(shortfall>0){const extra=withdrawFromCore(funds,shortfall,inp.saleMethod,weights);shortfall-=extra}
     }else{
-      if(inp.badYearRule==='cash_first'){
+      if(inp.badYearRule==='cash_first'||inp.badYearRule==='cash_defensive'){
        const fromCash=Math.min(shortfall,Math.max(0,cash));cash-=fromCash;shortfall-=fromCash;
+       if(shortfall>0&&inp.badYearRule==='cash_defensive'){const defensive=withdrawFromDefensiveReserve(funds,shortfall);shortfall-=defensive}
        if(shortfall>0){const extra=withdrawFromCore(funds,shortfall,inp.saleMethod,weights);shortfall-=extra}
       }else{
        const fromCore=withdrawFromCore(funds,shortfall,inp.saleMethod,weights);shortfall-=fromCore;

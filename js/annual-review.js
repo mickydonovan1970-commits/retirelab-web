@@ -64,6 +64,16 @@
     return {amount,sales:applyFundSale(funds,amount,method,targetWeights)};
   }
 
+  function defensiveWithdrawal(funds,requested){
+    const sales=funds.map(()=>0);
+    const indexes=fundDefs.map((fund,index)=>fund.defensiveReserve?index:null).filter(index=>index!==null&&funds[index]>.005);
+    const available=indexes.reduce((sum,index)=>sum+funds[index],0);
+    const amount=Math.min(Math.max(0,requested),available);
+    if(amount<=.005)return {amount:0,sales};
+    indexes.forEach(index=>{const take=Math.min(funds[index],amount*funds[index]/available);funds[index]-=take;sales[index]+=take});
+    return {amount,sales};
+  }
+
   function correlatedAnnualNormals(rng,count){
     const L=cholesky(buildCorrelationMatrix());
     const z=Array.from({length:count},()=>randn(rng));
@@ -185,6 +195,11 @@
         if(need>.005){const taken=takeCash(need,false);fromCash+=taken;need-=taken}
       }else{
         const taken=takeCash(need,false);fromCash+=taken;need-=taken;
+        if(need>.005&&inp.badYearRule==='cash_defensive'){
+          const defensive=defensiveWithdrawal(funds,need);
+          defensive.sales.forEach((value,index)=>sales[index]+=value);
+          fromCore+=defensive.amount;need-=defensive.amount;
+        }
         if(need>.005)need-=takeCore(need,'spending');
       }
 

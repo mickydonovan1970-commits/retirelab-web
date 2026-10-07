@@ -29,6 +29,7 @@ function buildSimulationSummary(){
   };
   const badRuleLabels={
     cash_first:'Cash first, then CORE',
+    cash_defensive:'Cash, then defensive reserve, then CORE',
     core_first:'CORE first'
   };
   const saleLabels={

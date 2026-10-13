@@ -522,7 +522,7 @@ const FUND_LIBRARY=[
 ];
 const FUND_LIBRARY_REVIEWED='25 September 2026';
 window.FUND_LIBRARY=FUND_LIBRARY;
-const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Defensive / Flexible','Bonds and Cash'];
+const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Absolute Return','Defensive / Flexible','Bonds and Cash'];
 window.FUND_CATEGORY_ORDER=FUND_CATEGORY_ORDER;
 
 function libraryFundById(id){return FUND_LIBRARY.find(f=>f.id===id)||null}

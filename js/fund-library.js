@@ -1,5 +1,18 @@
 const FUND_LIBRARY=[
   {
+    "id": "jupiter-merian-global-equity-absolute-return",
+    "name": "Jupiter Merian Global Equity Absolute Return Fund I GBP Hedged Acc",
+    "provider": "Jupiter",
+    "category": "Absolute Return",
+    "type": "Global equity market-neutral long/short absolute-return fund",
+    "identifier": "IE00BLP5S809",
+    "ret": 5.0,
+    "vol": 6.0,
+    "corr": 0.20,
+    "popular": true,
+    "description": "Actively managed global long/short equity strategy seeking positive absolute returns with low equity/bond market correlation. Uses derivatives; not cash or a conventional bond fund. Editable planning assumptions, not forecasts."
+  },
+  {
     "id": "vanguard-global-all-cap",
     "name": "Vanguard FTSE Global All Cap Index Fund",
     "provider": "Vanguard",
@@ -509,7 +522,7 @@ const FUND_LIBRARY=[
 ];
 const FUND_LIBRARY_REVIEWED='25 September 2026';
 window.FUND_LIBRARY=FUND_LIBRARY;
-const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Defensive / Flexible','Bonds and Cash'];
+const FUND_CATEGORY_ORDER=['Popular','Global Equity','US Equity','UK Equity','Europe','Japan','Emerging Markets','Multi-Asset','Income','Absolute Return','Defensive / Flexible','Bonds and Cash'];
 window.FUND_CATEGORY_ORDER=FUND_CATEGORY_ORDER;
 
 function libraryFundById(id){return FUND_LIBRARY.find(f=>f.id===id)||null}
@@ -558,6 +571,14 @@ function addLibraryFund(id){
   renderFundLibrary();
   scheduleProjectSave?.();
 }
+function retireLabLibraryDiagnostic(){
+ const found=FUND_LIBRARY.some(f=>f.id==='jupiter-merian-global-equity-absolute-return');
+ const categories=FUND_CATEGORY_ORDER.includes('Absolute Return');
+ console.info('[RetireLab Fund Library]',{version:'7.1.15',jupiterFound:found,absoluteReturnCategory:categories,fundCount:FUND_LIBRARY.length});
+ const tree=document.getElementById('fundLibraryTree');
+ if(tree && found && categories){tree.dataset.libraryVersion='7.1.15';}
+}
+retireLabLibraryDiagnostic();
 function renderFundLibrary(){
   const tree=document.getElementById('fundLibraryTree'); if(!tree)return;
   const q=(document.getElementById('fundLibrarySearch')?.value||'').trim().toLowerCase();

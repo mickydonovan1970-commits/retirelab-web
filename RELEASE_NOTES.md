@@ -1,8 +1,10 @@
-7.1.14 — Fix Fund Library category navigation so Jupiter Merian Absolute Return is visible and searchable.
+7.1.15: Fund Library cache-busting and console diagnostics for Jupiter/Absolute Return visibility. No simulation changes.
 
-# RetireLab Release 7.1.14 — Defensive Reserve Strategy
+7.1.15 — Fix Fund Library category navigation so Jupiter Merian Absolute Return is visible and searchable.
 
-7.1.14 — Added Jupiter Merian Global Equity Absolute Return I GBP Hedged Acc to Fund Library. Assumptions are illustrative and editable; not a bond/cash substitute.
+# RetireLab Release 7.1.15 — Defensive Reserve Strategy
+
+7.1.15 — Added Jupiter Merian Global Equity Absolute Return I GBP Hedged Acc to Fund Library. Assumptions are illustrative and editable; not a bond/cash substitute.
 
 - Added **Use cash, then defensive reserve, then CORE** as a Weak CORE Years strategy.
 - Any CORE fund can be explicitly designated as a **Defensive reserve** in the CORE allocation table.

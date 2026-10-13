@@ -571,6 +571,14 @@ function addLibraryFund(id){
   renderFundLibrary();
   scheduleProjectSave?.();
 }
+function retireLabLibraryDiagnostic(){
+ const found=FUND_LIBRARY.some(f=>f.id==='jupiter-merian-global-equity-absolute-return');
+ const categories=FUND_CATEGORY_ORDER.includes('Absolute Return');
+ console.info('[RetireLab Fund Library]',{version:'7.1.15',jupiterFound:found,absoluteReturnCategory:categories,fundCount:FUND_LIBRARY.length});
+ const tree=document.getElementById('fundLibraryTree');
+ if(tree && found && categories){tree.dataset.libraryVersion='7.1.15';}
+}
+retireLabLibraryDiagnostic();
 function renderFundLibrary(){
   const tree=document.getElementById('fundLibraryTree'); if(!tree)return;
   const q=(document.getElementById('fundLibrarySearch')?.value||'').trim().toLowerCase();

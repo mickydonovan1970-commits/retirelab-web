@@ -945,3 +945,25 @@ label:has(> input[type="checkbox"]),label:has(> input[type="radio"]){align-items
 /* 7.1.12 defensive reserve */
 .defensive-reserve-toggle{display:inline-flex;align-items:center;gap:7px;white-space:nowrap;color:#aeb7c4;font-size:13px;font-weight:600}
 .defensive-reserve-toggle input{width:17px;height:17px;margin:0;accent-color:#6f9b7a}
+
+/* 7.1.16: six-column CORE table; keep Remove accessible on narrow screens. */
+#fundTable{min-width:910px;table-layout:fixed}
+#fundTable th:nth-child(1),#fundTable td:nth-child(1){width:28%}
+#fundTable th:nth-child(2),#fundTable td:nth-child(2){width:21%}
+#fundTable th:nth-child(3),#fundTable td:nth-child(3){width:15%}
+#fundTable th:nth-child(4),#fundTable td:nth-child(4){width:15%}
+#fundTable th:nth-child(5),#fundTable td:nth-child(5){width:10%}
+#fundTable th:nth-child(6),#fundTable td:nth-child(6){width:11%}
+#fundTable .remove-fund-btn{display:inline-block;min-width:70px;white-space:nowrap}
+#fundTable .fund-details-btn{white-space:nowrap}
+#fundTable .fund-value,#fundTable .fund-pct{box-sizing:border-box}
+.strategy-summary-card p.strategy-full-summary{max-height:none;overflow:visible;overflow-wrap:anywhere;line-height:1.55;margin:9px 0}
+.strategy-portfolio-details{margin:10px 0;border-top:1px solid var(--line2);padding-top:9px}
+.strategy-portfolio-details summary{cursor:pointer;font-size:12px;font-weight:650;color:var(--ink)}
+.strategy-portfolio-scroll{overflow-x:auto;margin-top:10px}
+.strategy-portfolio-table{width:100%;font-size:11px;table-layout:auto}
+.strategy-portfolio-table th,.strategy-portfolio-table td{padding:7px 5px;vertical-align:top;text-align:left;overflow-wrap:anywhere}
+.strategy-portfolio-table th:nth-child(n+2),.strategy-portfolio-table td:nth-child(n+2){text-align:right;white-space:nowrap}
+.strategy-portfolio-table tfoot{font-weight:700;border-top:1px solid var(--line)}
+.reserve-marker{display:inline-block;font-size:10px;color:#a4c8ad;font-weight:500;white-space:nowrap}
+@media(min-width:1100px){.strategy-summary-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}

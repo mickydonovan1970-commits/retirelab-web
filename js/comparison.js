@@ -78,6 +78,33 @@ function comparisonExtremes(values,better){
   });
   return {best,worst};
 }
+function strategyPortfolioDetail(record){
+  const plan=record.plan||{};
+  const funds=Array.isArray(plan.funds)?plan.funds:[];
+  const cash=Number(plan.basics?.cashStart||0);
+  const core=funds.reduce((sum,f)=>sum+Math.max(0,Number(f.value)||0),0);
+  const total=core+cash;
+  if(!funds.length)return `<p class="strategy-portfolio-note">Portfolio breakdown unavailable for this saved simulation.</p>`;
+  const allocations=[{name:'Starting SIPP cash',value:cash,reserve:false},...funds.map(f=>({name:f.name||'Unnamed fund',value:Math.max(0,Number(f.value)||0),reserve:!!f.defensiveReserve}))];
+  const rows=allocations.map(f=>{
+    const percent=total>0?f.value/total*100:0;
+    return `<tr><td>${escapeSimulationText(f.name)}${f.reserve?' <span class="reserve-marker">Defensive reserve</span>':''}</td><td>${percent.toFixed(1)}%</td><td>${gbp(f.value)}</td></tr>`;
+  }).join('');
+  return `<div class="strategy-portfolio-scroll"><table class="strategy-portfolio-table"><thead><tr><th>Holding</th><th>% SIPP</th><th>Value</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th>Total SIPP</th><th>${total>0?'100.0%':'0.0%'}</th><th>${gbp(total)}</th></tr></tfoot></table></div>`;
+}
+function strategyAllocationDifferences(records){
+  const allocations=records.map(record=>{
+    const funds=record.plan?.funds||[];
+    const cash=Number(record.plan?.basics?.cashStart||0);
+    const total=cash+funds.reduce((sum,f)=>sum+(Number(f.value)||0),0);
+    const result=new Map([['__cash',total>0?cash/total:0]]);
+    funds.forEach(f=>result.set(f.id||f.name,total>0?(Number(f.value)||0)/total:0));
+    return result;
+  });
+  const keys=new Set(allocations.flatMap(map=>[...map.keys()]));
+  const different=[...keys].filter(key=>Math.max(...allocations.map(map=>map.get(key)||0))-Math.min(...allocations.map(map=>map.get(key)||0))>0.0005);
+  return different.length;
+}
 function renderComparison(){
   const records=selectedComparisonRecords();
   if(!records.length){
@@ -99,11 +126,21 @@ function renderComparison(){
     }).join('')}`;
     comparisonBody.appendChild(row);
   });
+  const changedHoldings=records.length>1?strategyAllocationDifferences(records):0;
+  const comparisonNote=document.getElementById('strategyAllocationDifferenceNote');
+  if(comparisonNote)comparisonNote.textContent=records.length>1?`${changedHoldings} holding allocation${changedHoldings===1?'':'s'} differ across the selected simulations (including cash).`:'';
   strategySummaryGrid.innerHTML=records.map((record,index)=>`
     <article class="strategy-summary-card strategy-summary-identity-${index}">
       <strong class="strategy-summary-name">${escapeSimulationText(simulationDisplayName(record))}</strong>
       <span>${escapeSimulationText(record.time||'')}</span>
-      <p>${escapeSimulationText(record.summary||'')}</p>
+      <details class="strategy-portfolio-details" open>
+        <summary>Full portfolio allocation</summary>
+        ${strategyPortfolioDetail(record)}
+      </details>
+      <details class="strategy-portfolio-details">
+        <summary>Simulation assumptions and withdrawal rules</summary>
+        <p class="strategy-full-summary">${escapeSimulationText(record.summary||'')}</p>
+      </details>
       <button type="button" class="secondary small load-library-strategy" data-id="${record.id}">Load into RetireLab</button>
     </article>`).join('');
   strategySummaryGrid.querySelectorAll('.load-library-strategy').forEach(button=>button.addEventListener('click',()=>loadSimulationRecord(getSimulationById(button.dataset.id))));
